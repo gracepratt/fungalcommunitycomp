@@ -25,7 +25,7 @@ data2018 <- read.csv("Raw Data/2018-Complete.csv")
 plantID <- read.csv("Raw Data/PlantID.csv")
 
 # OTU tables
-otu <- read.csv("Raw Data/fungiOTUcsv")
+otu <- read.csv("Raw Data/fungiOTU.csv")
 
 # taxanomy list 
 tax <- read.csv('Raw Data/taxonomy.csv')
