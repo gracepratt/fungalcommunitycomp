@@ -10,19 +10,19 @@
 ########################################################################
 
 # 2017 dataset
-data2017 <- read.csv("data/2017-Complete.csv")
+data2017 <- read.csv("Raw Data/2017-Complete.csv")
 
 # 2018 dataset
-data2018 <- read.csv("data/2018-Complete.csv")
+data2018 <- read.csv("Raw Data/2018-Complete.csv")
 
 # load plant traits table
-plantID <- read.csv("data/PlantID.csv")
+plantID <- read.csv("Raw Data/PlantID.csv")
 
 # OTU tables
-otu <- read.csv("data/fungiOTUcsv")
+otu <- read.csv("Raw Data/fungiOTUcsv")
 
 # taxanomy list 
-tax <- read.csv('data/taxonomy.csv')
+tax <- read.csv('Raw Data/taxonomy.csv')
 
 
 
