@@ -126,6 +126,8 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 
 df <- prop[c(77:1000)] #remove the mock community OTUs
 
+
+
 ########################################################################
 ## End
 ########################################################################
