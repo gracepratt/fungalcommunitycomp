@@ -9,7 +9,7 @@
 ## set figure path
 ########################################################################
 
-fig.path <- "Figures"
+fig.path <- "Outputs/Figures"
 
 ########################################################################
 ## load data
@@ -25,13 +25,16 @@ data2018 <- read.csv("Raw Data/2018-Complete.csv")
 plantID <- read.csv("Raw Data/PlantID.csv")
 
 # OTU tables
-otu <- read.csv("Raw Data/fungiOTUcsv")
+otu <- read.csv("Raw Data/fungiOTU.csv")
 
 # taxanomy list 
-tax <- read.csv('Raw Data/taxonomy.csv')
+tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
 
 
 
+########################################################################
+## load data
+########################################################################
 
 
 
