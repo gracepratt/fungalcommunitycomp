@@ -124,7 +124,11 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 ## 6. subset columns needed
 ########################################################################
 
-df <- prop[c(77:1000)] #remove the mock community OTUs
+wo_mock <- prop %>% select(-contains("mock")) #remove the mock community OTUs
+
+#rarefy??
+
+
 
 
 
