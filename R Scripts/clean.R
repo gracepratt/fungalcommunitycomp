@@ -121,22 +121,45 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 
 
 ########################################################################
-## 6. subset columns needed
+## 6. subset rows & columns needed
 ########################################################################
 
-wo_mock <- prop %>% select(-contains("mock")) #remove the mock community OTUs
+##subset rows needed
 
-#rarefy??
+wo_extras <- prop %>% drop_na(Lat_point)
+
+##subset columns needed
+
+wo_mock <- wo_extras %>% dplyr::select(-contains("mock")) #remove the mock community OTUs
+
+#rarefy to minimum number of species observed
+
+species_only <- wo_mock %>% dplyr::select(contains("OTU"))
+
+minReads <- min(rowSums(species_only))
+
+species_only.rr <- rrarefy(species_only, sample=minReads)
+
+species.rr_df <- data.frame(species_only.rr)
+
+keys <- wo_extras$Key
+
+species.rr_df$Key <- c(keys)
+
+table(is.na(species.rr_df))
+
 
 ########################################################################
 ## 7. create input dataframes
 ########################################################################
 
-species_table <- wo_mock %>% select("Code", "Lat_point", "Long_point", contains("OTU"))
+species_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(species.rr_df)
 
-mock_envi_table <- wo_mock %>% select("Code", "Lat_point", "Long_point","RSFalconTube", "BSFalconTube", 25:35) #add relevant colnames
+envi_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point","pH", "OM", "P") #add relevant colnames
 
+table(is.na(species_table))
 
+table(is.na(envi_table))
 
 which(names(df) == "") #function to find column indices
 

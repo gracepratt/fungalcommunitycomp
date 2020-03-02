@@ -8,6 +8,19 @@
 ########################################################################
 
 test_gdm_table <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                 siteColumn="Code", predData=mock_envi_table)
+                                 siteColumn="Key", predData=envi_table)
 
-test_gdm_table
+table(is.na(test_gdm_table))
+
+gdmModel <- gdm(test_gdm_table, geo= TRUE)
+summary(gdmModel)
+
+
+length(gdmModel$predictors)
+
+plot(gdmModel, plot.layout = c(4,4))
+
+
+
+
+
