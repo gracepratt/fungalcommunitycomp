@@ -33,7 +33,7 @@ library(plotrix)
 library(tidyr)
 library(tidyverse)
 library(indicspecies)
-#library(gdm)
+library(gdm)
 
 
 ########################################################################

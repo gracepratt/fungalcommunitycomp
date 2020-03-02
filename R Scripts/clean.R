@@ -134,11 +134,13 @@ wo_mock <- prop %>% select(-contains("mock")) #remove the mock community OTUs
 
 species_table <- wo_mock %>% select("Code", "Lat_point", "Long_point", contains("OTU"))
 
-mock_envi_table <- wo_mock %>% select("Code", "Lat_point", "Long_point", 53:67)
+mock_envi_table <- wo_mock %>% select("Code", "Lat_point", "Long_point","RSFalconTube", "BSFalconTube", 25:35) #add relevant colnames
 
-mock_envi_table
+
 
 which(names(df) == "") #function to find column indices
+
+#testing git
 
 
 ########################################################################
