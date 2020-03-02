@@ -22,6 +22,8 @@ row.names(prop) <- prop$Key
 
 
 
+
+
 ########################################################################
 ## 3. add crop plant functional groups
 ########################################################################
@@ -153,17 +155,26 @@ table(is.na(species.rr_df))
 ## 7. create input dataframes
 ########################################################################
 
+#species table
+
 species_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(species.rr_df)
 
-envi_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point","pH", "OM", "P") #add relevant colnames
+#environment table
 
+envi_variables <- wo_mock %>% dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  lapply(function(x) scale(x)) %>% 
+  as.data.frame() %>%
+  add_column(Key = keys)
+
+envi_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(envi_variables)
+
+#quick checks to make sure there are no missing values
 table(is.na(species_table))
 
 table(is.na(envi_table))
 
 which(names(df) == "") #function to find column indices
 
-#testing git
 
 
 ########################################################################

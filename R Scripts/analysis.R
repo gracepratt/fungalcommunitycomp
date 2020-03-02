@@ -18,7 +18,9 @@ summary(gdmModel)
 
 length(gdmModel$predictors)
 
-plot(gdmModel, plot.layout = c(4,4))
+plot(gdmModel, plot.layout = c(2,2))
+
+
 
 
 
