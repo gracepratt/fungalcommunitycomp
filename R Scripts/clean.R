@@ -162,7 +162,7 @@ species_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>%
 #environment table
 
 envi_variables <- wo_mock %>% dplyr::select("pH", "OM", "P") %>% #add relevant colnames
-  lapply(function(x) scale(x)) %>% 
+  lapply(function(x) scale(x, center = FALSE)) %>% 
   as.data.frame() %>%
   add_column(Key = keys)
 

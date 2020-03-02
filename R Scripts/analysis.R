@@ -21,6 +21,17 @@ length(gdmModel$predictors)
 plot(gdmModel, plot.layout = c(2,2))
 
 
+########################################################################
+## mantel tests
+########################################################################
+
+# transformed OTU table 
+h <- decostand(OTUcomp, method = "hellinger")
+pa <- decostand(OTUcomp, method = "pa")
+
+# CREATE DISSIMILARITY MATRIX
+dist.h = as.matrix((vegdist(h, "bray")))
+
 
 
 
