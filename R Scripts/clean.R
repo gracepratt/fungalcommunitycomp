@@ -155,6 +155,10 @@ table(is.na(species.rr_df))
 ## 7. create input dataframes
 ########################################################################
 
+#select the environmental variables you want
+
+envi_factors <- c("pH", "OM", "P")
+
 ##all farms
 #species table
 
@@ -164,7 +168,7 @@ species_table <- wo_mock %>%
 
 #environment table
 
-envi_variables <- wo_mock %>% dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+envi_variables <- wo_mock %>% dplyr::select(envi_factors) %>% #add relevant colnames
   lapply(function(x) scale(x, center = FALSE)) %>% 
   as.data.frame() %>%
   add_column(Key = keys)
@@ -194,7 +198,7 @@ mono_keys <- mono_species_table$Key
 
 mono_envi_variables <- wo_mock %>% 
   filter(FarmType == "Monoculture") %>%
-  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  dplyr::select(envi_factors) %>% #add relevant colnames
   lapply(function(x) scale(x, center = FALSE)) %>% 
   as.data.frame() %>%
   add_column(Key = mono_keys)
