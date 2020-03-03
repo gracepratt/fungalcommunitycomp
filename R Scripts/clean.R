@@ -155,6 +155,7 @@ table(is.na(species.rr_df))
 ## 7. create input dataframes
 ########################################################################
 
+##all farms
 #species table
 
 species_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(species.rr_df)
@@ -175,6 +176,26 @@ table(is.na(envi_table))
 
 which(names(df) == "") #function to find column indices
 
+#monocultures
+#species table
+
+mono_species_table <- wo_mock %>%
+  filter(FarmType == "Monoculture") %>%
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(species.rr_df) 
+
+#environment table
+
+mono_envi_variables <- wo_mock %>% 
+  filter(FarmType == "Monoculture") %>%
+  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  lapply(function(x) scale(x, center = FALSE)) %>% 
+  as.data.frame() %>%
+  add_column(Key = keys)
+
+mono_envi_table <- wo_mock %>% 
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(envi_variables)
 
 
 ########################################################################
