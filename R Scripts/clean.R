@@ -158,7 +158,9 @@ table(is.na(species.rr_df))
 ##all farms
 #species table
 
-species_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(species.rr_df)
+species_table <- wo_mock %>% 
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(species.rr_df)
 
 #environment table
 
@@ -167,7 +169,9 @@ envi_variables <- wo_mock %>% dplyr::select("pH", "OM", "P") %>% #add relevant c
   as.data.frame() %>%
   add_column(Key = keys)
 
-envi_table <- wo_mock %>% dplyr::select("Key", "Lat_point", "Long_point") %>% join(envi_variables)
+envi_table <- wo_mock %>% 
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(envi_variables)
 
 #quick checks to make sure there are no missing values
 table(is.na(species_table))
@@ -184,6 +188,8 @@ mono_species_table <- wo_mock %>%
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
   join(species.rr_df) 
 
+mono_keys <- mono_species_table$Key
+
 #environment table
 
 mono_envi_variables <- wo_mock %>% 
@@ -191,11 +197,36 @@ mono_envi_variables <- wo_mock %>%
   dplyr::select("pH", "OM", "P") %>% #add relevant colnames
   lapply(function(x) scale(x, center = FALSE)) %>% 
   as.data.frame() %>%
-  add_column(Key = keys)
+  add_column(Key = mono_keys)
 
 mono_envi_table <- wo_mock %>% 
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
   join(envi_variables)
+
+##Polycultures
+
+#species table
+
+poly_species_table <- wo_mock %>%
+  filter(FarmType == "Polyculture") %>%
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(species.rr_df) 
+
+poly_keys <- poly_species_table$Key
+
+#environment table
+
+poly_envi_variables <- wo_mock %>% 
+  filter(FarmType == "Polyculture") %>%
+  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  lapply(function(x) scale(x, center = FALSE)) %>% 
+  as.data.frame() %>%
+  add_column(Key = poly_keys)
+
+poly_envi_table <- wo_mock %>% 
+  dplyr::select("Key", "Lat_point", "Long_point") %>% 
+  join(envi_variables)
+
 
 
 ########################################################################

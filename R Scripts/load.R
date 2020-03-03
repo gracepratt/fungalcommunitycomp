@@ -68,4 +68,3 @@ tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
 
 
 
-
