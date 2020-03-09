@@ -43,6 +43,9 @@ summary(gdm_poly_model)
 plot(gdm_poly_model, plot.layout = c(2,2))
 
 
+gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10)
+
+
 ########################################################################
 ## mantel tests
 ########################################################################
