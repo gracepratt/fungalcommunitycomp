@@ -121,6 +121,12 @@ latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 
+########################################################################
+## 5. plant ids
+########################################################################
+
+prop <- merge(prop,plantID, by="PlantID")
+
 
 ########################################################################
 ## 6. subset rows & columns needed
@@ -151,29 +157,37 @@ species.rr_df$Key <- c(keys)
 table(is.na(species.rr_df))
 
 
+#REMOVE
+
+keys <- wo_extras$Key
+
+species_only <- wo_mock %>% dplyr::select(contains("OTU"))
+
+species_only$Key <- c(keys)
+
 ########################################################################
 ## 7. create input dataframes
 ########################################################################
 
 #select the environmental variables you want
 
-envi_factors <- c("pH", "OM", "P")
+envi_factors <- c("pH", "OM", "P", "CEC")
 
 envi_table <- wo_mock %>% 
-  dplyr::select("pH", "OM", "P")
+  dplyr::select(envi_factors)
 
 ##all farms
 #species table
 
 species_table <- wo_mock %>% 
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species.rr_df)
+  join(species_only)
 
 #environment table
 
 envi_variables <- wo_mock %>% dplyr::select(envi_factors) %>% #add relevant colnames
-  lapply(function(x) scale(x, center = FALSE)) %>% 
-  as.data.frame() %>%
+  #lapply(function(x) scale(x, center = FALSE)) %>% 
+  #as.data.frame() %>%
   add_column(Key = keys)
 
 envi_table <- wo_mock %>% 
@@ -202,8 +216,6 @@ mono_keys <- mono_species_table$Key
 mono_envi_variables <- wo_mock %>% 
   filter(FarmType == "Monoculture") %>%
   dplyr::select(envi_factors) %>% #add relevant colnames
-  lapply(function(x) scale(x, center = FALSE)) %>% 
-  as.data.frame() %>%
   add_column(Key = mono_keys)
 
 mono_envi_table <- wo_mock %>% 
@@ -226,13 +238,12 @@ poly_keys <- poly_species_table$Key
 poly_envi_variables <- wo_mock %>% 
   filter(FarmType == "Polyculture") %>%
   dplyr::select("pH", "OM", "P") %>% #add relevant colnames
-  lapply(function(x) scale(x, center = FALSE)) %>% 
-  as.data.frame() %>%
   add_column(Key = poly_keys)
 
 poly_envi_table <- wo_mock %>% 
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
   join(envi_variables)
+
 
 
 

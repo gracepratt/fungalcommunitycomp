@@ -113,21 +113,21 @@ dist.pa <- as.matrix((vegdist(pa, "bray")))
 dist.envi <- as.matrix(dist(envi_table, method = "euclidean"))
 
 #geo table
-dist.geo <- wo_mock %>% dplyr::select("Lat_point", "Long_point")
+geo <- wo_mock %>% dplyr::select("Long_point", "Lat_point")
 
-dist.geo <- as.matrix(dist(dist.geo, method = "euclidean")) #not sure if I should be using this
+dist.geo <- distm(geo, fun = distHaversine) #not sure if I should be using this
 
 
 #abundace vs. environment
 
-mantel_envi_h <- mantel(dist.h, dist.envi)
+mantel_envi_h <- mantel(dist.h, dist.envi, method = "spearman")
 
 mantel_envi_pa <- mantel(dist.pa, dist.envi)
 
 
 #abundance vs. geography
 
-mantel(dist.h, dist.geo)
+mantel(dist.h, dist.geo, method = "spearman")
 
 mantel(dist.pa, dist.geo)
 
