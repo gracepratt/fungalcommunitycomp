@@ -34,7 +34,7 @@ x_values <- data.frame(isplines$x) %>%
 y_values <- data.frame(isplines$y) %>% add_column(number = c(1:200)) %>%
   rename(Geographic_y = Geographic, pH_y = pH, OM_y = OM, P_y = P)
 
-#testing
+#Custom plots
 
 geography <- x_values %>%
   join(y_values)
