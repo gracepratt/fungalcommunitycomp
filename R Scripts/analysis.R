@@ -43,7 +43,9 @@ geography %>% ggplot() +
   geom_line(aes(x = Geographic, y = Geographic_y)) +
   geom_line(aes(x = pH, y = pH_y)) +
   geom_line(aes(x = OM, y = OM_y)) +
-  geom_line(aes(x = P, y = P_y))
+  geom_line(aes(x = P, y = P_y)) +
+  xlab("Predictor Dissimilarity") +
+  ylab("Partial Ecological Distance")
 
 
 
