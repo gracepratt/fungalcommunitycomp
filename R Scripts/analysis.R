@@ -15,8 +15,38 @@ table(is.na(test_gdm_table))
 gdmModel <- gdm(test_gdm_table, geo= TRUE)
 summary(gdmModel)
 
+envi_data <- envi_table[,-1]
+
+gdm.transform(gdmModel, envi_data)
+
 #plot
 plot(gdmModel, plot.layout = c(2,2))
+
+#customplot
+
+isplines <- isplineExtract(gdmModel)
+
+x_values <- data.frame(isplines$x) %>%
+  lapply(function(x) scale(x, center = TRUE)) %>% 
+  as.data.frame() %>% 
+  add_column(number = c(1:200)) 
+
+y_values <- data.frame(isplines$y) %>% add_column(number = c(1:200)) %>%
+  rename(Geographic_y = Geographic, pH_y = pH, OM_y = OM, P_y = P)
+
+#testing
+
+geography <- x_values %>%
+  join(y_values)
+
+geography %>% ggplot() +
+  geom_line(aes(x = Geographic, y = Geographic_y)) +
+  geom_line(aes(x = pH, y = pH_y)) +
+  geom_line(aes(x = OM, y = OM_y)) +
+  geom_line(aes(x = P, y = P_y))
+
+
+
 
 ##monocultures
 
@@ -44,6 +74,7 @@ plot(gdm_poly_model, plot.layout = c(2,2))
 
 
 #gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
+
 
 
 ########################################################################
