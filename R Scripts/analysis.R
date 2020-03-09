@@ -43,19 +43,44 @@ summary(gdm_poly_model)
 plot(gdm_poly_model, plot.layout = c(2,2))
 
 
-gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10)
+#gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
 
 
 ########################################################################
 ## mantel tests
 ########################################################################
 
+
 # transformed OTU table 
-h <- decostand(OTUcomp, method = "hellinger")
-pa <- decostand(OTUcomp, method = "pa")
+h <- decostand(species.rr_df, method = "hellinger")
+pa <- decostand(species.rr_df, method = "pa")
 
 # CREATE DISSIMILARITY MATRIX
-dist.h = as.matrix((vegdist(h, "bray")))
+dist.h <- as.matrix((vegdist(h, "bray")))
+
+dist.pa <- as.matrix((vegdist(pa, "bray")))
+
+dist.envi <- as.matrix((vegdist(envi_table, "bray")))
+
+#geo table
+dist.geo <- wo_mock %>% dplyr::select("Lat_point", "Long_point")
+
+dist.geo <- as.matrix(dist(dist.geo, method = "euclidean")) #not sure if I should be using this
+
+
+
+#abundace vs. environment
+
+mantel(dist.h, dist.envi)
+
+mantel(dist.pa, dist.envi)
+
+
+#abundance vs. geography
+
+mantel(dist.h, dist.geo)
+
+mantel(dist.pa, dist.geo)
 
 
 

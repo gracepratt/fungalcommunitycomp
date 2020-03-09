@@ -159,6 +159,9 @@ table(is.na(species.rr_df))
 
 envi_factors <- c("pH", "OM", "P")
 
+envi_table <- wo_mock %>% 
+  dplyr::select("pH", "OM", "P")
+
 ##all farms
 #species table
 
