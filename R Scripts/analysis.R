@@ -2,28 +2,28 @@
 ## gdm analysis
 ########################################################################
 
-##all farms
+########################################################################
+## all farms
+########################################################################
 
 # prepare site-pair tables
 
 test_gdm_table <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
                                  siteColumn="Key", predData=envi_table)
 
-table(is.na(test_gdm_table))
-
 #create model
 gdmModel <- gdm(test_gdm_table, geo= TRUE)
 summary(gdmModel)
 
-envi_data <- envi_table[,-1]
+#gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
 
-gdm.transform(gdmModel, envi_data)
 
-#plot
-plot(gdmModel, plot.layout = c(2,2))
+#gdm plot
+plot(gdmModel, plot.layout = c(1,2))
 
-#customplot
+#custom plots
 
+#4 predictors 
 isplines <- isplineExtract(gdmModel)
 
 x_values <- data.frame(isplines$x) %>%
@@ -31,15 +31,14 @@ x_values <- data.frame(isplines$x) %>%
   as.data.frame() %>% 
   add_column(number = c(1:200)) 
 
-y_values <- data.frame(isplines$y) %>% add_column(number = c(1:200)) %>%
+y_values <- data.frame(isplines$y) %>% 
+  add_column(number = c(1:200)) %>%
   rename(Geographic_y = Geographic, pH_y = pH, OM_y = OM, P_y = P)
 
-#Custom plots
-
-geography <- x_values %>%
+four_predictors <- x_values %>%
   join(y_values)
 
-geography %>% ggplot() +
+four_predictors %>% ggplot() +
   geom_line(aes(x = Geographic, y = Geographic_y)) +
   geom_line(aes(x = pH, y = pH_y)) +
   geom_line(aes(x = OM, y = OM_y)) +
@@ -47,10 +46,27 @@ geography %>% ggplot() +
   xlab("Predictor Dissimilarity") +
   ylab("Partial Ecological Distance")
 
+#predicted vs observed compositional dissimilarity
+
+comp_df <- data.frame(gdmModel$predicted, gdmModel$observed)
+
+comp_df %>% ggplot(aes(x = gdmModel.predicted, y = gdmModel.observed)) +
+  geom_point(color = 'lightblue') +
+  geom_smooth(method = lm)
+
+#ecological dist vs observed compositional dissimilarity
+
+dist_df <- data.frame(gdmModel$ecological, gdmModel$observed)
+
+dist_df %>% ggplot(aes(x = gdmModel.ecological, y = gdmModel.observed)) +
+  geom_point(color = 'lightblue') +
+  geom_smooth(method = lm)
 
 
 
-##monocultures
+########################################################################
+## monocultures
+########################################################################
 
 mono_gdm_table <- formatsitepair(mono_species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
                             siteColumn="Key", predData=mono_envi_table)
@@ -62,7 +78,9 @@ summary(gdm_mono_model)
 #plot
 plot(gdm_mono_model, plot.layout = c(2,2))
 
-##polycultures
+########################################################################
+## polycultures
+########################################################################
 
 poly_gdm_table <- formatsitepair(poly_species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
                                  siteColumn="Key", predData=poly_envi_table)
@@ -73,9 +91,6 @@ summary(gdm_poly_model)
 
 #plot
 plot(gdm_poly_model, plot.layout = c(2,2))
-
-
-#gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
 
 
 
@@ -93,7 +108,9 @@ dist.h <- as.matrix((vegdist(h, "bray")))
 
 dist.pa <- as.matrix((vegdist(pa, "bray")))
 
-dist.envi <- as.matrix((vegdist(envi_table, "bray")))
+#dist.envi <- as.matrix((vegdist(envi_table, "bray")))
+
+dist.envi <- as.matrix(dist(envi_table, method = "euclidean"))
 
 #geo table
 dist.geo <- wo_mock %>% dplyr::select("Lat_point", "Long_point")
@@ -101,12 +118,11 @@ dist.geo <- wo_mock %>% dplyr::select("Lat_point", "Long_point")
 dist.geo <- as.matrix(dist(dist.geo, method = "euclidean")) #not sure if I should be using this
 
 
-
 #abundace vs. environment
 
-mantel(dist.h, dist.envi)
+mantel_envi_h <- mantel(dist.h, dist.envi)
 
-mantel(dist.pa, dist.envi)
+mantel_envi_pa <- mantel(dist.pa, dist.envi)
 
 
 #abundance vs. geography
