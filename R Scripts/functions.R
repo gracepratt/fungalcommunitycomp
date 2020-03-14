@@ -15,3 +15,15 @@ input_tables <- function(complete_table, envi_variables){
   
   return(list(species_table, envi_table))
 }
+
+########################################################################
+## 2. create GDM models
+########################################################################
+
+gdmModel <- function(inputs, geo = TRUE) {
+  formated_tables <- formatsitepair(inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+                                    siteColumn="Key", predData= inputs[[2]])
+  
+  model <- gdm(formated_tables, geo = geo)
+  return(model)
+}
