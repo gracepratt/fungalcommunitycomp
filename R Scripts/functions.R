@@ -8,10 +8,10 @@
 
 input_tables <- function(complete_table, envi_variables){
   species_table <- complete_table %>% 
-    dplyr::select("Key", "Lat_point", "Long_point", contains("OTU"))
+    dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
   
   envi_table <- wo_extras %>% 
-    dplyr::select("Key", "Lat_point", "Long_point", envi_factors)
+    dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
   
   return(list(species_table, envi_table))
 }
@@ -26,4 +26,27 @@ gdmModel <- function(inputs, geo = TRUE) {
   
   model <- gdm(formated_tables, geo = geo)
   return(model)
+}
+
+########################################################################
+## 3. create nice tables with total Coeffs and % explain
+########################################################################
+
+
+table <- function(model){
+  Predictors <- c(poly_model$predictors, "Percent Deviance Explained")
+  
+  coef <- model$coefficients
+  
+  i <- 1
+  coeffs <- c()
+  while(i < length(coef)){
+    coeffs <- c(coeffs, sum(coef[i:(i+2)]))
+    i <- i+3
+  }
+  
+  Coefficients <- c(coeffs, model$explained)
+  
+  nice_table <- data.frame(Predictors, Coefficients)
+  return(nice_table)
 }
