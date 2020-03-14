@@ -18,30 +18,12 @@ plot(gdmModel, plot.layout = c(1,2))
 #monocultures
 mono_model <- gdmModel(mono_inputs)
 summary(mono_model)
+table(mono_model)
 
 #polycultures
 poly_model <- gdmModel(poly_inputs)
 summary(poly_model)
-
-#building table function
-
-Predictors <- c(poly_model$predictors, "Percent Deviance Explained")
-
-poly_coef <- poly_model$coefficients
-
-i <- 1
-coeffs <- c()
-while(i < length(poly_coef)){
-  coeffs <- c(coeffs, sum(poly_coef[i:(i+2)]))
-  i <- i+3
-}
-
-Coefficients <- c(coeffs, poly_model$explained)
-
-table <- data.frame(Predictors, Coefficients)
-  
-
-  
+table(poly_model)
 
 
 ########################################################################
