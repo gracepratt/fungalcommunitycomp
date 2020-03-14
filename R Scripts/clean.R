@@ -210,7 +210,7 @@ table(is.na(envi_table))
 mono_species_table <- wo_mock %>%
   filter(FarmType == "Monoculture") %>%
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species.rr_df) ``
+  join(species.rr_df) 
 
 mono_keys <- mono_species_table$Key
 
