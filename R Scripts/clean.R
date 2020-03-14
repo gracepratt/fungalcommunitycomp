@@ -6,7 +6,7 @@
 ## 1. clean and bind 2017 and 2018 soils dataset
 ########################################################################
 
-# bind 2017 and 2018 data
+# Change FALSE to Focal
 prop <- rbind(data2017, data2018)
 
 # rename columns
@@ -19,17 +19,18 @@ prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 # change row.names to Key
 row.names(prop) <- prop$Key
 
-
 ########################################################################
-## 2. add crop plant functional groups
+## 3. add crop plant functional groups
 ########################################################################
 
 # add crop plant functional groups
 prop <- merge(prop,plantID, by="PlantID")
 
 
+
+
 ########################################################################
-## 3. adjust lat long for each point
+## 5. adjust lat long for each point
 ########################################################################
 
 # extract unique lat long by farm
@@ -101,22 +102,31 @@ latlong$Point <- substring(latlong$variable, 4,4)
 
 latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
+#latlong$BlockPoint <- paste(latlong$Block, latlong$Point, sep="_")
+#prop$BlockPoint <- paste(prop$Block, prop$Point, sep="_")
 
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 
+########################################################################
+## 4. ADD OTU table
+########################################################################
+
+# add OTU table to complete dataset
+otu$Key <- row.names(otu)
 
 ########################################################################
-## 4. rarefy all fungi table
+## 6. subset rows & columns needed
 ########################################################################
+
 
 ##subset columns needed
 
 wo_mock <- otu %>% dplyr::select(-contains("mock")) #remove the mock community OTUs
 
-species_only <- wo_mock %>% dplyr::select(contains("OTU")) #only OTU data
-
 #rarefy to minimum number of species observed
+
+species_only <- wo_mock %>% dplyr::select(contains("OTU"))
 
 minReads <- min(rowSums(species_only))
 
@@ -124,85 +134,73 @@ species_only.rr <- rrarefy(species_only, sample=minReads)
 
 species.rr_df <- data.frame(species_only.rr)
 
-#create key
+keys <- otu$Key
 
-species.rr_df$Key <- prop$Key
+species.rr_df$Key <- c(keys)
 
-table(is.na(species.rr_df)) #test
+table(is.na(species.rr_df))
 
+##subset rows needed
 
+wo_extras <- prop %>% 
+  join(species.rr_df) %>% 
+  drop_na(Lat_point)
 
-########################################################################
-## 5. Add OTU tables to envi data
-########################################################################
-
-# add rarefied OTU table to complete dataeset
-all_fungi <- prop %>% join(species.rr_df)
-
-#add rarefied AMF table
-amf_otu$Key <- prop$Key
-
-amf <- prop %>% join(amf_otu)
-
-########################################################################
-## 6. subset rows needed
-########################################################################
-
-#drop extra sites
-
-all_fungi <- all_fungi %>% drop_na("Long_point")
-
-amf <- amf %>% drop_na("Long_point")
-
-#remove 0 otu values from AMF df
-
-amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
-
-amf <- amf %>% filter(rowsum != 0)
 
 ########################################################################
 ## 7. create input dataframes
 ########################################################################
 
-#select the environmental variables you want
-
-envi_factors <- c("pH", "OM", "P", "CEC")
-
-
-input_tables <- function(fungi_table, envi_variables){
-  species_table <- fungi_table %>% dplyr::select("Key", "Lat_point", "Long_point", contains("OTU"))
-  envi_table <- fungi_table %>% dplyr::select("Key", "Lat_point", "Long_point", envi_variables)
-  return(list(species_table, envi_table))
-}
-
-all_farms <- input_tables(all_fungi, envi_factors)
-
-
 ##all farms
 #species table
 
-species_table <- all_fungi %>% 
+species_table <- wo_extras %>% 
   dplyr::select("Key", "Lat_point", "Long_point", contains("OTU")) 
 
 #environment table
 
-envi_table <- all_fungi %>% dplyr::select("Key", "Lat_point", "Long_point", envi_factors)
+envi_factors <- c("pH", "OM", "P")
 
-#OLD
+envi_table <- wo_extras %>% 
+  dplyr::select("Key", "Lat_point", "Long_point", envi_factors) #add relevant colnames
 
-envi_variables <- wo_mock %>% dplyr::select(envi_factors) %>% #add relevant colnames
-  add_column(Key = keys)
 
-envi_table <- wo_mock %>% 
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(envi_variables)
 
 #quick checks to make sure there are no missing values
 table(is.na(species_table))
 
 table(is.na(envi_table))
 
-#which(names(df) == "") #function to find column indices
+
+########################################################################
+## trying to make a function
+########################################################################
+
+envi_factors <- c("pH", "OM", "P")
+
+input_tables <- function(complete_table, envi_variables){
+  species_table <- complete_table %>% 
+    dplyr::select("Key", "Lat_point", "Long_point", contains("OTU"))
+  
+  envi_table <- wo_extras %>% 
+    dplyr::select("Key", "Lat_point", "Long_point", envi_factors)
+  
+  return(list(species_table, envi_table))
+}
+
+
+all_inputs<- input_tables(wo_extras, envi_factors)
+
+
+
+
+########################################################################
+## OLDDDDD
+########################################################################
+
+
+
+which(names(df) == "") #function to find column indices
 
 #monocultures
 #species table
@@ -218,7 +216,9 @@ mono_keys <- mono_species_table$Key
 
 mono_envi_variables <- wo_mock %>% 
   filter(FarmType == "Monoculture") %>%
-  dplyr::select(envi_factors) %>% #add relevant colnames
+  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  lapply(function(x) scale(x, center = FALSE)) %>% 
+  as.data.frame() %>%
   add_column(Key = mono_keys)
 
 mono_envi_table <- wo_mock %>% 
@@ -241,12 +241,13 @@ poly_keys <- poly_species_table$Key
 poly_envi_variables <- wo_mock %>% 
   filter(FarmType == "Polyculture") %>%
   dplyr::select("pH", "OM", "P") %>% #add relevant colnames
+  lapply(function(x) scale(x, center = FALSE)) %>% 
+  as.data.frame() %>%
   add_column(Key = poly_keys)
 
 poly_envi_table <- wo_mock %>% 
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
   join(envi_variables)
-
 
 
 

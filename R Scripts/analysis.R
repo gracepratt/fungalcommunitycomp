@@ -8,8 +8,8 @@
 
 # prepare site-pair tables
 
-test_gdm_table <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                 siteColumn="Key", predData= envi_table)
+test_gdm_table <- formatsitepair(all_inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+                                 siteColumn="Key", predData=  all_inputs[[2]])
 
 #create model
 gdmModel <- gdm(test_gdm_table, geo= TRUE)
