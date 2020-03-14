@@ -69,7 +69,3 @@ tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
 plantID <- read.csv("Raw Data/PlantID.csv")
 
 
-
-
-
-

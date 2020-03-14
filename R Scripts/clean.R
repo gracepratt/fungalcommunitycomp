@@ -107,7 +107,7 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 
 
 ########################################################################
-## 6. rarefy all fungi table
+## 4. rarefy all fungi table
 ########################################################################
 
 ##subset columns needed
@@ -133,7 +133,7 @@ table(is.na(species.rr_df)) #test
 
 
 ########################################################################
-## 3. Add OTU tables
+## 5. Add OTU tables to envi data
 ########################################################################
 
 # add rarefied OTU table to complete dataeset
@@ -154,9 +154,11 @@ all_fungi <- all_fungi %>% drop_na("Long_point")
 
 amf <- amf %>% drop_na("Long_point")
 
-#remove 0 otu values from AMF df NEED TO DO
+#remove 0 otu values from AMF df
 
+amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
 
+amf <- amf %>% filter(rowsum != 0)
 
 ########################################################################
 ## 7. create input dataframes
@@ -173,17 +175,20 @@ input_tables <- function(fungi_table, envi_variables){
   return(list(species_table, envi_table))
 }
 
-input_tables(all_fungi, envi_factors)
+all_farms <- input_tables(all_fungi, envi_factors)
 
 
 ##all farms
 #species table
 
-species_table <- wo_mock %>% 
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species_only)
+species_table <- all_fungi %>% 
+  dplyr::select("Key", "Lat_point", "Long_point", contains("OTU")) 
 
 #environment table
+
+envi_table <- all_fungi %>% dplyr::select("Key", "Lat_point", "Long_point", envi_factors)
+
+#OLD
 
 envi_variables <- wo_mock %>% dplyr::select(envi_factors) %>% #add relevant colnames
   add_column(Key = keys)
@@ -205,7 +210,7 @@ table(is.na(envi_table))
 mono_species_table <- wo_mock %>%
   filter(FarmType == "Monoculture") %>%
   dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species.rr_df) 
+  join(species.rr_df) ``
 
 mono_keys <- mono_species_table$Key
 
