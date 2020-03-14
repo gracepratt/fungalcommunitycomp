@@ -108,17 +108,14 @@ latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 
-########################################################################
-## 4. ADD OTU table
-########################################################################
 
-# add OTU table to complete dataset
-otu$Key <- row.names(otu)
 
 ########################################################################
 ## 6. subset rows & columns needed
 ########################################################################
 
+#add key to OTUs
+otu$Key <- row.names(otu)
 
 ##subset columns needed
 
@@ -140,43 +137,35 @@ species.rr_df$Key <- c(keys)
 
 table(is.na(species.rr_df))
 
-##subset rows needed
 
-wo_extras <- prop %>% 
+########################################################################
+## 4. ADD OTU table
+########################################################################
+
+# add OTU table to complete dataset
+
+all_fungi <- prop %>% 
   join(species.rr_df) %>% 
   drop_na(Lat_point)
+
+#add AMF table for AMF dataset
+
+amf_otu$Key <- prop$Key
+  
+amf <- prop %>%
+  join(amf_otu) %>% 
+  drop_na(Lat_point)
+
+
 
 
 ########################################################################
 ## 7. create input dataframes
 ########################################################################
 
-##all farms
-#species table
+## function
 
-species_table <- wo_extras %>% 
-  dplyr::select("Key", "Lat_point", "Long_point", contains("OTU")) 
-
-#environment table
-
-envi_factors <- c("pH", "OM", "P")
-
-envi_table <- wo_extras %>% 
-  dplyr::select("Key", "Lat_point", "Long_point", envi_factors) #add relevant colnames
-
-
-
-#quick checks to make sure there are no missing values
-table(is.na(species_table))
-
-table(is.na(envi_table))
-
-
-########################################################################
-## trying to make a function
-########################################################################
-
-envi_factors <- c("pH", "OM", "P")
+envi_factors <- c("pH", "OM", "P") #choose the variables you want 
 
 input_tables <- function(complete_table, envi_variables){
   species_table <- complete_table %>% 
@@ -189,7 +178,16 @@ input_tables <- function(complete_table, envi_variables){
 }
 
 
-all_inputs<- input_tables(wo_extras, envi_factors)
+#all farms
+
+all_inputs<- input_tables(all_fungi, envi_factors)
+
+#monoculture
+
+monocultures <- wo_extras %>%
+  filter(FarmType == "Monoculture")
+
+#polyculture
 
 
 
