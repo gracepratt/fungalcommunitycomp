@@ -3,94 +3,58 @@
 ########################################################################
 
 ########################################################################
-## all farms
+## all fungi
 ########################################################################
 
-# prepare site-pair tables
-
-test_gdm_table <- formatsitepair(all_inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                 siteColumn="Key", predData=  all_inputs[[2]])
-
-#create model
-gdmModel <- gdm(test_gdm_table, geo= TRUE)
-summary(gdmModel)
+#all farms 
+all_farms_model <- gdmModel(all_inputs)
+summary(all_farms_model)
 
 #gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
-
 
 #gdm plot
 plot(gdmModel, plot.layout = c(1,2))
 
-#custom plots
+#monocultures
+mono_model <- gdmModel(mono_inputs)
+summary(mono_model)
 
-#4 predictors 
-isplines <- isplineExtract(gdmModel)
+#polycultures
+poly_model <- gdmModel(poly_inputs)
+summary(poly_model)
 
-x_values <- data.frame(isplines$x) %>%
-  lapply(function(x) scale(x, center = TRUE)) %>% 
-  as.data.frame() %>% 
-  add_column(number = c(1:200)) 
+#building table function
 
-y_values <- data.frame(isplines$y) %>% 
-  add_column(number = c(1:200)) %>%
-  rename(Geographic_y = Geographic, pH_y = pH, OM_y = OM, P_y = P)
+Predictors <- c(poly_model$predictors, "Percent Deviance Explained")
 
-four_predictors <- x_values %>%
-  join(y_values)
+poly_coef <- poly_model$coefficients
 
-four_predictors %>% ggplot() +
-  geom_line(aes(x = Geographic, y = Geographic_y)) +
-  geom_line(aes(x = pH, y = pH_y)) +
-  geom_line(aes(x = OM, y = OM_y)) +
-  geom_line(aes(x = P, y = P_y)) +
-  xlab("Predictor Dissimilarity") +
-  ylab("Partial Ecological Distance")
+i <- 1
+coeffs <- c()
+while(i < length(poly_coef)){
+  coeffs <- c(coeffs, sum(poly_coef[i:(i+2)]))
+  i <- i+3
+}
 
-#predicted vs observed compositional dissimilarity
+Coefficients <- c(coeffs, poly_model$explained)
 
-comp_df <- data.frame(gdmModel$predicted, gdmModel$observed)
+table <- data.frame(Predictors, Coefficients)
+  
 
-comp_df %>% ggplot(aes(x = gdmModel.predicted, y = gdmModel.observed)) +
-  geom_point(color = 'lightblue') +
-  geom_smooth(method = lm)
-
-#ecological dist vs observed compositional dissimilarity
-
-dist_df <- data.frame(gdmModel$ecological, gdmModel$observed)
-
-dist_df %>% ggplot(aes(x = gdmModel.ecological, y = gdmModel.observed)) +
-  geom_point(color = 'lightblue') +
-  geom_smooth(method = lm)
-
+  
 
 
 ########################################################################
-## monocultures
+## amf
 ########################################################################
 
-mono_gdm_table <- formatsitepair(mono_species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                            siteColumn="Key", predData=mono_envi_table)
+amf_allfarms <- formatsitepair(all_amf[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+                                 siteColumn="Key", predData=  all_amf[[2]])
 
 #create model
-gdm_mono_model <- gdm(mono_gdm_table, geo= TRUE)
-summary(gdm_mono_model)
+amfModel <- gdm(amf_allfarms, geo= TRUE)
+summary(amfModel)
 
-#plot
-plot(gdm_mono_model, plot.layout = c(2,2))
-
-########################################################################
-## polycultures
-########################################################################
-
-poly_gdm_table <- formatsitepair(poly_species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                 siteColumn="Key", predData=poly_envi_table)
-
-#create model
-gdm_poly_model <- gdm(poly_gdm_table, geo= TRUE)
-summary(gdm_poly_model)
-
-#plot
-plot(gdm_poly_model, plot.layout = c(2,2))
 
 
 
