@@ -156,96 +156,57 @@ amf <- prop %>%
   join(amf_otu) %>% 
   drop_na(Lat_point)
 
+#taking out samples with no AMF
+amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
 
+amf <- amf %>% filter(rowsum != 0)
 
 
 ########################################################################
 ## 7. create input dataframes
 ########################################################################
 
-## function
+# choose the variables you want
 
-envi_factors <- c("pH", "OM", "P") #choose the variables you want 
+envi_factors <- c("pH", "OM", "P")  
 
-input_tables <- function(complete_table, envi_variables){
-  species_table <- complete_table %>% 
-    dplyr::select("Key", "Lat_point", "Long_point", contains("OTU"))
-  
-  envi_table <- wo_extras %>% 
-    dplyr::select("Key", "Lat_point", "Long_point", envi_factors)
-  
-  return(list(species_table, envi_table))
-}
+########################################################################
+## all fungi
+########################################################################
 
-
-#all farms
+## all farms
 
 all_inputs<- input_tables(all_fungi, envi_factors)
 
 #monoculture
 
-monocultures <- wo_extras %>%
+monocultures <- all_fungi %>%
   filter(FarmType == "Monoculture")
+
+mono_inputs <- input_tables(monocultures, envi_factors)
 
 #polyculture
 
+polycultures <- all_fungi %>%
+  filter(FarmType == "Polyculture")
+
+poly_inputs <- input_tables(polycultures, envi_factors)
 
 
 
 ########################################################################
-## OLDDDDD
+## amf
 ########################################################################
 
+all_amf <- input_tables(amf, envi_factors)
 
 
-which(names(df) == "") #function to find column indices
 
-#monocultures
-#species table
 
-mono_species_table <- wo_mock %>%
-  filter(FarmType == "Monoculture") %>%
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species.rr_df) 
 
-mono_keys <- mono_species_table$Key
 
-#environment table
 
-mono_envi_variables <- wo_mock %>% 
-  filter(FarmType == "Monoculture") %>%
-  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
-  lapply(function(x) scale(x, center = FALSE)) %>% 
-  as.data.frame() %>%
-  add_column(Key = mono_keys)
 
-mono_envi_table <- wo_mock %>% 
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(envi_variables)
-
-##Polycultures
-
-#species table
-
-poly_species_table <- wo_mock %>%
-  filter(FarmType == "Polyculture") %>%
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(species.rr_df) 
-
-poly_keys <- poly_species_table$Key
-
-#environment table
-
-poly_envi_variables <- wo_mock %>% 
-  filter(FarmType == "Polyculture") %>%
-  dplyr::select("pH", "OM", "P") %>% #add relevant colnames
-  lapply(function(x) scale(x, center = FALSE)) %>% 
-  as.data.frame() %>%
-  add_column(Key = poly_keys)
-
-poly_envi_table <- wo_mock %>% 
-  dplyr::select("Key", "Lat_point", "Long_point") %>% 
-  join(envi_variables)
 
 
 
