@@ -34,7 +34,7 @@ gdmModel <- function(inputs, geo = TRUE) {
 
 
 table <- function(model){
-  Predictors <- c(poly_model$predictors, "Percent Deviance Explained")
+  Predictors <- c(model$predictors, "Percent Deviance Explained")
   
   coef <- model$coefficients
   
@@ -50,3 +50,42 @@ table <- function(model){
   nice_table <- data.frame(Predictors, Coefficients)
   return(nice_table)
 }
+
+########################################################################
+## 3. mantel functions with nice table
+########################################################################
+
+mantel_func <- function(input_table, transform_method = "hellinger", mantel_method = "spearman"){
+  
+  species <- input_table[[1]] %>% dplyr::select(contains("OTU"))
+  envi <- input_table[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+  geo <- input_table[[1]] %>% dplyr::select("Long_point", "Lat_point")
+  
+  # transformed OTU table 
+  trans <- decostand(species, method = transform_method)
+  
+  # CREATE DISSIMILARITY MATRIX
+  dist.sp <- as.matrix((vegdist(trans, "bray")))
+  dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+  dist.geo <- distm(geo, fun = distHaversine) 
+  
+  #mantel test
+  mantel_envi <- mantel(dist.sp, dist.envi, method = mantel_method)
+  mantel_geo <- mantel(dist.sp, dist.geo, method = mantel_method)
+  
+  #make a table 
+  Factor <- c("Environment", "Geography")
+  Statistic <- c(mantel_envi$statistic, mantel_geo$statistic)
+  Significance <- c(mantel_envi$signif, mantel_geo$signif)
+  
+  table <- data.frame(Factor, Statistic, Significance)
+  
+  
+  return(table)
+}
+
+
+
+
+
+
