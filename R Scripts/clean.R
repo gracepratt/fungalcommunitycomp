@@ -6,7 +6,7 @@
 ## 1. clean and bind 2017 and 2018 soils dataset
 ########################################################################
 
-# Change FALSE to Focal
+# Combine 2017 and 2018 data
 prop <- rbind(data2017, data2018)
 
 # rename columns
@@ -20,17 +20,15 @@ prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 row.names(prop) <- prop$Key
 
 ########################################################################
-## 3. add crop plant functional groups
+## 2. add crop plant functional groups
 ########################################################################
 
 # add crop plant functional groups
 prop <- merge(prop,plantID, by="PlantID")
 
 
-
-
 ########################################################################
-## 5. adjust lat long for each point
+## 3. adjust lat long for each point
 ########################################################################
 
 # extract unique lat long by farm
@@ -111,15 +109,15 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 
 
 ########################################################################
-## 6. subset rows & columns needed
+## 4. rarefy dataset with all fungi
 ########################################################################
 
 #add key to OTUs
 otu$Key <- row.names(otu)
 
-##subset columns needed
+#remove the mock community OTUs
 
-wo_mock <- otu %>% dplyr::select(-contains("mock")) #remove the mock community OTUs
+wo_mock <- otu %>% dplyr::select(-contains("mock")) 
 
 #rarefy to minimum number of species observed
 
@@ -131,18 +129,16 @@ species_only.rr <- rrarefy(species_only, sample=minReads)
 
 species.rr_df <- data.frame(species_only.rr)
 
-keys <- otu$Key
+species.rr_df$Key <- otu$Key
 
-species.rr_df$Key <- c(keys)
-
-table(is.na(species.rr_df))
+sum(is.na(species.rr_df))
 
 
 ########################################################################
-## 4. ADD OTU table
+## 5. Add OTU tables
 ########################################################################
 
-# add OTU table to complete dataset
+# add rarefied OTU table to complete dataset
 
 all_fungi <- prop %>% 
   join(species.rr_df) %>% 
@@ -163,12 +159,12 @@ amf <- amf %>% filter(rowsum != 0)
 
 
 ########################################################################
-## 7. create input dataframes
+## 6. create input dataframes
 ########################################################################
 
 # choose the variables you want
 
-envi_factors <- c("pH", "OM", "P")  
+envi_factors <- c("pH", "OM", "P", "CEC")  
 
 ########################################################################
 ## all fungi
