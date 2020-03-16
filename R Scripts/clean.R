@@ -155,7 +155,7 @@ amf <- prop %>%
 #taking out samples with no AMF
 amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
 
-amf <- amf %>% filter(rowsum != 0)
+amf <- amf %>% filter(rowsum > 0)
 
 
 ########################################################################
