@@ -10,7 +10,7 @@ input_tables <- function(complete_table, envi_variables){
   species_table <- complete_table %>% 
     dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
   
-  envi_table <- wo_extras %>% 
+  envi_table <- complete_table %>% 
     dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
   
   return(list(species_table, envi_table))
