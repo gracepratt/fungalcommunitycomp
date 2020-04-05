@@ -198,9 +198,19 @@ all_amf <- input_tables(amf, envi_factors)
 
 
 
+#monoculture
 
+monocultures_amf <- amf %>%
+  filter(FarmType == "Monoculture")
 
+mono_inputs_amf <- input_tables(monocultures_amf, envi_factors)
 
+#polyculture
+
+polycultures_amf <- amf %>%
+  filter(FarmType == "Polyculture")
+
+poly_inputs_amf <- input_tables(polycultures, envi_factors)
 
 
 

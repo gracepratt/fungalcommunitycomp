@@ -22,7 +22,7 @@ input_tables <- function(complete_table, envi_variables){
 
 gdmModel <- function(inputs, geo = TRUE) {
   formated_tables <- formatsitepair(inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                    siteColumn="Key", predData= inputs[[2]])
+                                    siteColumn="Key", predData= inputs[[2]], abundance = FALSE)
   
   model <- gdm(formated_tables, geo = geo)
   return(model)
