@@ -8,7 +8,7 @@
 
 #all farms 
 all_farms_model <- gdmModel(all_inputs)
-summary(all_farms_model)
+#summary(all_farms_model)
 table(all_farms_model)
 
 #gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
