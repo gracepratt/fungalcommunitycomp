@@ -11,7 +11,7 @@ all_farms_model <- gdmModel(all_inputs)
 #summary(all_farms_model)
 table(all_farms_model)
 
-#gdm.varImp(test_gdm_table, geo = TRUE, nPerm = 10) #very slow
+gdm.varImp(test_gdm_table, geo = TRUE) #very slow
 
 #gdm plot
 plot(all_farms_model, plot.layout = c(1,2))
