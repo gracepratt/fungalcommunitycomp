@@ -236,11 +236,11 @@ guilds <- wGuilds %>% dplyr::select("Guild")
 OTUColumns <- all_fungi %>% 
   dplyr::select(contains("OTU"))
 
-colnames(OTUColumns) <- guilds
-
-OTUColumns
 
 
+colnames(OTUColumns) <- guilds$Guild
+
+transposed <- t(OTUColumns)
 
 ########################################################################
 ## End

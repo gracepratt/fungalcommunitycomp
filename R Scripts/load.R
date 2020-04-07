@@ -60,7 +60,7 @@ plantID <- read.csv("Raw Data/PlantID.csv")
 otu <- read.csv("Raw Data/fungiOTU.csv")
 
 #amf rarerified table
-amf_otu <- read.csv("Raw Data/otu.rr.csv")
+amf_otu <- read.csv("Raw Data/glomOTU_rMin.csv")
 
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
