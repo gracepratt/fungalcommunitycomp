@@ -208,6 +208,33 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 
 
 ########################################################################
+## creating dissimilarity input
+########################################################################
+
+species <- all_fungi%>%
+  dplyr::select(contains("OTU"))
+
+
+dist.sp <- as.matrix(vegdist(species, "bray"))
+
+species_table1 <- cbind(all_fungi$Key, dist.sp) %>% 
+  data.frame() %>% 
+  rename("Key" = 'V1')
+
+envi_table1 <- all_fungi %>%
+  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+
+formated_tables1 <- formatsitepair(species_table1, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
+                                  siteColumn="Key", predData= envi_table1, abundance = FALSE)
+
+
+
+
+
+
+
+
+########################################################################
 ## adding functional groups
 ########################################################################
 
@@ -274,6 +301,8 @@ envi_table <- fdSum %>%
 
 formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
                                   siteColumn="Key", predData= envi_table, abundance = FALSE)
+
+
 
 
 
