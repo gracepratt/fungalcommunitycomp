@@ -260,7 +260,20 @@ fdSum <- all_fungi %>%
 
 
 
+########################################################################
+## input tables functional groups (might remove)
+########################################################################
 
+species_table <- fdCount %>% 
+  dplyr::select("Key", "Long_point", "Lat_point", c(79:168))
+
+envi_table <- fdCount %>% 
+  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+
+
+
+formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+                                  siteColumn="Key", predData= envi_table, abundance = FALSE)
 
 
 
