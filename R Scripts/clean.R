@@ -230,17 +230,23 @@ justOTU <- all_fungi %>%
 wGuilds <- justOTU %>% 
   left_join(rawguilds, by = "X.OTU.ID")
 
-guilds <- wGuilds %>% dplyr::select("Guild")
+
 
 
 OTUColumns <- all_fungi %>% 
-  dplyr::select(contains("OTU"))
+  dplyr::select(Key, contains("OTU"))
 
 
 
-colnames(OTUColumns) <- guilds$Guild
 
-transposed <- t(OTUColumns)
+
+
+
+
+
+
+
+
 
 ########################################################################
 ## End
