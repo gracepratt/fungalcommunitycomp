@@ -87,5 +87,3 @@ mantel_func <- function(input_table, transform_method = "hellinger", mantel_meth
 
 
 
-
-
