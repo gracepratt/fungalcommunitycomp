@@ -116,11 +116,9 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 otu$Key <- row.names(otu)
 
 #remove the mock community OTUs
-
 wo_mock <- otu %>% dplyr::select(-contains("mock")) 
 
 #rarefy to minimum number of species observed
-
 species_only <- wo_mock %>% dplyr::select(contains("OTU"))
 
 minReads <- min(rowSums(species_only))
@@ -139,13 +137,11 @@ sum(is.na(species.rr_df))
 ########################################################################
 
 # add rarefied OTU table to complete dataset
-
 all_fungi <- prop %>% 
   join(species.rr_df) %>% 
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
-
 amf_otu$Key <- prop$Key
   
 amf <- prop %>%
@@ -196,8 +192,6 @@ poly_inputs <- input_tables(polycultures, envi_factors)
 
 all_amf <- input_tables(amf, envi_factors)
 
-
-
 #monoculture
 
 monocultures_amf <- amf %>%
@@ -217,25 +211,51 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 ## adding functional groups
 ########################################################################
 
+#pull out OTU columns and transpose to make 1 row per Key and OTU
 OTURows<- all_fungi %>% 
   dplyr::select(Key, contains("OTU")) %>%
   pivot_longer(cols = starts_with("OTU"), names_to = "OTU")
 
+#pull out names of guilds
 rawguilds <- tax %>%
   dplyr::select("OTU" = "X.OTU.ID", "Guild")
 
-
+#join guild names with OTU in each key 
 wGuild <- OTURows %>%
   left_join(rawguilds) %>%
+  drop_na() %>%
   filter(value > 0)
   
-testing <- wGuild[1:10,] %>%
-  filter(value > 0)
+#group by key and guild
+grouped <- wGuild %>% 
+  group_by(Key, Guild) %>% 
+  summarise(count = n(), sum = sum(value)) 
 
-grouped <- wGuild %>% group_by(Key, Guild) %>% 
-  summarise(count = n(), sum = sum(value))
+#re-pivot back to wide format with guilds as column names
 
+#count
+wideCount <- grouped %>%
+  dplyr::select("Key", "Guild", "count") %>%
+  pivot_wider(names_from = Guild, values_from = count)
 
+wideCount[is.na(wideCount)] <- 0 #change NAs to 0
+
+#sum
+wideSum <- grouped %>%
+  dplyr::select("Key", "Guild", "sum") %>%
+  pivot_wider(names_from = Guild, values_from = sum)
+
+wideSum[is.na(wideSum)] <- 0
+
+#rejoin with full table 
+fdCount <- all_fungi %>%
+  dplyr::select(-contains("OTU")) %>%
+  join(wideCount)
+
+fdSum <- all_fungi %>%
+  dplyr::select(-contains("OTU")) %>%
+  join(wideSum)
+  
 
 
 
