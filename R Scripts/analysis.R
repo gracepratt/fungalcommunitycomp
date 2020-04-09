@@ -12,9 +12,7 @@ all_farms_model <- gdmModel(all_inputs)
 table(all_farms_model)
 
 
-formated_tables <- formatsitepair(all_inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                  siteColumn="Key", predData= all_inputs[[2]], abundance = FALSE)
-gdm.varImp(formated_tables, geo = TRUE) #very slow
+#gdm.varImp(formated_tables, geo = TRUE) #very slow
 
 #gdm plot
 plot(all_farms_model, plot.layout = c(1,2))
@@ -64,6 +62,8 @@ plot(poly_model_amf, plot.layout = c(1,2))
 
 
 
+
+
 ########################################################################
 ## mantel tests
 ########################################################################
@@ -71,5 +71,20 @@ plot(poly_model_amf, plot.layout = c(1,2))
 all_mantel <- mantel_func(all_inputs)
 mono_mantel <- mantel_func(mono_inputs)
 poly_mantel <- mantel_func(poly_inputs)
+
+
+
+
+########################################################################
+## functional groups
+########################################################################
+
+
+model <- gdm(formated_tables, geo = TRUE)
+
+table(model)
+
+
+
 
 
