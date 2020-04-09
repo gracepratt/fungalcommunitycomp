@@ -217,24 +217,36 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 ## adding functional groups
 ########################################################################
 
+OTURows<- all_fungi %>% 
+  dplyr::select(Key, contains("OTU")) %>%
+  pivot_longer(cols = starts_with("OTU"), names_to = "OTU")
+
 rawguilds <- tax %>%
-  dplyr::select("X.OTU.ID", "Guild")
+  dplyr::select("OTU" = "X.OTU.ID", "Guild")
 
 
-justOTU <- all_fungi %>% 
-  dplyr::select(contains("OTU")) %>% 
-  colnames() %>%
-  data.frame() %>%
-  rename("X.OTU.ID" = ".")
+wGuild <- OTURows %>%
+  left_join(rawguilds) %>%
+  filter(value > 0)
+  
+testing <- wGuild[1:10,] %>%
+  filter(value > 0)
 
-wGuilds <- justOTU %>% 
-  left_join(rawguilds, by = "X.OTU.ID")
+grouped <- wGuild %>% group_by(Key, Guild) %>% 
+  summarise(count = n(), sum = sum(value))
 
 
 
 
-OTUColumns <- all_fungi %>% 
-  dplyr::select(Key, contains("OTU"))
+
+
+
+
+
+
+
+
+
 
 
 
