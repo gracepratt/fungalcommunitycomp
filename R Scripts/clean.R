@@ -264,10 +264,10 @@ fdSum <- all_fungi %>%
 ## input tables functional groups (might remove)
 ########################################################################
 
-species_table <- fdCount %>% 
+species_table <- fdSum %>% 
   dplyr::select("Key", "Long_point", "Lat_point", c(79:168))
 
-envi_table <- fdCount %>% 
+envi_table <- fdSum %>% 
   dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
 
 
