@@ -74,6 +74,43 @@ poly_mantel <- mantel_func(poly_inputs)
 
 
 
+#environment vs distance
+
+#all farms
+
+envi <- all_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+geo <- all_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+
+
+dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+dist.geo <- distm(geo, fun = distHaversine)
+
+all_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+
+
+#monoculture
+envi <- mono_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+geo <- mono_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+
+
+dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+dist.geo <- distm(geo, fun = distHaversine)
+
+mono_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+
+
+#polyculture
+envi <- poly_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+geo <- poly_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+
+
+dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+dist.geo <- distm(geo, fun = distHaversine)
+
+poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+
+
+
 
 ########################################################################
 ## functional groups
@@ -93,6 +130,12 @@ table(model)
 model1 <- gdm(formated_tables1, geo = TRUE)
 
 table(model1)
+
+
+
+
+
+
 
 
 
