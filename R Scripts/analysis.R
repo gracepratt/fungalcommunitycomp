@@ -12,7 +12,7 @@ all_farms_model <- gdmModel(all_inputs)
 table(all_farms_model)
 
 
-#gdm.varImp(formated_tables, geo = TRUE) #very slow
+gdm.varImp(formated_tables, geo = TRUE, nPerm = 40) #very slow
 
 #gdm plot
 plot(all_farms_model, plot.layout = c(1,2))

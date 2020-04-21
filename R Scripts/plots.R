@@ -32,6 +32,8 @@ predictors_plot <- function(model){
 }
 
 
+
+
 # all AMF
 all_amf_plots <- predictors_plot(all_amf_model)
 ggsave("all_amf_plots.pdf", plot=all_amf_plots, path=fig.path, width = 5, height=4, useDingbats=FALSE)
