@@ -6,8 +6,9 @@
 ## 1. clean and bind 2017 and 2018 soils dataset
 ########################################################################
 
-# Combine 2017 and 2018 data
-prop <- rbind(data2017, data2018)
+# Enter 2017-2018 data as prop (since the relational database combines both now )
+# Only inclde non-OTU columns 
+prop <- data[1:84]
 
 # rename columns
 colnames(prop)[4] <- c("Transect")
@@ -19,16 +20,9 @@ prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 # change row.names to Key
 row.names(prop) <- prop$Key
 
-########################################################################
-## 2. add crop plant functional groups
-########################################################################
-
-# add crop plant functional groups
-prop <- merge(prop,plantID, by="PlantID")
-
 
 ########################################################################
-## 3. adjust lat long for each point
+## 2. adjust lat long for each point
 ########################################################################
 
 # extract unique lat long by farm
@@ -109,7 +103,7 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 
 
 ########################################################################
-## 4. rarefy dataset with all fungi
+## 3. rarefy dataset with all fungi
 ########################################################################
 
 #add key to OTUs
@@ -133,7 +127,7 @@ sum(is.na(species.rr_df))
 
 
 ########################################################################
-## 5. Add OTU tables
+## 4. Add OTU tables
 ########################################################################
 
 # add rarefied OTU table to complete dataset
@@ -159,8 +153,9 @@ amf <- amf %>% filter(rowsum > 0)
 ########################################################################
 
 # choose the variables you want
+# Adding CN_ration, TOC and N, removing OM
 
-envi_factors <- c("pH", "OM", "P", "CEC")  
+envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  
 
 ########################################################################
 ## all fungi
@@ -292,7 +287,7 @@ fdSum <- all_fungi %>%
 ########################################################################
 
 species_table <- fdSum %>% 
-  dplyr::select("Key", "Long_point", "Lat_point", c(79:168))
+  dplyr::select("Key", "Long_point", "Lat_point", c(90:177))
 
 envi_table <- fdSum %>% 
   dplyr::select("Key", "Long_point", "Lat_point", envi_factors)

@@ -47,11 +47,8 @@ fig.path <- "Outputs/Figures"
 ## load data
 ########################################################################
 
-# 2017 dataset
-data2017 <- read.csv("Raw Data/2017-Complete.csv")
-
-# 2018 dataset
-data2018 <- read.csv("Raw Data/2018-Complete.csv")
+# 2017-2018 dataset
+data <- read.csv("Raw Data/20172018-Complete.csv")
 
 # load plant traits table
 plantID <- read.csv("Raw Data/PlantID.csv")
@@ -65,7 +62,12 @@ amf_otu <- read.csv("Raw Data/glomOTU_rMin.csv")
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
 
-#plant id
-plantID <- read.csv("Raw Data/PlantID.csv")
+#plant id (removed because already in relational relational database)
+# plantID <- read.csv("Raw Data/PlantID.csv")
 
 
+########################################################################
+## load functions
+########################################################################
+
+source("R Scripts/functions.R")
