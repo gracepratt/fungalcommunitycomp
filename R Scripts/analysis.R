@@ -12,7 +12,7 @@ all_farms_model <- gdmModel(all_inputs)
 table(all_farms_model)
 
 
-gdm.varImp(formated_tables, geo = TRUE, nPerm = 40) #very slow
+gdm.varImp(formated_tables, geo = TRUE, nPerm = 50, cores=4) #very slow
 
 #gdm plot
 plot(all_farms_model, plot.layout = c(1,2))
@@ -21,11 +21,17 @@ plot(all_farms_model, plot.layout = c(1,2))
 mono_model <- gdmModel(mono_inputs)
 #summary(mono_model)
 table(mono_model)
+#gdm plot
+plot(mono_model, plot.layout = c(1,2))
+
 
 #polycultures
 poly_model <- gdmModel(poly_inputs)
 #summary(poly_model)
 table(poly_model)
+
+#gdm plot
+plot(poly_model, plot.layout = c(1,2))
 
 
 ########################################################################
@@ -33,17 +39,17 @@ table(poly_model)
 ########################################################################
 
 
-#create model
+# create model
 all_amf_model <- gdmModel(all_amf)
 #summary(mono_model)
 table(all_amf_model)
-
 
 #gdm plot
 plot(all_amf_model, plot.layout = c(1,2))
 
 
-#monocultures
+# monocultures
+## Given how little deviance is explained by this model, this it make more sense to try a bunch a different parameters and see if those explain a bit more?
 mono_model_amf <- gdmModel(mono_inputs_amf)
 #summary(mono_model)
 table(mono_model_amf)
