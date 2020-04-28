@@ -7,7 +7,7 @@
 ########################################################################
 
 # Enter 2017-2018 data as prop (since the relational database combines both now )
-# Only inclde non-OTU columns 
+# Only include non-OTU columns 
 prop <- data[1:84]
 
 # rename columns
@@ -153,9 +153,9 @@ amf <- amf %>% filter(rowsum > 0)
 ########################################################################
 
 # choose the variables you want
-# Adding CN_ration, TOC and N, removing OM
+# Adding CN_ratio, TOC and N, removing OM
 
-envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  
+envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  #testing
 
 ########################################################################
 ## all fungi
@@ -203,7 +203,7 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 
 
 ########################################################################
-## creating dissimilarity input
+## creating dissimilarity input (Might remove)
 ########################################################################
 
 species <- all_fungi%>%
