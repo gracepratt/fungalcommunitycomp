@@ -25,14 +25,16 @@ predictors_plot <- function(model){
   
   predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
     geom_line() +
-    xlab("Predictor Dissimilarity") +
-    ylab("Community Dissimilarity") + 
+    xlab("Standardized Variables") +
+    ylab("Partial Ecological Distance") + 
     theme_classic()
   
 }
 
 
 
+#all fungi
+all_farms_plots <- predictors_plot(all_farms_model)
 
 # all AMF
 all_amf_plots <- predictors_plot(all_amf_model)
