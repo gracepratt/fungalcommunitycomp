@@ -253,25 +253,33 @@ wGuild <- OTURows %>%
   left_join(rawguilds) %>%
   drop_na() %>%
   filter(value > 0)
+
+
+#subsetting OTUs (need to make a function eventually probably)
+
+amf_fd <- wGuild %>% 
+  filter(str_detect(Guild, pattern = "Arbuscular Mycorrhizal")) 
   
-#group by key and guild WRONG
-grouped <- wGuild %>% 
-  group_by(Key, Guild) %>% 
-  summarise(count = n(), sum = sum(value)) 
+
+
+
+
+
+
 
 #re-pivot back to wide format with guilds as column names
 
 #count
-wideCount <- grouped %>%
+wideCount <- amf_fd %>%
   dplyr::select("Key", "Guild", "count") %>%
   pivot_wider(names_from = Guild, values_from = count)
 
 wideCount[is.na(wideCount)] <- 0 #change NAs to 0
 
 #sum
-wideSum <- grouped %>%
-  dplyr::select("Key", "Guild", "sum") %>%
-  pivot_wider(names_from = Guild, values_from = sum)
+wideSum <- amf_fd %>%
+  dplyr::select("Key", "OTU", "value") %>%
+  pivot_wider(names_from = OTU, values_from = value)
 
 wideSum[is.na(wideSum)] <- 0
 
@@ -293,7 +301,7 @@ fdSum <- all_fungi %>%
 ########################################################################
 
 species_table <- fdSum %>% 
-  dplyr::select("Key", "Long_point", "Lat_point", c(90:177))
+  dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
 
 envi_table <- fdSum %>% 
   dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
