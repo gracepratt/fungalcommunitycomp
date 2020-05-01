@@ -136,7 +136,7 @@ all_fungi <- prop %>%
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
-amf_otu$Key <- prop$Key
+amf_otu_100$Key <- prop$Key
   
 amf <- prop %>%
   join(amf_otu) %>% 
