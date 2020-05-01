@@ -100,7 +100,12 @@ latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 
+########################################################################
+## 3. adding mono vs poly as a binary (0/1) variable
+########################################################################
 
+prop_b <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
+                                          "Polyculture" = 0))
 
 ########################################################################
 ## 3. rarefy dataset with all fungi
@@ -131,14 +136,14 @@ sum(is.na(species.rr_df))
 ########################################################################
 
 # add rarefied OTU table to complete dataset
-all_fungi <- prop %>% 
+all_fungi <- prop_b %>% 
   join(species.rr_df) %>% 
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
 amf_otu_100$Key <- prop$Key
   
-amf <- prop %>%
+amf <- prop_b %>%
   join(amf_otu) %>% 
   drop_na(Lat_point)
 
@@ -233,6 +238,7 @@ formated_tables1 <- formatsitepair(species_table1, bioFormat=3, XColumn="Long_po
 ## adding functional groups
 ########################################################################
 
+
 #pull out OTU columns and transpose to make 1 row per Key and OTU
 OTURows<- all_fungi %>% 
   dplyr::select(Key, contains("OTU")) %>%
@@ -248,7 +254,7 @@ wGuild <- OTURows %>%
   drop_na() %>%
   filter(value > 0)
   
-#group by key and guild
+#group by key and guild WRONG
 grouped <- wGuild %>% 
   group_by(Key, Guild) %>% 
   summarise(count = n(), sum = sum(value)) 
