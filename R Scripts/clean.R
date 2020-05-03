@@ -94,9 +94,6 @@ latlong$Point <- substring(latlong$variable, 4,4)
 
 latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
-#latlong$BlockPoint <- paste(latlong$Block, latlong$Point, sep="_")
-#prop$BlockPoint <- paste(prop$Block, prop$Point, sep="_")
-
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 
@@ -144,7 +141,7 @@ all_fungi <- prop_b %>%
 amf_otu_100$Key <- prop$Key
   
 amf <- prop_b %>%
-  join(amf_otu) %>% 
+  join(amf_otu_100) %>% 
   drop_na(Lat_point)
 
 #taking out samples with no AMF
@@ -251,8 +248,7 @@ rawguilds <- tax %>%
 #join guild names with OTU in each key 
 wGuild <- OTURows %>%
   left_join(rawguilds) %>%
-  drop_na() %>%
-  filter(value > 0)
+  drop_na()
 
 
 #subsetting OTUs (need to make a function eventually probably)
@@ -293,7 +289,10 @@ fdSum <- all_fungi %>%
   join(wideSum)
   
 
+#taking out samples with no AMF
+fdSum$rowsum <- rowSums(fdSum %>% dplyr::select(contains("OTU")))
 
+fdSum <- fdSum %>% filter(rowsum > 0)
 
 
 ########################################################################

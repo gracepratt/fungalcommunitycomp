@@ -64,7 +64,7 @@ amf_otu_nr <- read.csv("Raw Data/glomOTU_nr.csv")
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
 
-#plant id (removed because already in relational relational database)
+#plant id (removed because already in relational database)
 # plantID <- read.csv("Raw Data/PlantID.csv")
 
 
