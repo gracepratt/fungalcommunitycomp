@@ -158,6 +158,75 @@ mantel_func <- function(input_table, transform_method = "hellinger", mantel_meth
   return(table)
 }
 
+########################################################################
+## plot variable isplines
+########################################################################
+
+predictors_plot <- function(model){
+  isplines <- isplineExtract(model)
+  
+  x_values <- data.frame(isplines$x) %>%
+    lapply(function(x) scale(x, center = TRUE)) %>% 
+    as.data.frame() %>% 
+    add_column(Key = row.names(data.frame(isplines$x))) %>%
+    dplyr::select("Key", X = 1)
+  
+  y_values <- data.frame(isplines$y) %>% 
+    add_column(Key = row.names(data.frame(isplines$y))) %>%
+    gather(key = "Factor", value = "Y", -"Key" )
+  
+  predictors <- y_values %>%
+    full_join(x_values, by = "Key")
+  
+  
+  predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
+    geom_line() +
+    xlab("Standardized Variables") +
+    ylab("Partial Ecological Distance") + 
+    theme_classic()
+  
+}
 
 
+########################################################################
+## plot obs vs predicted comp dissimilarity
+########################################################################
 
+comp_plot <- function(model){
+  
+  x_values <- model$predicted
+  y_values <- model$observed
+  
+  df <- data.frame(x_values, y_values)
+  
+  
+  df %>% ggplot(aes(x = x_values, y = y_values)) +
+    geom_point(size=0.2, alpha=0.5) +
+    geom_smooth(method = lm)+ 
+    xlab("Predicted Community Dissimilarity") +
+    ylab("Observed Community Dissimilarity") + 
+    theme_classic()
+  
+}
+
+
+########################################################################
+## plot pred ecological distance vs obs comp dissimilarity
+########################################################################
+
+ecodist_plot <- function(model){
+  
+  x_values <- model$ecological
+  y_values <- model$observed
+  
+  df <- data.frame(x_values, y_values)
+  
+  
+  df %>% ggplot(aes(x = x_values, y = y_values)) +
+    geom_point(size=0.2, alpha=0.5) +
+    geom_smooth(method = lm)+ 
+    xlab("Predicted Ecological Distance") +
+    ylab("Observed Community Dissimilarity") + 
+    theme_classic()
+  
+}

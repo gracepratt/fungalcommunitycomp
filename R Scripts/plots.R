@@ -6,33 +6,6 @@
 ## predictor coefficient plots
 ########################################################################
 
-predictors_plot <- function(model){
-  isplines <- isplineExtract(model)
-  
-  x_values <- data.frame(isplines$x) %>%
-    lapply(function(x) scale(x, center = TRUE)) %>% 
-    as.data.frame() %>% 
-    add_column(Key = row.names(data.frame(isplines$x))) %>%
-    dplyr::select("Key", X = 1)
-  
-  y_values <- data.frame(isplines$y) %>% 
-    add_column(Key = row.names(data.frame(isplines$y))) %>%
-    gather(key = "Factor", value = "Y", -"Key" )
-  
-  predictors <- y_values %>%
-    full_join(x_values, by = "Key")
-  
-  
-  predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
-    geom_line() +
-    xlab("Standardized Variables") +
-    ylab("Partial Ecological Distance") + 
-    theme_classic()
-  
-}
-
-
-
 #all fungi
 all_farms_plots <- predictors_plot(all_farms_model)
 
@@ -53,19 +26,13 @@ ggsave("poly_amf_plots.pdf", plot=poly_amf_plots, path=fig.path,  width = 5, hei
 ## predicted vs observed compositional dissimilarity
 ########################################################################
 
-comp_df <- data.frame(all_farms_model$predicted, all_farms_model$observed)
-
-comp_df %>% ggplot(aes(x = all_farms_model.predicted, y = all_farms_model.observed)) +
-  geom_point() +
-  geom_smooth(method = lm)
-
-
+comp_plot(all_farms_model)
 
 # all AMF
 all_amf_comp <- data.frame(all_amf_model$predicted, all_amf_model$observed)
 
 all_amf_comp_plot <- all_amf_comp %>% ggplot(aes(x = all_amf_model.predicted, y = all_amf_model.observed)) +
-  geom_point(size=1, alpha=0.5) +
+  geom_point(size=0.2, alpha=0.5) +
   geom_smooth(method = lm)+ 
   xlab("Predicted Community Dissimilarity") +
   ylab("Observed Community Dissimilarity") + 
@@ -100,11 +67,11 @@ poly_amf_comp_plot <- poly_amf_comp %>% ggplot(aes(x = poly_model_amf.predicted,
 ggsave("poly_amf_comp_plot.pdf", plot=poly_amf_comp_plot, path=fig.path, width = 6, height=4, useDingbats=FALSE)
 
 
+########################################################################
+## pred ecological dist vs observed compositional dissimilarity
+########################################################################
 
-#ecological dist vs observed compositional dissimilarity
+ecodist_plot(all_farms_model)
 
-# dist_df <- data.frame(gdmModel$ecological, gdmModel$observed)
-# 
-# dist_df %>% ggplot(aes(x = gdmModel.ecological, y = gdmModel.observed)) +
-#   geom_point(color = 'lightblue') +
-#   geom_smooth(method = lm)
+
+
