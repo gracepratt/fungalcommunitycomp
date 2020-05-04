@@ -30,14 +30,14 @@ input_diss <- function(complete_table, envi_variables){
   
   dist.sp <- as.matrix(vegdist(species_table, "bray"))
   
-  species_table <- cbind(complete_table$Key, dist.sp) 
+  species_matrix <- cbind(complete_table$Key, dist.sp) 
   
-  colnames(species_table)[1] <- "Key"
+  colnames(species_matrix)[1] <- "Key"
   
   envi_table <- complete_table %>%
     dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
   
-  formated_tables <- formatsitepair(species_table, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
+  formated_tables <- formatsitepair(species_matrix, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
                                      siteColumn="Key", predData= envi_table, abundance = FALSE)
   
   return(formated_tables)
@@ -87,8 +87,6 @@ guild_filter <- function(complete_table, guild){
   
   return(fd_complete)
 }
-
-
 
 
 ########################################################################
