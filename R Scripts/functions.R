@@ -44,11 +44,54 @@ input_diss <- function(complete_table, envi_variables){
 }
 
 
+########################################################################
+## filtering out certain functional groups
+########################################################################
+
+guild_filter <- function(complete_table, guild){
+  
+  #pull out OTU columns and transpose to make 1 row per Key and OTU
+  OTURows<- complete_table %>% 
+    dplyr::select(Key, contains("OTU")) %>%
+    pivot_longer(cols = starts_with("OTU"), names_to = "OTU")
+  
+  #pull out names of guilds
+  rawguilds <- tax %>%
+    dplyr::select("OTU" = "X.OTU.ID", "Guild")
+  
+  #join guild names with OTU in each key 
+  wGuild <- OTURows %>%
+    left_join(rawguilds) %>%
+    drop_na()
+  
+  #subsetting OTUs to only guild of interest
+  fdGroup <- wGuild %>% 
+    filter(str_detect(Guild, pattern = guild)) 
+  
+  #re-pivot back to wide format 
+  wide <- fdGroup %>%
+    dplyr::select("Key", "OTU", "value") %>%
+    pivot_wider(names_from = OTU, values_from = value)
+  
+  wide[is.na(wide)] <- 0
+  
+  #rejoin with full table 
+  fd_complete <- complete_table %>%
+    dplyr::select(-contains("OTU")) %>%
+    join(wide)
+  
+  #taking out samples with none of the guild
+  fd_complete$rowsum <- rowSums(fd_complete%>% dplyr::select(contains("OTU")))
+  
+  fd_complete <- fd_complete %>% filter(rowsum > 0)
+  
+  return(fd_complete)
+}
 
 
 
 ########################################################################
-## 2. create GDM models
+## 2. create GDM models (not using right now)
 ########################################################################
 
 gdmModel <- function(inputs, geo = TRUE) {
