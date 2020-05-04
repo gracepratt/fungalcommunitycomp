@@ -290,45 +290,6 @@ fungal_par_inputs <- input_tables(fungal_par, envi_factors)
 
 
 
-########################################################################
-## input tables functional groups (might remove)
-########################################################################
-
-#dissimilarity matrix
-species.1 <- fdSum%>%
-  dplyr::select(contains("OTU"))
-
-
-dist.sp.1 <- as.matrix(vegdist(species.1, "bray"))
-
-species_table2 <- cbind(fdSum$Key, dist.sp.1) 
-
-colnames(species_table2)[1] <- "Key"
-
-
-
-
-
-
-species_table <- fdSum %>% 
-  dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
-
-envi_table <- fdSum %>% 
-  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
-
-
-
-formated_tables <- formatsitepair(species_table2, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
-                                  siteColumn="Key", predData= envi_table, abundance = FALSE)
-
-
-
-
-amf_fd <- input_tables(fdSum, envi_factors)
-
-
-
-
 
 
 
