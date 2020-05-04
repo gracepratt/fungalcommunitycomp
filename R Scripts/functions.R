@@ -3,7 +3,7 @@
 ########################################################################
 
 ########################################################################
-## 1. inputs for model with species tables
+## 1. species table inputs for gdm
 ########################################################################
 
 input_tables <- function(complete_table, envi_variables){
@@ -20,7 +20,7 @@ input_tables <- function(complete_table, envi_variables){
 }
 
 ########################################################################
-## 2. dissimilarity matrix inputs
+## 2. dissimilarity matrix inputs for gdm
 ########################################################################
 
 input_diss <- function(complete_table, envi_variables){
@@ -45,7 +45,7 @@ input_diss <- function(complete_table, envi_variables){
 
 
 ########################################################################
-## filtering out certain functional groups
+## 3. subsetting fungal guilds
 ########################################################################
 
 guild_filter <- function(complete_table, guild){
@@ -90,20 +90,9 @@ guild_filter <- function(complete_table, guild){
 
 
 
-########################################################################
-## 2. create GDM models (not using right now)
-########################################################################
-
-gdmModel <- function(inputs, geo = TRUE) {
-  formated_tables <- formatsitepair(inputs[[1]], bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                    siteColumn="Key", predData= inputs[[2]], abundance = FALSE)
-  
-  model <- gdm(formated_tables, geo = geo)
-  return(model)
-}
 
 ########################################################################
-## 3. create nice tables with total Coeffs and % explain
+## 4. nice output tables for gdm models
 ########################################################################
 
 
@@ -126,7 +115,7 @@ table <- function(model){
 }
 
 ########################################################################
-## 3. mantel functions with nice table
+## 5. mantel functions with nice table
 ########################################################################
 
 mantel_func <- function(input_table, transform_method = "hellinger", mantel_method = "spearman"){
@@ -159,7 +148,7 @@ mantel_func <- function(input_table, transform_method = "hellinger", mantel_meth
 }
 
 ########################################################################
-## plot variable isplines
+## 6. plot variable isplines
 ########################################################################
 
 predictors_plot <- function(model){
@@ -189,7 +178,7 @@ predictors_plot <- function(model){
 
 
 ########################################################################
-## plot obs vs predicted comp dissimilarity
+## 7. plot obs vs predicted comp dissimilarity
 ########################################################################
 
 comp_plot <- function(model){
@@ -211,7 +200,7 @@ comp_plot <- function(model){
 
 
 ########################################################################
-## plot pred ecological distance vs obs comp dissimilarity
+## 8. plot pred ecological distance vs obs comp dissimilarity
 ########################################################################
 
 ecodist_plot <- function(model){
