@@ -121,13 +121,32 @@ poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
 ## functional groups
 ########################################################################
 
+#AMF
+amf_fd <- gdm(amf_fd_inputs, geo = TRUE)
+table(amf_fd)
+plot(amf_fd, plot.layout = c(1,2))
+amf_fd_d <- gdm(amf_fd_inputs_d, geo = TRUE)
+table(amf_fd_d)
+plot(amf_fd_d, plot.layout = c(1,2))
 
-modeldiss <- gdm(formated_tables, geo = TRUE)
+#plant pathogens
+plant_path <- gdm(plant_path_inputs, geo = TRUE)
+table(plant_path)
+plant_path_d <- gdm(plant_path_inputs_d, geo = TRUE)
+table(plant_path_d)
 
-table(modeldiss)
+#saprotroph
+saprotroph <- gdm(sap_inputs, geo = TRUE)
+table(saprotroph)
+saprotroph_d <- gdm(sap_inputs_d, geo = TRUE)
+table(saprotroph_d)
 
-modelreg <- gdmModel(amf_fd)
-table(modelreg)
+#fungal parasite
+fungal_parasite <- gdm(fungal_par_inputs, geo = TRUE)
+table(fungal_parasite)
+fungal_parasite_d <- gdm(fungal_par_inputs_d, geo = TRUE)
+table(fungal_parasite_d)
+
 
 
 ########################################################################

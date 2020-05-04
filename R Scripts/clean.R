@@ -203,6 +203,7 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 ## creating dissimilarity input 
 ########################################################################
 
+#all fungi
 all_diss <- input_diss(all_fungi, envi_factors)
 
 
@@ -236,25 +237,57 @@ amf_fd <- wGuild %>%
   filter(str_detect(Guild, pattern = "Arbuscular Mycorrhizal")) 
   
 
-#re-pivot back to wide format with guilds as column names
+#re-pivot back to wide format 
 
-#sum
-wideSum <- amf_fd %>%
+amf_wide <- amf_fd %>%
   dplyr::select("Key", "OTU", "value") %>%
   pivot_wider(names_from = OTU, values_from = value)
 
-wideSum[is.na(wideSum)] <- 0
+amf_wide[is.na(amf_wide)] <- 0
 
 #rejoin with full table 
-fdSum <- all_fungi %>%
+fdSum<- all_fungi %>%
   dplyr::select(-contains("OTU")) %>%
-  join(wideSum)
+  join(amf_wide)
   
 
 #taking out samples with no AMF
 fdSum$rowsum <- rowSums(fdSum %>% dplyr::select(contains("OTU")))
 
 fdSum <- fdSum %>% filter(rowsum > 0)
+
+
+amf_fd_inputs <- input_diss(fdSum, envi_factors)
+
+amf_fd_gdm <- gdm(amf_fd_inputs, geo = TRUE)
+
+
+########################################################################
+## functional groups with function
+########################################################################
+
+#amf
+amf_filter <- guild_filter(all_fungi, "Arbuscular Mycorrhizal")
+amf_fd_inputs_d <- input_diss(amf_filter, envi_factors)
+amf_fd_inputs <- input_tables(amf_filter, envi_factors)
+
+#plant pathogen
+plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
+plant_path_inputs_d <- input_diss(plant_pathogen, envi_factors)
+plant_path_inputs <- input_tables(plant_pathogen, envi_factors)
+
+#saprotroph
+all_saprotroph <- guild_filter(all_fungi, "Saprotroph")
+sap_inputs_d <- input_diss(all_saprotroph, envi_factors)
+sap_inputs <- input_tables(all_saprotroph, envi_factors)
+
+#fungal parasite
+fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
+fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
+fungal_par_inputs <- input_tables(fungal_par, envi_factors)
+
+
+
 
 
 ########################################################################
@@ -288,7 +321,12 @@ envi_table <- fdSum %>%
 formated_tables <- formatsitepair(species_table2, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
                                   siteColumn="Key", predData= envi_table, abundance = FALSE)
 
+
+
+
 amf_fd <- input_tables(fdSum, envi_factors)
+
+
 
 
 
