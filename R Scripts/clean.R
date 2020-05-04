@@ -207,6 +207,57 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 all_diss <- input_diss(all_fungi, envi_factors)
 
 
+########################################################################
+## functional groups with function
+########################################################################
+
+#amf
+amf_filter <- guild_filter(all_fungi, "Arbuscular Mycorrhizal")
+amf_fd_inputs_d <- input_diss(amf_filter, envi_factors)
+amf_fd_inputs <- input_tables(amf_filter, envi_factors)
+
+#plant pathogen
+plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
+plant_path_inputs_d <- input_diss(plant_pathogen, envi_factors)
+plant_path_inputs <- input_tables(plant_pathogen, envi_factors)
+
+#saprotroph
+all_saprotroph <- guild_filter(all_fungi, "Saprotroph")
+sap_inputs_d <- input_diss(all_saprotroph, envi_factors)
+sap_inputs <- input_tables(all_saprotroph, envi_factors)
+
+#fungal parasite
+fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
+fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
+fungal_par_inputs <- input_tables(fungal_par, envi_factors)
+
+
+
+
+########################################################################
+## SCRATCH
+########################################################################
+
+########################################################################
+## dissimilarity inputs
+########################################################################
+
+
+species_table1 <- all_fungi%>%
+  dplyr::select(contains("OTU"))
+
+
+dist.sp1 <- as.matrix(vegdist(species_table1, "bray"))
+
+species_matrix1 <- cbind(all_fungi$Key, dist.sp1) 
+
+colnames(species_matrix1)[1] <- "Key"
+
+envi_table1 <- all_fungi %>%
+  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+
+formated_tables1 <- formatsitepair(species_matrix1, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
+                                  siteColumn="Key", predData= envi_table1, abundance = FALSE)
 
 
 
@@ -235,7 +286,7 @@ wGuild <- OTURows %>%
 
 amf_fd <- wGuild %>% 
   filter(str_detect(Guild, pattern = "Arbuscular Mycorrhizal")) 
-  
+
 
 #re-pivot back to wide format 
 
@@ -249,7 +300,7 @@ amf_wide[is.na(amf_wide)] <- 0
 fdSum<- all_fungi %>%
   dplyr::select(-contains("OTU")) %>%
   join(amf_wide)
-  
+
 
 #taking out samples with no AMF
 fdSum$rowsum <- rowSums(fdSum %>% dplyr::select(contains("OTU")))
@@ -260,37 +311,6 @@ fdSum <- fdSum %>% filter(rowsum > 0)
 amf_fd_inputs <- input_diss(fdSum, envi_factors)
 
 amf_fd_gdm <- gdm(amf_fd_inputs, geo = TRUE)
-
-
-########################################################################
-## functional groups with function
-########################################################################
-
-#amf
-amf_filter <- guild_filter(all_fungi, "Arbuscular Mycorrhizal")
-amf_fd_inputs_d <- input_diss(amf_filter, envi_factors)
-amf_fd_inputs <- input_tables(amf_filter, envi_factors)
-
-#plant pathogen
-plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
-plant_path_inputs_d <- input_diss(plant_pathogen, envi_factors)
-plant_path_inputs <- input_tables(plant_pathogen, envi_factors)
-
-#saprotroph
-all_saprotroph <- guild_filter(all_fungi, "Saprotroph")
-sap_inputs_d <- input_diss(all_saprotroph, envi_factors)
-sap_inputs <- input_tables(all_saprotroph, envi_factors)
-
-#fungal parasite
-fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
-fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
-fungal_par_inputs <- input_tables(fungal_par, envi_factors)
-
-
-
-
-
-
 
 
 
