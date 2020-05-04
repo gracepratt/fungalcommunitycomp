@@ -101,7 +101,7 @@ prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, 
 ## 3. adding mono vs poly as a binary (0/1) variable
 ########################################################################
 
-prop_b <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
+prop <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
                                           "Polyculture" = 0))
 
 ########################################################################
@@ -114,18 +114,14 @@ otu$Key <- row.names(otu)
 #remove the mock community OTUs
 wo_mock <- otu %>% dplyr::select(-contains("mock")) 
 
-#rarefy to minimum number of species observed
+#rarefy to minimum number of sequences observed
 species_only <- wo_mock %>% dplyr::select(contains("OTU"))
 
 minReads <- min(rowSums(species_only))
 
-species_only.rr <- rrarefy(species_only, sample=minReads)
-
-species.rr_df <- data.frame(species_only.rr)
+species.rr_df <- data.frame(rrarefy(species_only, sample=minReads))
 
 species.rr_df$Key <- otu$Key
-
-sum(is.na(species.rr_df))
 
 
 ########################################################################
@@ -133,14 +129,14 @@ sum(is.na(species.rr_df))
 ########################################################################
 
 # add rarefied OTU table to complete dataset
-all_fungi <- prop_b %>% 
+all_fungi <- prop %>% 
   join(species.rr_df) %>% 
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
 amf_otu_100$Key <- prop$Key
   
-amf <- prop_b %>%
+amf <- prop %>%
   join(amf_otu_100) %>% 
   drop_na(Lat_point)
 
@@ -155,7 +151,6 @@ amf <- amf %>% filter(rowsum > 0)
 ########################################################################
 
 # choose the variables you want
-# Adding CN_ratio, TOC and N, removing OM
 
 envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  #testing
 
@@ -205,26 +200,10 @@ poly_inputs_amf <- input_tables(polycultures, envi_factors)
 
 
 ########################################################################
-## creating dissimilarity input (Might remove)
+## creating dissimilarity input 
 ########################################################################
 
-species <- all_fungi%>%
-  dplyr::select(contains("OTU"))
-
-
-dist.sp <- as.matrix(vegdist(species, "bray"))
-
-species_table1 <- cbind(all_fungi$Key, dist.sp) %>% 
-  data.frame() %>% 
-  rename("Key" = 'V1')
-
-envi_table1 <- all_fungi %>%
-  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
-
-formated_tables1 <- formatsitepair(species_table1, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
-                                  siteColumn="Key", predData= envi_table1, abundance = FALSE)
-
-
+all_diss <- input_diss(all_fungi, envi_factors)
 
 
 
@@ -257,20 +236,7 @@ amf_fd <- wGuild %>%
   filter(str_detect(Guild, pattern = "Arbuscular Mycorrhizal")) 
   
 
-
-
-
-
-
-
 #re-pivot back to wide format with guilds as column names
-
-#count
-wideCount <- amf_fd %>%
-  dplyr::select("Key", "Guild", "count") %>%
-  pivot_wider(names_from = Guild, values_from = count)
-
-wideCount[is.na(wideCount)] <- 0 #change NAs to 0
 
 #sum
 wideSum <- amf_fd %>%
@@ -280,10 +246,6 @@ wideSum <- amf_fd %>%
 wideSum[is.na(wideSum)] <- 0
 
 #rejoin with full table 
-fdCount <- all_fungi %>%
-  dplyr::select(-contains("OTU")) %>%
-  join(wideCount)
-
 fdSum <- all_fungi %>%
   dplyr::select(-contains("OTU")) %>%
   join(wideSum)
@@ -299,6 +261,22 @@ fdSum <- fdSum %>% filter(rowsum > 0)
 ## input tables functional groups (might remove)
 ########################################################################
 
+#dissimilarity matrix
+species.1 <- fdSum%>%
+  dplyr::select(contains("OTU"))
+
+
+dist.sp.1 <- as.matrix(vegdist(species.1, "bray"))
+
+species_table2 <- cbind(fdSum$Key, dist.sp.1) 
+
+colnames(species_table2)[1] <- "Key"
+
+
+
+
+
+
 species_table <- fdSum %>% 
   dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
 
@@ -307,10 +285,10 @@ envi_table <- fdSum %>%
 
 
 
-formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+formated_tables <- formatsitepair(species_table2, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
                                   siteColumn="Key", predData= envi_table, abundance = FALSE)
 
-
+amf_fd <- input_tables(fdSum, envi_factors)
 
 
 

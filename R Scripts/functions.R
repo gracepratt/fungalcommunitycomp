@@ -3,18 +3,49 @@
 ########################################################################
 
 ########################################################################
-## 1. create input dataframes for GDM model 
+## 1. inputs for model with species tables
 ########################################################################
 
 input_tables <- function(complete_table, envi_variables){
   species_table <- complete_table %>% 
-  dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
+    dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
   
   envi_table <- complete_table %>% 
     dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
   
-  return(list(species_table, envi_table))
+  formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
+                                    siteColumn="Key", predData= envi_table, abundance = FALSE)
+  
+  return(formated_tables)
 }
+
+########################################################################
+## 2. dissimilarity matrix inputs
+########################################################################
+
+input_diss <- function(complete_table, envi_variables){
+  species_table <- complete_table%>%
+    dplyr::select(contains("OTU"))
+  
+  
+  dist.sp <- as.matrix(vegdist(species_table, "bray"))
+  
+  species_table <- cbind(complete_table$Key, dist.sp) 
+  
+  colnames(species_table)[1] <- "Key"
+  
+  envi_table <- complete_table %>%
+    dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+  
+  formated_tables <- formatsitepair(species_table, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
+                                     siteColumn="Key", predData= envi_table, abundance = FALSE)
+  
+  return(formated_tables)
+}
+
+
+
+
 
 ########################################################################
 ## 2. create GDM models
