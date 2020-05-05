@@ -179,6 +179,7 @@ envi_factors <- c("pH", "P", "CEC", "N")  #testing
 ## all farms
 
 all_inputs<- input_tables(all_fungi, envi_factors)
+all_diss <- input_diss(all_fungi, envi_factors)
 
 #monoculture
 
@@ -186,6 +187,7 @@ monocultures <- all_fungi %>%
   filter(FarmType == "Monoculture")
 
 mono_inputs <- input_tables(monocultures, envi_factors)
+mono_diss <- input_diss(monocultures, envi_factors)
 
 #polyculture
 
@@ -193,6 +195,7 @@ polycultures <- all_fungi %>%
   filter(FarmType == "Polyculture")
 
 poly_inputs <- input_tables(polycultures, envi_factors)
+poly_diss <- input_diss(polycultures, envi_factors)
 
 
 
@@ -201,6 +204,7 @@ poly_inputs <- input_tables(polycultures, envi_factors)
 ########################################################################
 
 all_amf <- input_tables(amf, envi_factors)
+all_amf_diss <- input_diss(amf, envi_factors)
 
 #monoculture
 
@@ -208,6 +212,7 @@ monocultures_amf <- amf %>%
   filter(FarmType == "Monoculture")
 
 mono_inputs_amf <- input_tables(monocultures_amf, envi_factors)
+mono_diss_amf <- input_diss(monocultures_amf, envi_factors)
 
 #polyculture
 
@@ -215,14 +220,7 @@ polycultures_amf <- amf %>%
   filter(FarmType == "Polyculture")
 
 poly_inputs_amf <- input_tables(polycultures_amf, envi_factors)
-
-
-########################################################################
-## creating dissimilarity input 
-########################################################################
-
-#all fungi
-all_diss <- input_diss(all_fungi, envi_factors)
+poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 
 ########################################################################
@@ -248,6 +246,15 @@ sap_inputs <- input_tables(all_saprotroph, envi_factors)
 fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
 fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
 fungal_par_inputs <- input_tables(fungal_par, envi_factors)
+
+
+
+
+
+
+
+
+
 
 
 
