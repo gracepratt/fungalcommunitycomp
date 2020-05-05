@@ -11,10 +11,10 @@ input_tables <- function(complete_table, envi_variables){
     dplyr::select("Key", "Long_point", "Lat_point", contains("OTU"))
   
   envi_table <- complete_table %>% 
-    dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+    dplyr::select("Key", "Long_point", "Lat_point", envi_variables)
   
   formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                    siteColumn="Key", predData= envi_table, abundance = FALSE)
+                                    siteColumn="Key", predData= envi_table, abundance = TRUE)
   
   return(formated_tables)
 }
@@ -35,10 +35,10 @@ input_diss <- function(complete_table, envi_variables){
   colnames(species_matrix)[1] <- "Key"
   
   envi_table <- complete_table %>%
-    dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
+    dplyr::select("Key", "Long_point", "Lat_point", envi_variables)
   
   formated_tables <- formatsitepair(species_matrix, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
-                                     siteColumn="Key", predData= envi_table, abundance = FALSE)
+                                     siteColumn="Key", predData= envi_table, abundance = TRUE)
   
   return(formated_tables)
 }
