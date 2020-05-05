@@ -136,24 +136,16 @@ all_fungi <- prop %>%
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
-amf_otu$Key <- prop$Key
+old_amf$Key <- prop$Key
   
 amf <- prop %>%
-  join(amf_otu) %>% 
+  join(old_amf) %>% 
   drop_na(Lat_point)
 
 #taking out samples with no AMF
 amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
 
 amf <- amf %>% filter(rowsum > 0)
-
-amf %>% 
-  dplyr::select( starts_with("OTU")) %>%
-  estimateR() %>%
-  t() %>%
-  as.data.frame() %>%
-  mutate(Key = row_number())
-  
 
 
 # add vegan calculations for chao1
@@ -169,7 +161,7 @@ amf <- cbind(amf, richness[,1:2], diversity)
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "CEC", "N")  #testing
+envi_factors <- c("pH", "P", "OM", "CEC")  #testing
 
 
 ########################################################################
