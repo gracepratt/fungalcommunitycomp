@@ -77,9 +77,9 @@ table(poly_amf_diss_model)
 ## mantel tests
 ########################################################################
 
-all_mantel <- mantel_func(all_inputs)
-mono_mantel <- mantel_func(mono_inputs)
-poly_mantel <- mantel_func(poly_inputs)
+all_mantel <- mantel_func(all_fungi, envi_factors)
+mono_mantel <- mantel_func(monocultures, envi_factors)
+poly_mantel <- mantel_func(polycultures, envi_factors)
 
 
 
