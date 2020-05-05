@@ -21,6 +21,8 @@ prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 row.names(prop) <- prop$Key
 
 
+
+
 ########################################################################
 ## 2. adjust lat long for each point
 ########################################################################
@@ -134,16 +136,31 @@ all_fungi <- prop %>%
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
-amf_otu_100$Key <- prop$Key
+amf_otu$Key <- prop$Key
   
 amf <- prop %>%
-  join(amf_otu_100) %>% 
+  join(amf_otu) %>% 
   drop_na(Lat_point)
 
 #taking out samples with no AMF
 amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
 
 amf <- amf %>% filter(rowsum > 0)
+
+amf %>% 
+  dplyr::select( starts_with("OTU")) %>%
+  estimateR() %>%
+  t() %>%
+  as.data.frame() %>%
+  mutate(Key = row_number())
+  
+
+
+# add vegan calculations for chao1
+richness <- t(as.data.frame(estimateR(amf %>% dplyr::select( contains("OTU")))))
+diversity <- data.frame(diversity=diversity(amf %>% dplyr::select( contains("OTU"))))
+amf <- cbind(amf, richness[,1:2], diversity)
+
 
 
 ########################################################################
@@ -152,7 +169,8 @@ amf <- amf %>% filter(rowsum > 0)
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  #testing
+envi_factors <- c("pH", "P", "CEC", "N")  #testing
+
 
 ########################################################################
 ## all fungi
@@ -161,7 +179,6 @@ envi_factors <- c("pH", "P", "CEC", "TOC","N", "CN_ratio")  #testing
 ## all farms
 
 all_inputs<- input_tables(all_fungi, envi_factors)
-all_diss <- input_diss(all_fungi, envi_factors)
 
 #monoculture
 
@@ -169,7 +186,6 @@ monocultures <- all_fungi %>%
   filter(FarmType == "Monoculture")
 
 mono_inputs <- input_tables(monocultures, envi_factors)
-mono_diss <- input_diss(monocultures, envi_factors)
 
 #polyculture
 
@@ -177,7 +193,6 @@ polycultures <- all_fungi %>%
   filter(FarmType == "Polyculture")
 
 poly_inputs <- input_tables(polycultures, envi_factors)
-poly_diss <- input_diss(polycultures, envi_factors)
 
 
 
@@ -186,7 +201,6 @@ poly_diss <- input_diss(polycultures, envi_factors)
 ########################################################################
 
 all_amf <- input_tables(amf, envi_factors)
-all_amf_diss <- input_diss(amf, envi_factors)
 
 #monoculture
 
@@ -194,15 +208,21 @@ monocultures_amf <- amf %>%
   filter(FarmType == "Monoculture")
 
 mono_inputs_amf <- input_tables(monocultures_amf, envi_factors)
-mono_diss_amf <- input_diss(monocultures_amf, envi_factors)
 
 #polyculture
 
 polycultures_amf <- amf %>%
   filter(FarmType == "Polyculture")
 
-poly_inputs_amf <- input_tables(polycultures, envi_factors)
-poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
+poly_inputs_amf <- input_tables(polycultures_amf, envi_factors)
+
+
+########################################################################
+## creating dissimilarity input 
+########################################################################
+
+#all fungi
+all_diss <- input_diss(all_fungi, envi_factors)
 
 
 ########################################################################
@@ -228,20 +248,6 @@ sap_inputs <- input_tables(all_saprotroph, envi_factors)
 fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
 fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
 fungal_par_inputs <- input_tables(fungal_par, envi_factors)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
