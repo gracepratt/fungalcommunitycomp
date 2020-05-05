@@ -58,8 +58,9 @@ otu <- read.csv("Raw Data/fungiOTU.csv")
 
 #amf rarerified table
 amf_otu <- read.csv("Raw Data/glomOTU_rMin.csv")
-amf_otu_100 <- read.csv("Raw Data/glomOTU_r100.csv")
-amf_otu_nr <- read.csv("Raw Data/glomOTU_nr.csv")
+old_amf <- read.csv("Raw Data/Old AMF Tables/otu.rr.csv")
+# amf_otu_100 <- read.csv("Raw Data/glomOTU_r100.csv")
+# amf_otu_nr <- read.csv("Raw Data/glomOTU_nr.csv")
 
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv')
