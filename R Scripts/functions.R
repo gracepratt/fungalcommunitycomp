@@ -116,11 +116,11 @@ table <- function(model){
 ## 5. mantel functions with nice table
 ########################################################################
 
-mantel_func <- function(input_table, transform_method = "hellinger", mantel_method = "spearman"){
+mantel_func <- function(complete_table, envi_variables, transform_method = "hellinger", mantel_method = "spearman"){
   
-  species <- input_table[[1]] %>% dplyr::select(contains("OTU"))
-  envi <- input_table[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
-  geo <- input_table[[1]] %>% dplyr::select("Long_point", "Lat_point")
+  species <- complete_table %>% dplyr::select(contains("OTU"))
+  envi <- complete_table %>% dplyr::select(envi_factors)
+  geo <- complete_table %>% dplyr::select("Long_point", "Lat_point")
   
   # transformed OTU table 
   trans <- decostand(species, method = transform_method)
