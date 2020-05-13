@@ -1,0 +1,82 @@
+---
+title: "Beta-diversity project"
+output: pdf_document
+---
+
+```{r include=FALSE, cache=FALSE}
+## Source for Analysis workflow 
+
+
+## *******************************************************
+## 1. load
+## *******************************************************
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/load.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/clean.R', chdir = TRUE)
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/analysis.R', chdir = TRUE)
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/plot.R', chdir = TRUE)
+
+```
+
+
+
+# ALL FARMS
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(all_amf_model)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+all_amf_plots 
+```
+
+\pagebreak  
+
+
+# MONOCULTURE
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(mono_model_amf)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+mono_amf_plots 
+```
+
+\pagebreak  
+
+
+# POLYCULTURE
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(poly_model_amf)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+poly_amf_plots 
+```
+
+\pagebreak  
