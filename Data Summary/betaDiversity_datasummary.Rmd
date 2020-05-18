@@ -38,12 +38,12 @@ source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project
 
 **Tables** 
 ```{r, tidy=TRUE, echo=FALSE}
-table(all_amf_model)
+table(amf_diss_model)
 ```
 
 
 **Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
 all_amf_plots 
 all_amf_comp_plot
 ```
@@ -55,12 +55,12 @@ all_amf_comp_plot
 
 **Tables** 
 ```{r, tidy=TRUE, echo=FALSE}
-table(mono_model_amf)
+table(mono_amf_diss_model)
 ```
 
 
 **Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
 mono_amf_plots 
 mono_amf_comp_plot
 ```
@@ -72,14 +72,16 @@ mono_amf_comp_plot
 
 **Tables** 
 ```{r, tidy=TRUE, echo=FALSE}
-table(poly_model_amf)
+table(poly_amf_diss_model)
 ```
 
 
 **Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
 poly_amf_plots 
 poly_amf_comp_plot
 ```
 
 \pagebreak  
+
+

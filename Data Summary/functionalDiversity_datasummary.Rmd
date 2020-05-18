@@ -1,0 +1,139 @@
+---
+title: "Functional Diversity Data Summary"
+author: "Grace Pratt"
+date: "5/18/2020"
+output: pdf_document
+---
+
+```{r, include=FALSE, cache - FALSE}
+## Source for Analysis workflow 
+
+
+## *******************************************************
+## 1. load
+## *******************************************************
+
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/load.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/clean.R', chdir = TRUE)
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/analysis.R', chdir = TRUE)
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/plots.R', chdir = TRUE)
+```
+
+
+# AMF FUNCTIONAL GROUP
+
+```{r, tidy=TRUE, echo=FALSE}
+table(amf_fd)
+
+table(amf_fd_mono)
+
+table(amf_fd_poly)
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+amf_fd_plots
+
+```
+
+
+\pagebreak  
+
+# PLANT PATHOGENS
+
+```{r, tidy=TRUE, echo=FALSE}
+table(plant_path)
+
+table(plant_path_mono)
+
+table(plant_path_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+plant_path_plots
+
+```
+
+
+\pagebreak  
+
+# SAPROTROPHS
+
+```{r, tidy=TRUE, echo=FALSE}
+table(saprotroph)
+
+table(saprotroph_mono)
+
+table(saprotroph_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+saprotroph_plots
+
+```
+
+
+\pagebreak
+
+#FUNGAL PARASITE
+
+```{r, tidy=TRUE, echo=FALSE}
+table(fungal_parasite)
+
+table(fungal_par_mono)
+
+table(fungal_par_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+fungal_par_plots
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
