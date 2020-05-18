@@ -10,7 +10,7 @@
 all_farms_plots <- predictors_plot(all_farms_model)
 
 # all AMF
-all_amf_plots <- predictors_plot(amf_diss_model) + ggtitle("All farms") + theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+all_amf_plots <- predictors_plot(amf_diss_model) #+ ggtitle("All farms") + theme(legend.position="none", plot.title = element_text(hjust = 0.5))
 # ggsave("all_amf_plots.pdf", plot=all_amf_plots, path=fig.path, width = 5, height=4, useDingbats=FALSE)
 
 # monoculture
