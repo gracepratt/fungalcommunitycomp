@@ -14,7 +14,7 @@ input_tables <- function(complete_table, envi_variables){
     dplyr::select("Key", "Long_point", "Lat_point", envi_variables)
   
   formated_tables <- formatsitepair(species_table, bioFormat=1, XColumn="Long_point", YColumn="Lat_point",
-                                    siteColumn="Key", predData= envi_table, abundance = TRUE)
+                                    siteColumn="Key", predData= envi_table, abundance = FALSE)
   
   return(formated_tables)
 }
@@ -150,6 +150,8 @@ mantel_func <- function(complete_table, envi_variables, transform_method = "hell
 ########################################################################
 
 predictors_plot <- function(model){
+  
+
   isplines <- isplineExtract(model)
   
   x_values <- data.frame(isplines$x) %>%
@@ -170,6 +172,7 @@ predictors_plot <- function(model){
     geom_line() +
     xlab("Standardized Variables") +
     ylab("Partial Ecological Distance") + 
+    # ylim(0, 2.5) +
     theme_classic()
   
 }

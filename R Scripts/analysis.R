@@ -129,6 +129,12 @@ poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
 amf_fd <- gdm(amf_fd_inputs, geo = TRUE)
 table(amf_fd)
 
+amf_fd_mono <- gdm(amf_mono_inputs, geo = TRUE)
+table(amf_fd_mono)
+
+amf_fd_poly <- gdm(amf_poly_inputs, geo = TRUE)
+table(amf_fd_poly)
+
 amf_fd_d <- gdm(amf_fd_inputs_d, geo = TRUE)
 table(amf_fd_d) #better by 2%
 
@@ -137,6 +143,12 @@ table(amf_fd_d) #better by 2%
 plant_path <- gdm(plant_path_inputs, geo = TRUE)
 table(plant_path) #better by 7%
 
+plant_path_mono <- gdm(plant_mono_inputs, geo = TRUE)
+table(plant_path_mono)
+
+plant_path_poly <- gdm(plant_poly_inputs, geo = TRUE)
+table(plant_path_poly)
+
 plant_path_d <- gdm(plant_path_inputs_d, geo = TRUE)
 table(plant_path_d)
 
@@ -144,12 +156,24 @@ table(plant_path_d)
 saprotroph <- gdm(sap_inputs, geo = TRUE)
 table(saprotroph) #better by 10%
 
+saprotroph_mono <- gdm(sap_mono_inputs, geo = TRUE)
+table(saprotroph_mono)
+
+saprotroph_poly<- gdm(sap_poly_inputs, geo = TRUE)
+table(saprotroph_poly)
+
 saprotroph_d <- gdm(sap_inputs_d, geo = TRUE)
 table(saprotroph_d)
 
 #fungal parasite
 fungal_parasite <- gdm(fungal_par_inputs, geo = TRUE)
 table(fungal_parasite) #better by 2%
+
+fungal_par_mono <- gdm(fungal_mono_inputs, geo = TRUE)
+table(fungal_par_mono)
+
+fungal_par_poly <- gdm(fungal_poly_inputs, geo = TRUE)
+table(fungal_par_poly)
 
 fungal_parasite_d <- gdm(fungal_par_inputs_d, geo = TRUE)
 table(fungal_parasite_d)

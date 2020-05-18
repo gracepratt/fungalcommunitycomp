@@ -7,8 +7,11 @@
 ########################################################################
 
 # Enter 2017-2018 data as prop (since the relational database combines both now )
+# prop <- rbind(data2017, data2018)
+
 # Only include non-OTU columns 
-prop <- data[1:84]
+prop <- data[1:84] # nrow=378, ncol=84
+# nrow=378, ncol=84
 
 # rename columns
 colnames(prop)[4] <- c("Transect")
@@ -17,9 +20,13 @@ colnames(prop)[8] <- c("Block")
 prop$farmCode <- paste(prop$Year, prop$FarmKey, sep="_")
 prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 
-# change row.names to Key
-row.names(prop) <- prop$Key
+# create N:P ratio column
 
+prop$NP_ratio <- (prop$N/prop$P)*100
+
+# change row.names to Key
+row.names(prop) <- prop$Key # nrow=378, ncol=86
+# nrow=378, ncol=86
 
 
 
@@ -97,15 +104,18 @@ latlong$Point <- substring(latlong$variable, 4,4)
 latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
-prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
+prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] # nrow=378, ncol=88
+# nrow=378, ncol=88
 
 ########################################################################
 ## 3. adding mono vs poly as a binary (0/1) variable
 ########################################################################
 
 prop <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
-                                          "Polyculture" = 0))
+                                          "Polyculture" = 0)) # nrow=378, ncol=89
 
+# nrow=378, ncol=89
+ 
 ########################################################################
 ## 3. rarefy dataset with all fungi
 ########################################################################
@@ -136,23 +146,26 @@ all_fungi <- prop %>%
   drop_na(Lat_point)
 
 #add AMF table for AMF dataset
-old_amf$Key <- prop$Key
+amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
+# nrow=378, ncol=245
   
 amf <- prop %>%
-  join(old_amf) %>% 
-  drop_na(Lat_point)
+  join(amf_otu) %>% 
+  drop_na(Lat_point) # nrow=372, ncol=333
+# nrow=372, ncol=333
 
 #taking out samples with no AMF
-amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU")))
+amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=372, ncol=334
+# nrow=372, ncol=334
 
-amf <- amf %>% filter(rowsum > 0)
+amf <- amf %>% filter(rowsum > 0) # nrow=322, ncol=334
+ # nrow=322, ncol=334
 
-
-# add vegan calculations for chao1
-richness <- t(as.data.frame(estimateR(amf %>% dplyr::select( contains("OTU")))))
-diversity <- data.frame(diversity=diversity(amf %>% dplyr::select( contains("OTU"))))
-amf <- cbind(amf, richness[,1:2], diversity)
-
+# # add vegan calculations for chao1
+# richness <- t(as.data.frame(estimateR(amf %>% dplyr::select( contains("OTU")))))
+# diversity <- data.frame(diversity=diversity(amf %>% dplyr::select( contains("OTU"))))
+# amf <- cbind(amf, richness[,1:2], diversity)
+# 
 
 
 ########################################################################
@@ -161,7 +174,7 @@ amf <- cbind(amf, richness[,1:2], diversity)
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "OM", "CEC")  #testing
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")  #testing
 
 
 ########################################################################
@@ -170,23 +183,23 @@ envi_factors <- c("pH", "P", "OM", "CEC")  #testing
 
 ## all farms
 
-all_inputs<- input_tables(all_fungi, envi_factors)
+all_inputs<- input_tables(all_fungi, envi_factors) # nrow=69006, ncol=14
+# nrow=372, ncol=3428, # nrow=372, ncol=7
 all_diss <- input_diss(all_fungi, envi_factors)
 
 #monoculture
-
 monocultures <- all_fungi %>%
-  filter(FarmType == "Monoculture")
+  filter(FarmType == "Monoculture") 
 
-mono_inputs <- input_tables(monocultures, envi_factors)
+mono_inputs <- input_tables(monocultures, envi_factors) 
 mono_diss <- input_diss(monocultures, envi_factors)
 
 #polyculture
-
+#nrow=192
 polycultures <- all_fungi %>%
   filter(FarmType == "Polyculture")
 
-poly_inputs <- input_tables(polycultures, envi_factors)
+poly_inputs <- input_tables(polycultures, envi_factors) 
 poly_diss <- input_diss(polycultures, envi_factors)
 
 
@@ -195,23 +208,30 @@ poly_diss <- input_diss(polycultures, envi_factors)
 ## amf
 ########################################################################
 
-all_amf <- input_tables(amf, envi_factors)
+
+all_amf <- input_tables(amf, envi_factors) # nrow=51681, ncol=14
+# [[1]] nrow=322, ncol=247, nrow=322, ncol=7
 all_amf_diss <- input_diss(amf, envi_factors)
 
 #monoculture
 
 monocultures_amf <- amf %>%
-  filter(FarmType == "Monoculture")
+  filter(FarmType == "Monoculture") #nrow=161, ncol=334
+#nrow=161, ncol=334
 
-mono_inputs_amf <- input_tables(monocultures_amf, envi_factors)
+mono_inputs_amf <- input_tables(monocultures_amf, envi_factors) #nrow=12880, ncol=14
+# [[1]] nrow=161, ncol=247, [[2]] nrow=161, ncol=7
+
 mono_diss_amf <- input_diss(monocultures_amf, envi_factors)
 
 #polyculture
 
 polycultures_amf <- amf %>%
-  filter(FarmType == "Polyculture")
+  filter(FarmType == "Polyculture") #nrow=161, ncol=334
+#nrow=161, ncol=334
 
-poly_inputs_amf <- input_tables(polycultures_amf, envi_factors)
+poly_inputs_amf <- input_tables(polycultures_amf, envi_factors) #nrow=12880, ncol=14
+# [[1]] nrow=161, ncol=247, [[2]] nrow=161, ncol=7
 poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 
@@ -221,23 +241,47 @@ poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 #amf
 amf_filter <- guild_filter(all_fungi, "Arbuscular Mycorrhizal")
+amf_mono_filter <- guild_filter(monocultures, "Arbuscular Mycorrhizal")
+amf_poly_filter <- guild_filter(polycultures, "Arbuscular Mycorrhizal")
+
 amf_fd_inputs_d <- input_diss(amf_filter, envi_factors)
+
 amf_fd_inputs <- input_tables(amf_filter, envi_factors)
+amf_mono_inputs <- input_tables(amf_mono_filter, envi_factors)
+amf_poly_inputs <- input_tables(amf_poly_filter, envi_factors)
 
 #plant pathogen
 plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
+plant_mono  <- guild_filter(monocultures, "Plant Pathogen")
+plant_poly <- guild_filter(polycultures, "Plant Pathogen")
+
 plant_path_inputs_d <- input_diss(plant_pathogen, envi_factors)
+
 plant_path_inputs <- input_tables(plant_pathogen, envi_factors)
+plant_mono_inputs <- input_tables(plant_mono, envi_factors)
+plant_poly_inputs <- input_tables(plant_poly, envi_factors)
 
 #saprotroph
 all_saprotroph <- guild_filter(all_fungi, "Saprotroph")
+sap_mono <- guild_filter(monocultures, "Saprotroph")
+sap_poly <- guild_filter(polycultures, "Saprotroph")
+
 sap_inputs_d <- input_diss(all_saprotroph, envi_factors)
+
 sap_inputs <- input_tables(all_saprotroph, envi_factors)
+sap_mono_inputs <- input_tables(sap_mono, envi_factors)
+sap_poly_inputs <- input_tables(sap_poly, envi_factors)
 
 #fungal parasite
 fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
+fungal_mono <- guild_filter(monocultures, "Fungal Parasite")
+fungal_poly <- guild_filter(polycultures, "Fungal Parasite")
+
 fungal_par_inputs_d <- input_diss(fungal_par, envi_factors)
+
 fungal_par_inputs <- input_tables(fungal_par, envi_factors)
+fungal_mono_inputs <- input_tables(fungal_mono, envi_factors)
+fungal_poly_inputs <- input_tables(fungal_poly, envi_factors)
 
 
 
