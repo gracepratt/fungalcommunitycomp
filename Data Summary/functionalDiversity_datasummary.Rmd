@@ -5,7 +5,7 @@ date: "5/18/2020"
 output: pdf_document
 ---
 
-```{r, include=FALSE, cache - FALSE}
+```{r, include=FALSE}
 ## Source for Analysis workflow 
 
 
@@ -113,16 +113,72 @@ fungal_par_plots
 
 
 
+# FTBL Groups
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_nvf
+
+```
 
 
 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_nvf
+
+```
 
 
 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_f
+
+```
 
 
 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_n
 
+```
+
+
+# Box Plots
+
+## NP Ratio
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+np_ratio
+
+```
+
+
+## pH
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+pH
+
+```
+
+
+## P
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+P
+
+```
+
+## TOC
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+TOC
+
+```
+
+
+## N 
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+N
+
+```
 
 
 
