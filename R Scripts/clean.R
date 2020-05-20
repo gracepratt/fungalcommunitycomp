@@ -28,7 +28,7 @@ prop$NP_ratio <- (prop$N/prop$P)*100
 row.names(prop) <- prop$Key # nrow=378, ncol=86
 # nrow=378, ncol=86
 
-prop <- prop %>% filter(NP_ratio < 2)
+prop <- prop %>% filter(NP_ratio < 10)
 
 
 
