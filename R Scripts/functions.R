@@ -226,18 +226,52 @@ ecodist_plot <- function(model){
 ########################################################################
 
 alpha_plot <- plotFunction <- function(colNames, expVar, data){
+  # library(scales)
+  
   plotList <- list()
   for (i in colNames) {
-    min <- (min/0.03)*.90
-    min <- round(min ,0)
+    # create dataset
+    df <- data[c(expVar,i)]
+    
+   
+    # rename dataframe
+    colnames(df) <- c("expVar","y")
+
     plotList[[i]] <- ggplot(	df, aes(x = expVar, y = y, color=expVar, fill=expVar))  + 
       geom_boxplot()+
-      scale_y_continuous(expand = c(0.01, 0.01), limits=c(min, max),breaks=seq(min, max,length.out=6)) +
+      scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(df$y), max(df$y), length.out = 6),1)) +
       scale_fill_manual(values=c('#f2e6cb',  '#99cec6','#f2e6cb','#99cec6'))+
       scale_color_manual(values=c('#dfc27d',  '#018571','#dfc27d','#018571'))+
       ylab(paste(i)) +	
       xlab("") +	
-      theme_simple() + theme(legend.position="none")
+      theme_classic() + theme(legend.position="none")
+  }
+  return(plotList)
+}
+
+alpha_env <- plotFunction <- function(colNames, expVar, color, data){
+  # library(scales)
+  
+  plotList <- list()
+  for (i in colNames) {
+    # create dataset
+    df <- data[c(expVar,i, color)]
+    
+    
+    # rename dataframe
+    colnames(df) <- c("expVar","y", "color")
+    
+    plotList[[i]] <- ggplot(	df, aes(x = expVar, y = y))  + 
+      geom_point(aes(color=color, fill=color, group=color)) +
+      geom_smooth(aes(color=color, fill=color, group=color), method = "lm", fill = NA) +
+      geom_smooth(method = "lm", fill = NA, color="black") +
+      scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(df$y), max(df$y), length.out = 6),1)) +
+      # scale_x_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(df$expVar), max(df$expVar), length.out = 6),1)) +
+      scale_fill_manual(values=c('#f2e6cb',  '#99cec6','#f2e6cb','#99cec6'))+
+      scale_color_manual(values=c('#dfc27d',  '#018571','#dfc27d','#018571'))+
+      ylab(paste(i)) +	
+      xlab(paste(expVar)) +	
+      theme_classic() + theme(legend.position="none")
   }
   return(plotList)
 }
