@@ -174,7 +174,7 @@ amf <- amf %>% filter(rowsum > 0) # nrow=322, ncol=334
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")  #testing
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")  #testing
 
 
 ########################################################################
@@ -201,6 +201,25 @@ polycultures <- all_fungi %>%
 
 poly_inputs <- input_tables(polycultures, envi_factors) 
 poly_diss <- input_diss(polycultures, envi_factors)
+
+
+#FTBL 
+
+mono_f <- all_fungi %>%
+  filter(FTBL == "Monoculture_F")
+
+mono_f_inputs <- input_tables(mono_f, envi_factors)
+
+mono_n <- all_fungi %>%
+  filter(FTBL == "Monoculture_N")
+
+mono_n_inputs <- input_tables(mono_n, envi_factors)
+
+poly_f <- all_fungi %>%
+  filter(FTBL == "Polyculture_F")
+
+poly_n <- all_fungi %>%
+  filter(FTBL == "Polyculture_N")
 
 
 
@@ -307,100 +326,13 @@ alpha_par <- as.data.frame(microbiome::alpha(t(fungal_par %>% dplyr::select(cont
   rename(obs_par = observed, div_par=diversity_shannon) %>%
   mutate(Key = fungal_par$Key)
 
+meta <- all_fungi[1:89] 
 
-alphaDF <-all_fungi[1:89] %>%
-  left_join(all_fungialpha_AMF, alpha_pathogen,alpha_sap,alpha_par, by="Key" )
-
-
-
-
-
-
-########################################################################
-## SCRATCH
-########################################################################
-
-########################################################################
-## dissimilarity inputs
-########################################################################
-
-
-species_table1 <- all_fungi%>%
-  dplyr::select(contains("OTU"))
-
-
-dist.sp1 <- as.matrix(vegdist(species_table1, "bray"))
-
-species_matrix1 <- cbind(all_fungi$Key, dist.sp1) 
-
-colnames(species_matrix1)[1] <- "Key"
-
-envi_table1 <- all_fungi %>%
-  dplyr::select("Key", "Long_point", "Lat_point", envi_factors)
-
-formated_tables1 <- formatsitepair(species_matrix1, bioFormat=3, XColumn="Long_point", YColumn="Lat_point",
-                                  siteColumn="Key", predData= envi_table1, abundance = FALSE)
-
-
-
-
-########################################################################
-## adding functional groups
-########################################################################
-
-
-#pull out OTU columns and transpose to make 1 row per Key and OTU
-OTURows<- all_fungi %>% 
-  dplyr::select(Key, contains("OTU")) %>%
-  pivot_longer(cols = starts_with("OTU"), names_to = "OTU")
-
-#pull out names of guilds
-rawguilds <- tax %>%
-  dplyr::select("OTU" = "X.OTU.ID", "Guild")
-
-#join guild names with OTU in each key 
-wGuild <- OTURows %>%
-  left_join(rawguilds) %>%
-  drop_na()
-
-
-#subsetting OTUs (need to make a function eventually probably)
-
-amf_fd <- wGuild %>% 
-  filter(str_detect(Guild, pattern = "Arbuscular Mycorrhizal")) 
-
-
-#re-pivot back to wide format 
-
-amf_wide <- amf_fd %>%
-  dplyr::select("Key", "OTU", "value") %>%
-  pivot_wider(names_from = OTU, values_from = value)
-
-amf_wide[is.na(amf_wide)] <- 0
-
-#rejoin with full table 
-fdSum<- all_fungi %>%
-  dplyr::select(-contains("OTU")) %>%
-  join(amf_wide)
-
-
-#taking out samples with no AMF
-fdSum$rowsum <- rowSums(fdSum %>% dplyr::select(contains("OTU")))
-
-fdSum <- fdSum %>% filter(rowsum > 0)
-
-
-amf_fd_inputs <- input_diss(fdSum, envi_factors)
-
-amf_fd_gdm <- gdm(amf_fd_inputs, geo = TRUE)
-
-
-
-
-
-
-
-
+alphaDF <-meta %>%
+  left_join(alpha_AMF, by="Key" ) %>%
+  left_join(., alpha_pathogen, by="Key" ) %>%
+  left_join(., alpha_sap, by="Key" ) %>%
+  left_join(., alpha_par, by="Key" )  
 
 
 
