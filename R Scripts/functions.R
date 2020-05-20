@@ -263,8 +263,8 @@ alpha_env <- plotFunction <- function(colNames, expVar, color, data){
     
     plotList[[i]] <- ggplot(	df, aes(x = expVar, y = y))  + 
       geom_point(aes(color=color, fill=color, group=color)) +
-      geom_smooth(aes(color=color, fill=color, group=color), method = "lm", fill = NA) +
-      geom_smooth(method = "lm", fill = NA, color="black") +
+      geom_smooth(aes(color=color, fill=color, group=color), method = "glm", fill = NA) +
+      geom_smooth(method = "glm", fill = NA, color="black") +
       scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(df$y), max(df$y), length.out = 6),1)) +
       # scale_x_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(df$expVar), max(df$expVar), length.out = 6),1)) +
       scale_fill_manual(values=c('#f2e6cb',  '#99cec6','#f2e6cb','#99cec6'))+
