@@ -28,6 +28,9 @@ prop$NP_ratio <- (prop$N/prop$P)*100
 row.names(prop) <- prop$Key # nrow=378, ncol=86
 # nrow=378, ncol=86
 
+prop <- prop %>% filter(NP_ratio < 2)
+
+
 
 
 ########################################################################
@@ -145,6 +148,15 @@ all_fungi <- prop %>%
   join(species.rr_df) %>% 
   drop_na(Lat_point)
 
+
+
+# rows to switch
+KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:3515)]
+VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:3515)]
+# switch
+all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:3515)] <- VD_rows
+all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:3515)] <- KY_rows
+
 #add AMF table for AMF dataset
 amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
 # nrow=378, ncol=245
@@ -153,6 +165,14 @@ amf <- prop %>%
   join(amf_otu) %>% 
   drop_na(Lat_point) # nrow=372, ncol=333
 # nrow=372, ncol=333
+
+# rows to switch
+KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(91:334)]
+VD_rows <- amf[amf$farmCode %in% c("2018_VD"), c(91:334)]
+# switch
+amf[amf$farmCode %in% c("2018_KY"), c(91:334)] <- VD_rows
+amf[amf$farmCode %in% c("2018_VD"), c(91:334)] <- KY_rows
+
 
 #taking out samples with no AMF
 amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=372, ncol=334
@@ -218,10 +238,12 @@ mono_n_inputs <- input_tables(mono_n, envi_factors)
 poly_f <- all_fungi %>%
   filter(FTBL == "Polyculture_F")
 
+poly_f_inputs <- input_tables(poly_f, envi_factors)
+
 poly_n <- all_fungi %>%
   filter(FTBL == "Polyculture_N")
 
-
+poly_n_inputs <- input_tables(poly_n, envi_factors)
 
 ########################################################################
 ## amf
@@ -310,6 +332,11 @@ fungal_poly_inputs <- input_tables(fungal_poly, envi_factors)
 ########################################################################
 
 
+
+alpha_ALL <- as.data.frame(microbiome::alpha(t(all_fungi %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
+  rename(obs_all = observed, div_all=diversity_shannon) %>%
+  mutate(Key = all_fungi$Key)
+
 alpha_AMF <- as.data.frame(microbiome::alpha(t(amf_filter %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
   rename(obs_amf = observed, div_amf=diversity_shannon) %>%
   mutate(Key = amf_filter$Key)
@@ -329,7 +356,10 @@ alpha_par <- as.data.frame(microbiome::alpha(t(fungal_par %>% dplyr::select(cont
 meta <- all_fungi[1:89] 
 
 alphaDF <-meta %>%
+  left_join(alpha_ALL, by="Key" ) %>%
+  mutate(obs_all = ifelse(is.na(obs_all), 0, obs_all), div_all= ifelse(is.na(div_all), 0, div_all)) %>%
   left_join(alpha_AMF, by="Key" ) %>%
+  mutate(obs_amf = ifelse(is.na(obs_amf), 0, obs_amf), div_amf= ifelse(is.na(div_amf), 0, div_amf)) %>%
   left_join(., alpha_pathogen, by="Key" ) %>%
   left_join(., alpha_sap, by="Key" ) %>%
   left_join(., alpha_par, by="Key" )  

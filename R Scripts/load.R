@@ -29,13 +29,13 @@ library(plyr)
 library(dplyr)
 # library(ggbiplot)
 # library(visreg)
-#library(plotrix)
+library(plotrix)
 library(tidyr)
 library(tidyverse)
 #library(indicspecies)
 library(gdm)
 library(geosphere)
-
+library(microbiome)
 
 ########################################################################
 ## set figure path
