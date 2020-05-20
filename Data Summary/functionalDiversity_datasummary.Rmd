@@ -1,7 +1,7 @@
 ---
 title: "Functional Diversity Data Summary"
 author: "Grace Pratt"
-date: "5/18/2020"
+date: "5/20/2020"
 output: pdf_document
 ---
 
@@ -141,6 +141,35 @@ polyvmono_n
 
 ```
 
+\pagebreak 
+
+# AMF FTBL
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_amf_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_amf_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_amf_f
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_amf_n
+
+```
 
 # Box Plots
 
