@@ -146,56 +146,68 @@ poly_n_model <- gdm(poly_n_inputs, geo = TRUE)
 table(poly_n_model)
 
 
+#AMF
+
+mono_f_amf_model <- gdm(mono_f_amf_inputs, geo = TRUE)
+table(mono_f_amf_model)
+
+mono_n_amf_model <- gdm(mono_n_amf_inputs, geo = TRUE)
+table(mono_n_amf_model)
+
+poly_f_amf_model <- gdm(poly_f_amf_inputs, geo = TRUE)
+table(poly_f_amf_model)
+
+poly_n_amf_model <- gdm(poly_n_amf_inputs, geo = TRUE)
+table(poly_n_amf_model)
 
 
-
-########################################################################
-## mantel tests
-########################################################################
-
-all_mantel <- mantel_func(all_fungi, envi_factors)
-mono_mantel <- mantel_func(monocultures, envi_factors)
-poly_mantel <- mantel_func(polycultures, envi_factors)
-
-
-
-#environment vs distance
-
-#all farms
-
-envi <- all_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
-geo <- all_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
-
-
-dist.envi <- as.matrix(dist(envi, method = "euclidean"))
-dist.geo <- distm(geo, fun = distHaversine)
-
-all_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
-
-
-#monoculture
-envi <- mono_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
-geo <- mono_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
-
-
-dist.envi <- as.matrix(dist(envi, method = "euclidean"))
-dist.geo <- distm(geo, fun = distHaversine)
-
-mono_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
-
-
-#polyculture
-envi <- poly_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
-geo <- poly_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
-
-
-dist.envi <- as.matrix(dist(envi, method = "euclidean"))
-dist.geo <- distm(geo, fun = distHaversine)
-
-poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
-
-
-
+# ########################################################################
+# ## mantel tests
+# ########################################################################
+# 
+# all_mantel <- mantel_func(all_fungi, envi_factors)
+# mono_mantel <- mantel_func(monocultures, envi_factors)
+# poly_mantel <- mantel_func(polycultures, envi_factors)
+# 
+# 
+# 
+# #environment vs distance
+# 
+# #all farms
+# 
+# envi <- all_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+# geo <- all_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+# 
+# 
+# dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+# dist.geo <- distm(geo, fun = distHaversine)
+# 
+# all_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+# 
+# 
+# #monoculture
+# envi <- mono_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+# geo <- mono_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+# 
+# 
+# dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+# dist.geo <- distm(geo, fun = distHaversine)
+# 
+# mono_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+# 
+# 
+# #polyculture
+# envi <- poly_inputs[[2]] %>% dplyr::select(-"Key", -"Lat_point", -"Long_point")
+# geo <- poly_inputs[[2]] %>% dplyr::select("Long_point", "Lat_point")
+# 
+# 
+# dist.envi <- as.matrix(dist(envi, method = "euclidean"))
+# dist.geo <- distm(geo, fun = distHaversine)
+# 
+# poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
+# 
+# 
+# 
 
 ########################################################################
 ## slpha tests
@@ -204,16 +216,28 @@ poly_mantel_envi <- mantel(dist.envi, dist.geo, method = "spearman")
 
 divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","div_amf", "div_path","div_sap","div_par")
 
+options(contrasts = c("contr.sum","contr.poly"))
+
 alphaModels <- sapply(c("obs_all","obs_amf","obs_path", "obs_sap","obs_par"), USE.NAMES=TRUE, simplify = FALSE,
        function(x) { 
-         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+(1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
-         list(car::Anova(model), round(summary(model)$coefficients,3)) 
+         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+ FocalCrop+ + scale(pH)+ scale(P)+ scale(TOC)+ scale(N) + scale(NP_ratio) + (1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
+         list(summary(model)) 
        })
 
 
 alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", divIndices)] %>%
   gather(key = "variable", value = "value", -c(FarmType)) %>%
   group_by(FarmType, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
+
+
+alphaBlockSummary <-  alphaDF[, names(alphaDF) %in% c("Block", divIndices)] %>%
+  gather(key = "variable", value = "value", -c(Block)) %>%
+  group_by(Block, variable) %>%
   summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
   ungroup() %>%
   as.data.frame() %>% 
