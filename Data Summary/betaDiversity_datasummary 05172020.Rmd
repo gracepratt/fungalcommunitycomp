@@ -15,6 +15,7 @@ source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project
 
 source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
 
+
 ## *******************************************************
 ## 2. clean
 ## *******************************************************
