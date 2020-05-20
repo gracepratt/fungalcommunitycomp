@@ -286,9 +286,30 @@ fungal_poly_inputs <- input_tables(fungal_poly, envi_factors)
 
 
 
+########################################################################
+## alpha diversity of functional groups
+########################################################################
 
 
+alpha_AMF <- as.data.frame(microbiome::alpha(t(amf_filter %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
+  rename(obs_amf = observed, div_amf=diversity_shannon) %>%
+  mutate(Key = amf_filter$Key)
 
+alpha_pathogen <- as.data.frame(microbiome::alpha(t(plant_pathogen %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
+  rename(obs_path = observed, div_path=diversity_shannon) %>%
+  mutate(Key = plant_pathogen$Key)
+
+alpha_sap <- as.data.frame(microbiome::alpha(t(all_saprotroph %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
+  rename(obs_sap = observed, div_sap=diversity_shannon) %>%
+  mutate(Key = all_saprotroph$Key)
+
+alpha_par <- as.data.frame(microbiome::alpha(t(fungal_par %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
+  rename(obs_par = observed, div_par=diversity_shannon) %>%
+  mutate(Key = fungal_par$Key)
+
+
+alphaDF <-all_fungi[1:89] %>%
+  left_join(all_fungialpha_AMF, alpha_pathogen,alpha_sap,alpha_par, by="Key" )
 
 
 
