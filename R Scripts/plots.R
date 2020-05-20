@@ -155,3 +155,137 @@ fungal_par_plots<- cowplot::plot_grid(plot_grid(fungal_par_plot, fungal_mono_plo
 
 
 
+########################################################################
+## FTBL plots
+########################################################################
+
+mono_f_plot <- predictors_plot(mono_f_model) + ggtitle("Monoculture F") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+
+
+mono_n_plot <- predictors_plot(mono_n_model) + ggtitle("Monoculture N") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+
+poly_f_plot <- predictors_plot(poly_f_model) + ggtitle("Polyculture F") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+
+poly_n_plot <- predictors_plot(poly_n_model) + ggtitle("Polyculture N") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+
+
+mono_nvf <- cowplot::plot_grid(plot_grid(mono_n_plot, mono_f_plot, nrow=1), 
+                                       legend, rel_widths = c(3, .4) )
+
+
+poly_nvf <- cowplot::plot_grid(plot_grid(poly_n_plot, poly_f_plot, nrow=1), 
+                               legend, rel_widths = c(3, .4) )
+
+polyvmono_f <- cowplot::plot_grid(plot_grid(poly_f_plot, mono_f_plot, nrow=1), 
+                                  legend, rel_widths = c(3, .4) )
+
+polyvmono_n <- cowplot::plot_grid(plot_grid(poly_n_plot,mono_n_plot, nrow=1), 
+                                  legend, rel_widths = c(3, .4) )
+
+########################################################################
+## box plots
+########################################################################
+
+#NP ratio
+
+np <- ggplot(all_fungi, aes(x= NP_ratio)) + 
+  geom_boxplot() + ggtitle("All farms")
+
+mono_np <- ggplot(monocultures, aes(x= NP_ratio)) + 
+  geom_boxplot() + ggtitle("Monoculture")
+
+poly_np <- ggplot(polycultures, aes(x= NP_ratio)) + 
+  geom_boxplot() + ggtitle("Polyculture")
+
+np_ratio <- cowplot::plot_grid(plot_grid(mono_np, poly_np, np, nrow=3),
+                               rel_widths = c(3, .4) )
+
+#pH
+
+pH_all <- ggplot(all_fungi, aes(x= pH)) + 
+  geom_boxplot() + ggtitle("All farms")
+
+pH_mono <- ggplot(monocultures, aes(x= pH)) + 
+  geom_boxplot() + ggtitle("Monoculture")
+
+
+pH_poly <- ggplot(polycultures, aes(x= pH)) + 
+  geom_boxplot() + ggtitle("Polyculture")
+
+pH <- cowplot::plot_grid(plot_grid(pH_mono, pH_poly, pH_all, nrow=3), 
+                         rel_widths = c(3, .4) )
+
+#P
+
+P_all <- ggplot(all_fungi, aes(x= P)) + 
+  geom_boxplot() + ggtitle("All farms")
+
+P_mono <- ggplot(monocultures, aes(x= P)) + 
+  geom_boxplot() + ggtitle("Monoculture")
+
+
+P_poly <- ggplot(polycultures, aes(x= P)) + 
+  geom_boxplot() + ggtitle("Polyculture")
+
+P <- cowplot::plot_grid(plot_grid(P_mono, P_poly, P_all, nrow=3), 
+                         rel_widths = c(3, .4) )
+
+
+#TOC
+
+TOC_all <- ggplot(all_fungi, aes(x= TOC)) + 
+  geom_boxplot() + ggtitle("All farms")
+
+TOC_mono <- ggplot(monocultures, aes(x= TOC)) + 
+  geom_boxplot() + ggtitle("Monoculture")
+
+
+TOC_poly <- ggplot(polycultures, aes(x= TOC)) + 
+  geom_boxplot() + ggtitle("Polyculture")
+
+TOC <- cowplot::plot_grid(plot_grid(TOC_mono, TOC_poly, TOC_all, nrow=3), 
+                        rel_widths = c(3, .4) )
+
+
+#N
+
+N_all <- ggplot(all_fungi, aes(x= N)) + 
+  geom_boxplot() + ggtitle("All farms")
+
+N_mono <- ggplot(monocultures, aes(x= N)) + 
+  geom_boxplot() + ggtitle("Monoculture")
+
+
+N_poly <- ggplot(polycultures, aes(x= N)) + 
+  geom_boxplot() + ggtitle("Polyculture")
+
+N <- cowplot::plot_grid(plot_grid(N_mono, N_poly, N_all, nrow=3), 
+                        rel_widths = c(3, .4) )
+
+########################################################################
+## alpha diversity plots for functional  groups
+########################################################################
+
+divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","div_amf", "div_path","div_sap","div_par")
+  
+alphaPlots <- alpha_plot(colNames=divIndices,expVar = "FarmType", data = alphaDF)
+
+richPlots <- plot_grid(alphaPlots[[1]], alphaPlots[[2]], alphaPlots[[3]], alphaPlots[[4]], alphaPlots[[5]], ncol=3)
+divPlots <- plot_grid(alphaPlots[[6]], alphaPlots[[7]], alphaPlots[[8]], alphaPlots[[9]], alphaPlots[[10]], ncol=3)
+
+alpha_env_Plots <- alpha_env(colNames=divIndices,expVar = "pH", color="FarmType",data = alphaDF)
+
+
+
+alphaSummary <-  ss[, names(ss) %in% c("FarmType", divIndices)] %>%
+  gather(key = "variable", value = "value", -c(FarmType, Block)) %>%
+  group_by(FarmType, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
