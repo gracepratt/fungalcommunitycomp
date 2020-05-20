@@ -22,15 +22,19 @@ prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 
 # create N:P ratio column
 
-prop$NP_ratio <- (prop$N/prop$P)*100
+prop$NP_ratio <- ((prop$N)/prop$P)*100
 
 # change row.names to Key
 row.names(prop) <- prop$Key # nrow=378, ncol=86
 # nrow=378, ncol=86
 
-prop <- prop %>% filter(NP_ratio < 10)
+prop <- prop %>% filter(NP_ratio < 600)
+
+# prop$NP_ratio <- (log(prop$N)/log(prop$P))*100
 
 
+extraKey <- prop[ grepl('Ex', prop$Code),]$Key
+prop <- prop[!prop$Key %in% extraKey,]
 
 
 ########################################################################
@@ -136,26 +140,30 @@ minReads <- min(rowSums(species_only))
 
 species.rr_df <- data.frame(rrarefy(species_only, sample=minReads))
 
+#taking away OTUs with no reads
+species.rr_df <- species.rr_df[,colSums(species.rr_df!= 0)>0]
+
+
 species.rr_df$Key <- otu$Key
+species.rr_df <- species.rr_df[!species.rr_df$Key %in% extraKey,]
 
 
 ########################################################################
 ## 4. Add OTU tables
 ########################################################################
 
+
 # add rarefied OTU table to complete dataset
 all_fungi <- prop %>% 
   join(species.rr_df) %>% 
   drop_na(Lat_point)
 
-
-
 # rows to switch
-KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:3515)]
-VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:3515)]
+KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))]
+VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))]
 # switch
-all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:3515)] <- VD_rows
-all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:3515)] <- KY_rows
+all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))] <- VD_rows
+all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_rows
 
 #add AMF table for AMF dataset
 amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
@@ -167,11 +175,11 @@ amf <- prop %>%
 # nrow=372, ncol=333
 
 # rows to switch
-KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(91:334)]
-VD_rows <- amf[amf$farmCode %in% c("2018_VD"), c(91:334)]
+KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(91:ncol(amf))]
+VD_rows <- amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))]
 # switch
-amf[amf$farmCode %in% c("2018_KY"), c(91:334)] <- VD_rows
-amf[amf$farmCode %in% c("2018_VD"), c(91:334)] <- KY_rows
+amf[amf$farmCode %in% c("2018_KY"), c(91:ncol(amf))] <- VD_rows
+amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))] <- KY_rows
 
 
 #taking out samples with no AMF
@@ -276,6 +284,30 @@ poly_inputs_amf <- input_tables(polycultures_amf, envi_factors) #nrow=12880, nco
 poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 
+#FTBL
+
+#FTBL 
+
+mono_f_amf <- amf %>%
+  filter(FTBL == "Monoculture_F")
+
+mono_f_amf_inputs <- input_tables(mono_f_amf, envi_factors)
+
+mono_n_amf <- amf %>%
+  filter(FTBL == "Monoculture_N")
+
+mono_n_amf_inputs <- input_tables(mono_n_amf, envi_factors)
+
+poly_f_amf <- amf %>%
+  filter(FTBL == "Polyculture_F")
+
+poly_f_amf_inputs <- input_tables(poly_f_amf, envi_factors)
+
+poly_n_amf <- amf%>%
+  filter(FTBL == "Polyculture_N")
+
+poly_n_amf_inputs <- input_tables(poly_n_amf, envi_factors)
+
 ########################################################################
 ## functional groups with function
 ########################################################################
@@ -367,9 +399,29 @@ alphaDF <-meta %>%
 
 
 
+###SCRATCH
 
 
+amf_key <- amf$Key
+#322
 
+
+filter_key <- amf_filter$Key
+#320
+
+
+same_amf <- amf_key[!(amf_key %in% filter_key)]
+
+same_filter <- filter_key[!(filter_key %in% amf_key)]
+
+
+amf_columns <- colnames(amf %>% dplyr::select(contains("OTU")))
+
+filter_columns <- colnames(amf_filter %>% dplyr::select(contains("OTU")))
+
+col_amf <- amf_columns[!(amf_columns %in% filter_columns)]
+
+col_filter <- filter_columns[!(filter_columns %in% amf_columns)]
 
 ########################################################################
 ## End

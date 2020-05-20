@@ -86,6 +86,10 @@ tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
 
 source("R Scripts/functions.R")
 
+
+#SET SEED
+set.seed(5)
+
 # old function
 # similar results to new function
 # source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitytesting/functionsOLD.R', chdir = TRUE)
