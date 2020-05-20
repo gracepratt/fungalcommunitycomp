@@ -220,3 +220,24 @@ ecodist_plot <- function(model){
     theme_classic()
   
 }
+
+########################################################################
+## 8. plot alpha diversity
+########################################################################
+
+alpha_plot <- plotFunction <- function(colNames, expVar, data){
+  plotList <- list()
+  for (i in colNames) {
+    min <- (min/0.03)*.90
+    min <- round(min ,0)
+    plotList[[i]] <- ggplot(	df, aes(x = expVar, y = y, color=expVar, fill=expVar))  + 
+      geom_boxplot()+
+      scale_y_continuous(expand = c(0.01, 0.01), limits=c(min, max),breaks=seq(min, max,length.out=6)) +
+      scale_fill_manual(values=c('#f2e6cb',  '#99cec6','#f2e6cb','#99cec6'))+
+      scale_color_manual(values=c('#dfc27d',  '#018571','#dfc27d','#018571'))+
+      ylab(paste(i)) +	
+      xlab("") +	
+      theme_simple() + theme(legend.position="none")
+  }
+  return(plotList)
+}
