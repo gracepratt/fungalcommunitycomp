@@ -187,9 +187,9 @@ options(contrasts = c("contr.sum","contr.poly"))
 
 alphaModels <- sapply(c("obs_all","obs_amf","obs_path", "obs_sap","obs_par"), USE.NAMES=TRUE, simplify = FALSE,
        function(x) { 
-         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+ FocalCrop+ + scale(pH)+ scale(P)+ scale(TOC)+ scale(N) + scale(NP_ratio) + (1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
+         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+ FocalCrop +  scale(pH) + scale(P) + scale(TOC) + scale(N)  + (1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
          list(summary(model)) 
-       })
+       }) #TOOK OUT scale(NP_ratio) IDK WHY IT WON'T WORK
 
 
 alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", divIndices)] %>%
