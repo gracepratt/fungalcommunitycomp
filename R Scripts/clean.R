@@ -7,11 +7,8 @@
 ########################################################################
 
 # Enter 2017-2018 data as prop (since the relational database combines both now )
-# prop <- rbind(data2017, data2018)
-
 # Only include non-OTU columns 
 prop <- data[1:84] # nrow=378, ncol=84
-# nrow=378, ncol=84
 
 # rename columns
 colnames(prop)[4] <- c("Transect")
@@ -20,21 +17,14 @@ colnames(prop)[8] <- c("Block")
 prop$farmCode <- paste(prop$Year, prop$FarmKey, sep="_")
 prop$FTBL <- paste(prop$FarmType, prop$Block, sep="_")
 
-# create N:P ratio column
-
-prop$NP_ratio <- ((prop$N)/prop$P)*100
 
 # change row.names to Key
 row.names(prop) <- prop$Key # nrow=378, ncol=86
-# nrow=378, ncol=86
-
-prop <- prop %>% filter(NP_ratio < 600)
-
-# prop$NP_ratio <- (log(prop$N)/log(prop$P))*100
 
 
+#remove Extra samples
 extraKey <- prop[ grepl('Ex', prop$Code),]$Key
-prop <- prop[!prop$Key %in% extraKey,]
+prop <- prop[!prop$Key %in% extraKey,] #nrow=372, ncol=86
 
 
 ########################################################################
@@ -112,16 +102,22 @@ latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
 prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
 prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] # nrow=378, ncol=88
-# nrow=378, ncol=88
+# nrow=372, ncol=88
 
 ########################################################################
-## 3. adding mono vs poly as a binary (0/1) variable
+## 3. adding additional variables (N:P ratio & mono vs poly)
 ########################################################################
 
 prop <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
-                                          "Polyculture" = 0)) # nrow=378, ncol=89
+                                          "Polyculture" = 0)) # nrow=372, ncol=89
 
-# nrow=378, ncol=89
+# create N:P ratio column
+prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
+
+#remove N:P ratio outlier
+prop <- prop %>% filter(NP_ratio < 600) #nrow=371, ncol=90
+# prop$NP_ratio <- (log(prop$N)/log(prop$P))*100 #probably will be removed
+
  
 ########################################################################
 ## 3. rarefy dataset with all fungi
@@ -155,8 +151,7 @@ species.rr_df <- species.rr_df[!species.rr_df$Key %in% extraKey,]
 
 # add rarefied OTU table to complete dataset
 all_fungi <- prop %>% 
-  join(species.rr_df) %>% 
-  drop_na(Lat_point)
+  join(species.rr_df) #nrow=371, ncol=3387
 
 # rows to switch
 KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))]
@@ -167,12 +162,9 @@ all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_row
 
 #add AMF table for AMF dataset
 amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
-# nrow=378, ncol=245
   
 amf <- prop %>%
-  join(amf_otu) %>% 
-  drop_na(Lat_point) # nrow=372, ncol=333
-# nrow=372, ncol=333
+  join(amf_otu) # nrow=371, ncol=334
 
 # rows to switch
 KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(91:ncol(amf))]
@@ -183,17 +175,10 @@ amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))] <- KY_rows
 
 
 #taking out samples with no AMF
-amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=372, ncol=334
-# nrow=372, ncol=334
+amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=371, ncol=335
 
-amf <- amf %>% filter(rowsum > 0) # nrow=322, ncol=334
- # nrow=322, ncol=334
 
-# # add vegan calculations for chao1
-# richness <- t(as.data.frame(estimateR(amf %>% dplyr::select( contains("OTU")))))
-# diversity <- data.frame(diversity=diversity(amf %>% dplyr::select( contains("OTU"))))
-# amf <- cbind(amf, richness[,1:2], diversity)
-# 
+amf <- amf %>% filter(rowsum > 0) # nrow=321, ncol=335
 
 
 ########################################################################
@@ -202,7 +187,7 @@ amf <- amf %>% filter(rowsum > 0) # nrow=322, ncol=334
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")  #testing
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")  
 
 
 ########################################################################
@@ -283,8 +268,6 @@ poly_inputs_amf <- input_tables(polycultures_amf, envi_factors) #nrow=12880, nco
 # [[1]] nrow=161, ncol=247, [[2]] nrow=161, ncol=7
 poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
-
-#FTBL
 
 #FTBL 
 
@@ -399,29 +382,7 @@ alphaDF <-meta %>%
 
 
 
-###SCRATCH
 
-
-amf_key <- amf$Key
-#322
-
-
-filter_key <- amf_filter$Key
-#320
-
-
-same_amf <- amf_key[!(amf_key %in% filter_key)]
-
-same_filter <- filter_key[!(filter_key %in% amf_key)]
-
-
-amf_columns <- colnames(amf %>% dplyr::select(contains("OTU")))
-
-filter_columns <- colnames(amf_filter %>% dplyr::select(contains("OTU")))
-
-col_amf <- amf_columns[!(amf_columns %in% filter_columns)]
-
-col_filter <- filter_columns[!(filter_columns %in% amf_columns)]
 
 ########################################################################
 ## End
