@@ -63,6 +63,22 @@ ecodist_plot(all_farms_model)
 ## functional diveristy group plots
 ########################################################################
 
+#All farms 
+all_farms_plot <- predictors_plot(all_farms_model) + ggtitle("All farms") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+
+mono_plots <- predictors_plot(mono_model) + ggtitle("Monoculture") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
+
+poly_plots <- predictors_plot(poly_model) + ggtitle("Polyculture") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
+
+legend <- get_legend(predictors_plot(all_farms_model))
+
+all_fungi_plots <- cowplot::plot_grid(plot_grid(all_farms_plot, mono_plots, poly_plots, nrow=1), 
+                                   legend, rel_widths = c(3, .4) )
+
+
 #AMF
 
 amf_fd_plot <- predictors_plot(amf_fd) + ggtitle("All farms") + 
@@ -272,9 +288,11 @@ divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","
   
 alphaPlots <- alpha_plot(colNames=divIndices,expVar = "FarmType", data = alphaDF)
 alphaBlockPlots <-  alpha_plot(colNames=divIndices,expVar = "Block", data = alphaDF)
-  
+alphaFTBLPlots <-  alpha_plot(colNames=divIndices,expVar = "FTBL", data = alphaDF)
+
 richPlots <- plot_grid(alphaPlots[[1]], alphaPlots[[2]], alphaPlots[[3]], alphaPlots[[4]], alphaPlots[[5]], ncol=3)
 richBlockPlots <- plot_grid(alphaBlockPlots[[1]], alphaBlockPlots[[2]], alphaBlockPlots[[3]], alphaBlockPlots[[4]], alphaBlockPlots[[5]], ncol=3)
+richFTBLPlots <- plot_grid(alphaFTBLPlots[[1]], alphaFTBLPlots[[2]], alphaFTBLPlots[[3]], alphaFTBLPlots[[4]], alphaFTBLPlots[[5]], ncol=3)
 
 divPlots <- plot_grid(alphaPlots[[6]], alphaPlots[[7]], alphaPlots[[8]], alphaPlots[[9]], alphaPlots[[10]], ncol=3)
 
