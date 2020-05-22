@@ -100,8 +100,8 @@ latlong$Point <- substring(latlong$variable, 4,4)
 
 latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
-prop$Lat_point <- latlong$Lat[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
-prop$Long_point <- latlong$Long[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] # nrow=378, ncol=88
+prop$Lat_point <- latlong$LAT[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
+prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] # nrow=378, ncol=88
 # nrow=372, ncol=88
 
 ########################################################################
@@ -160,6 +160,13 @@ VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))
 all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))] <- VD_rows
 all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_rows
 
+#just eggplant filter
+all_fungi <- all_fungi %>%
+  filter(FocalCrop == "Eggplant")
+
+
+
+# AMF
 #add AMF table for AMF dataset
 amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
   
@@ -269,27 +276,6 @@ poly_inputs_amf <- input_tables(polycultures_amf, envi_factors) #nrow=12880, nco
 poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 
-#FTBL 
-
-mono_f_amf <- amf %>%
-  filter(FTBL == "Monoculture_F")
-
-mono_f_amf_inputs <- input_tables(mono_f_amf, envi_factors)
-
-mono_n_amf <- amf %>%
-  filter(FTBL == "Monoculture_N")
-
-mono_n_amf_inputs <- input_tables(mono_n_amf, envi_factors)
-
-poly_f_amf <- amf %>%
-  filter(FTBL == "Polyculture_F")
-
-poly_f_amf_inputs <- input_tables(poly_f_amf, envi_factors)
-
-poly_n_amf <- amf%>%
-  filter(FTBL == "Polyculture_N")
-
-poly_n_amf_inputs <- input_tables(poly_n_amf, envi_factors)
 
 ########################################################################
 ## functional groups with function
@@ -305,6 +291,31 @@ amf_fd_inputs_d <- input_diss(amf_filter, envi_factors)
 amf_fd_inputs <- input_tables(amf_filter, envi_factors)
 amf_mono_inputs <- input_tables(amf_mono_filter, envi_factors)
 amf_poly_inputs <- input_tables(amf_poly_filter, envi_factors)
+
+
+#FTBL 
+
+mono_f_amf <- amf_filter %>%
+  filter(FTBL == "Monoculture_F")
+
+mono_f_amf_inputs <- input_tables(mono_f_amf, envi_factors)
+
+mono_n_amf <- amf_filter %>%
+  filter(FTBL == "Monoculture_N")
+
+mono_n_amf_inputs <- input_tables(mono_n_amf, envi_factors)
+
+poly_f_amf <- amf_filter %>%
+  filter(FTBL == "Polyculture_F")
+
+poly_f_amf_inputs <- input_tables(poly_f_amf, envi_factors)
+
+poly_n_amf <- amf_filter %>%
+  filter(FTBL == "Polyculture_N")
+
+poly_n_amf_inputs <- input_tables(poly_n_amf, envi_factors)
+
+
 
 #plant pathogen
 plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
@@ -377,7 +388,8 @@ alphaDF <-meta %>%
   mutate(obs_amf = ifelse(is.na(obs_amf), 0, obs_amf), div_amf= ifelse(is.na(div_amf), 0, div_amf)) %>%
   left_join(., alpha_pathogen, by="Key" ) %>%
   left_join(., alpha_sap, by="Key" ) %>%
-  left_join(., alpha_par, by="Key" )  
+  left_join(., alpha_par, by="Key" )  %>%
+  mutate(NP_ratio = (N/P)*100)
 
 
 
@@ -387,3 +399,9 @@ alphaDF <-meta %>%
 ########################################################################
 ## End
 ########################################################################
+
+
+
+# scratch work for distance
+
+distanceM <-distHaversine(all_inputs[,3:4],all_inputs[,5:6])

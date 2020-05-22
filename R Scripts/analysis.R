@@ -163,41 +163,58 @@ poly_n_amf_model <- gdm(poly_n_amf_inputs, geo = TRUE)
 table(poly_n_amf_model)
 
 
-#########################################################################
-### mantel tests
-#########################################################################
-
-#all fungi
-
-all_mantel <- mantel_func(all_fungi, envi_factors)
-mono_mantel <- mantel_func(monocultures, envi_factors)
-poly_mantel <- mantel_func(polycultures, envi_factors)
-
-
-
-
-########################################################################
-## alpha tests
-########################################################################
-
-
+# #########################################################################
+# ### mantel tests
+# #########################################################################
+# 
+# #all fungi
+# 
+# all_mantel <- mantel_func(all_fungi, envi_factors)
+# mono_mantel <- mantel_func(monocultures, envi_factors)
+# poly_mantel <- mantel_func(polycultures, envi_factors)
+# 
+# 
+# 
+# 
+# ########################################################################
+# ## alpha tests
+# ########################################################################
+# 
+# 
 divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","div_amf", "div_path","div_sap","div_par")
 
 options(contrasts = c("contr.sum","contr.poly"))
 
 alphaModels <- sapply(c("obs_all","obs_amf","obs_path", "obs_sap","obs_par"), USE.NAMES=TRUE, simplify = FALSE,
-       function(x) { 
-         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+ FocalCrop +  scale(pH) + scale(P) + scale(TOC) + scale(N)  + (1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
-         list(summary(model)) 
-       }) #TOOK OUT scale(NP_ratio) IDK WHY IT WON'T WORK
+       function(x) {
+         model <- glmer.nb(substitute(round(i,0) ~ FarmType*Block+   scale(pH) + scale(P) + scale(NP_ratio) + scale(TOC) + scale(N)  + (1|farmCode), list(i = as.name(x))), data=alphaDF, nAGQ=1, na.action=na.fail)
+         list(summary(model))
+       })
 
+envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
+                      function(x) {
+                        model <- lmer(substitute(log(i+1) ~ FarmType*Block + (1|farmCode), list(i = as.name(x))), data=alphaDF, na.action=na.exclude)
+                        anova(model)
+                      })
+
+divModels <- sapply(c("div_all","div_amf","div_path", "div_sap","div_par"), USE.NAMES=TRUE, simplify = FALSE,
+                      function(x) {
+                        model <- lmer(substitute(log(i + 1) ~ FarmType*Block+   scale(pH) + scale(P) + scale(NP_ratio) + scale(TOC) + scale(N)  + (1|farmCode), list(i = as.name(x))), data=alphaDF,  na.action=na.exclude)
+                        list(summary(model))
+                      })
+
+envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
+                    function(x) {
+                      model <- lmer(substitute(log(i+1) ~ FarmType*Block + (1|farmCode), list(i = as.name(x))), data=alphaDF, na.action=na.exclude)
+                      anova(model)
+                    })
 
 alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", divIndices)] %>%
   gather(key = "variable", value = "value", -c(FarmType)) %>%
   group_by(FarmType, variable) %>%
   summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
   ungroup() %>%
-  as.data.frame() %>% 
+  as.data.frame() %>%
   mutate_if(is.numeric, round, 3) %>%
   arrange(variable)
 
@@ -207,6 +224,49 @@ alphaBlockSummary <-  alphaDF[, names(alphaDF) %in% c("Block", divIndices)] %>%
   group_by(Block, variable) %>%
   summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
   ungroup() %>%
-  as.data.frame() %>% 
+  as.data.frame() %>%
   mutate_if(is.numeric, round, 3) %>%
   arrange(variable)
+
+
+alphaFTBLSummary <-  alphaDF[, names(alphaDF) %in% c("FTBL", divIndices)] %>%
+  gather(key = "variable", value = "value", -c(FTBL)) %>%
+  group_by(FTBL, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
+
+
+alphaEnvSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", envi_factors)] %>%
+  gather(key = "variable", value = "value", -c(FarmType)) %>%
+  group_by(FarmType, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
+
+
+alphaEnvBlockSummary <-  alphaDF[, names(alphaDF) %in% c("Block", envi_factors)] %>%
+  gather(key = "variable", value = "value", -c(Block)) %>%
+  group_by(Block, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
+
+
+alphaEnvFTBLSummary <-  alphaDF[, names(alphaDF) %in% c("FTBL", envi_factors)] %>%
+  gather(key = "variable", value = "value", -c(FTBL)) %>%
+  group_by(FTBL, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(variable)
+
+
+

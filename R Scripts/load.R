@@ -48,7 +48,7 @@ fig.path <- "Outputs/Figures"
 ########################################################################
 
 
-setwd('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/')
+# setwd('/Volumes/GoogleDrive/My Drive/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
 
 
 # 2017-2018 dataset
