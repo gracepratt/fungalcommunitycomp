@@ -31,44 +31,24 @@ amf_plots <- cowplot::plot_grid(plot_grid(all_amf_plots, mono_amf_plots, poly_am
 ## predicted vs observed compositional dissimilarity
 ########################################################################
 
-comp_plot(all_farms_model)
+
+#all fungi
+all_fungi_comp <- comp_plot(all_farms_model)
+
+## AMF 
 
 # all AMF
-all_amf_comp <- data.frame(all_amf_model$predicted, all_amf_model$observed)
-
-all_amf_comp_plot <- all_amf_comp %>% ggplot(aes(x = all_amf_model.predicted, y = all_amf_model.observed)) +
-  geom_point(size=0.2, alpha=0.5) +
-  geom_smooth(method = lm)+
-  xlab("Predicted Community Dissimilarity") +
-  ylab("Observed Community Dissimilarity") +
-  theme_classic()
-
+all_amf_comp_plot <- comp_plot(all_amf_model)
 # ggsave("all_amf_comp_plot.pdf", plot=all_amf_comp_plot, path=fig.path, width = 6, height=4, useDingbats=FALSE)
 
 
-# monoculture
-mono_amf_comp <- data.frame(mono_model_amf$predicted, mono_model_amf$observed)
-
-mono_amf_comp_plot <- mono_amf_comp %>% ggplot(aes(x = mono_model_amf.predicted, y = mono_model_amf.observed)) +
-  geom_point(size=1, alpha=0.5) +
-  geom_smooth(method = lm)+
-  xlab("Predicted Community Dissimilarity") +
-  ylab("Observed Community Dissimilarity") +
-  theme_classic()
-
+# monoculture 
+mono_amf_comp_plot <- comp_plot(mono_model_amf)
 # ggsave("mono_amf_comp_plot.pdf", plot=mono_amf_comp_plot, path=fig.path, width = 6, height=4, useDingbats=FALSE)
 
 
 # polyculture
-poly_amf_comp <- data.frame(poly_model_amf$predicted, poly_model_amf$observed)
-
-poly_amf_comp_plot <- poly_amf_comp %>% ggplot(aes(x = poly_model_amf.predicted, y = poly_model_amf.observed)) +
-  geom_point(size=1, alpha=0.5) +
-  geom_smooth(method = lm)+
-  xlab("Predicted Community Dissimilarity") +
-  ylab("Observed Community Dissimilarity") +
-  theme_classic()
-
+poly_amf_comp <- comp_plot(poly_model_amf)
 # ggsave("poly_amf_comp_plot.pdf", plot=poly_amf_comp_plot, path=fig.path, width = 6, height=4, useDingbats=FALSE)
 
 
@@ -223,46 +203,39 @@ polyvmono_amf_n <- cowplot::plot_grid(plot_grid(poly_n_amf_plot,mono_n_amf_plot,
 ## box plots
 ########################################################################
 
+
+
+
 #NP ratio
 
-np <- ggplot(all_fungi, aes(x= NP_ratio)) + 
-  geom_boxplot() + ggtitle("All farms") + theme_classic()
+np_all <- boxplot_variable(all_fungi, "NP_ratio", "All farms")
 
-mono_np <- ggplot(monocultures, aes(x= NP_ratio)) + 
-  geom_boxplot() + ggtitle("Monoculture") + theme_classic()
+np_mono <- boxplot_variable(monocultures, "NP_ratio", "Monocultures")
 
-poly_np <- ggplot(polycultures, aes(x= NP_ratio)) + 
-  geom_boxplot() + ggtitle("Polyculture") + theme_classic()
+np_poly <- boxplot_variable(polycultures, "NP_ratio", "Polycultures")
 
-np_ratio <- cowplot::plot_grid(plot_grid(mono_np, poly_np, np, nrow=3),
-                               rel_widths = c(3, .4) ) 
+np_ratio <- cowplot::plot_grid(plot_grid(np_mono, np_poly, np_all, nrow=3),
+                               rel_widths = c(3, .4)) 
+
 
 #pH
 
-pH_all <- ggplot(all_fungi, aes(x= pH)) + 
-  geom_boxplot() + ggtitle("All farms") + theme_classic()
+pH_all <- boxplot_variable(all_fungi, "pH", "All farms")
 
-pH_mono <- ggplot(monocultures, aes(x= pH)) + 
-  geom_boxplot() + ggtitle("Monoculture") + theme_classic()
+pH_mono <- boxplot_variable(monocultures, "pH", "Monocultures")
 
-
-pH_poly <- ggplot(polycultures, aes(x= pH)) + 
-  geom_boxplot() + ggtitle("Polyculture") + theme_classic()
+pH_poly <- boxplot_variable(polycultures, "pH", "Polycultures")
 
 pH <- cowplot::plot_grid(plot_grid(pH_mono, pH_poly, pH_all, nrow=3), 
                          rel_widths = c(3, .4) )
 
 #P
 
-P_all <- ggplot(all_fungi, aes(x= P)) + 
-  geom_boxplot() + ggtitle("All farms") + theme_classic()
+P_all <- boxplot_variable(all_fungi, "P", "All farms")
 
-P_mono <- ggplot(monocultures, aes(x= P)) + 
-  geom_boxplot() + ggtitle("Monoculture") + theme_classic()
+P_mono <- boxplot_variable(monocultures, "P", "Monocultures")
 
-
-P_poly <- ggplot(polycultures, aes(x= P)) + 
-  geom_boxplot() + ggtitle("Polyculture") + theme_classic()
+P_poly <- boxplot_variable(polycultures, "P", "Polycultures")
 
 P <- cowplot::plot_grid(plot_grid(P_mono, P_poly, P_all, nrow=3), 
                          rel_widths = c(3, .4) )
@@ -270,15 +243,11 @@ P <- cowplot::plot_grid(plot_grid(P_mono, P_poly, P_all, nrow=3),
 
 #TOC
 
-TOC_all <- ggplot(all_fungi, aes(x= TOC)) + 
-  geom_boxplot() + ggtitle("All farms") + theme_classic()
+TOC_all <- boxplot_variable(all_fungi, "TOC", "All farms")
 
-TOC_mono <- ggplot(monocultures, aes(x= TOC)) + 
-  geom_boxplot() + ggtitle("Monoculture") + theme_classic()
+TOC_mono <- boxplot_variable(monocultures, "TOC", "Monocultures")
 
-
-TOC_poly <- ggplot(polycultures, aes(x= TOC)) + 
-  geom_boxplot() + ggtitle("Polyculture") + theme_classic()
+TOC_poly <- boxplot_variable(polycultures, "TOC", "Polycultures")
 
 TOC <- cowplot::plot_grid(plot_grid(TOC_mono, TOC_poly, TOC_all, nrow=3), 
                         rel_widths = c(3, .4) )
@@ -286,15 +255,11 @@ TOC <- cowplot::plot_grid(plot_grid(TOC_mono, TOC_poly, TOC_all, nrow=3),
 
 #N
 
-N_all <- ggplot(all_fungi, aes(x= N)) + 
-  geom_boxplot() + ggtitle("All farms") + theme_classic()
+N_all <- boxplot_variable(all_fungi, "N", "All farms")
 
-N_mono <- ggplot(monocultures, aes(x= N)) + 
-  geom_boxplot() + ggtitle("Monoculture") + theme_classic()
+N_mono <- boxplot_variable(monocultures, "N", "Monocultures")
 
-
-N_poly <- ggplot(polycultures, aes(x= N)) + 
-  geom_boxplot() + ggtitle("Polyculture") + theme_classic()
+N_poly <- boxplot_variable(polycultures, "N", "Polycultures")
 
 N <- cowplot::plot_grid(plot_grid(N_mono, N_poly, N_all, nrow=3), 
                         rel_widths = c(3, .4) )
