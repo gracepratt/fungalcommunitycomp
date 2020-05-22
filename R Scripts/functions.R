@@ -119,7 +119,7 @@ table <- function(model){
 mantel_func <- function(complete_table, envi_variables, transform_method = "hellinger", mantel_method = "spearman"){
   
   species <- complete_table %>% dplyr::select(contains("OTU"))
-  envi <- complete_table %>% dplyr::select(envi_factors)
+  envi <- complete_table %>% dplyr::select(envi_variables)
   geo <- complete_table %>% dplyr::select("Long_point", "Lat_point")
   
   # transformed OTU table 
@@ -133,11 +133,12 @@ mantel_func <- function(complete_table, envi_variables, transform_method = "hell
   #mantel test
   mantel_envi <- mantel(dist.sp, dist.envi, method = mantel_method)
   mantel_geo <- mantel(dist.sp, dist.geo, method = mantel_method)
+  mantel_envivgeo <- mantel(dist.envi, dist.geo, method = mantel_method)
   
   #make a table 
-  Factor <- c("Environment", "Geography")
-  Statistic <- c(mantel_envi$statistic, mantel_geo$statistic)
-  Significance <- c(mantel_envi$signif, mantel_geo$signif)
+  Factor <- c("Species v Environment", "Species v Geography", "Environment v Geography")
+  Statistic <- c(mantel_envi$statistic, mantel_geo$statistic, mantel_envivgeo$statistic)
+  Significance <- c(mantel_envi$signif, mantel_geo$signif, mantel_envivgeo$signif)
   
   table <- data.frame(Factor, Statistic, Significance)
   
@@ -274,4 +275,20 @@ alpha_env <- plotFunction <- function(colNames, expVar, color, data){
       theme_classic() + theme(legend.position="none")
   }
   return(plotList)
+}
+
+
+
+########################################################################
+## 9. box plot of environmental variable range
+########################################################################
+
+boxplot_variable <- function(complete_table, variable, title){
+  
+  ggplot(complete_table, aes_string(x= variable)) + 
+    geom_boxplot() + ggtitle(title) + theme_classic() + 
+    theme(axis.ticks.y = element_blank(), 
+          axis.text.y = element_blank(),
+          axis.line.y = element_blank())
+  
 }
