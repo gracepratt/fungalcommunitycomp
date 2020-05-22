@@ -50,6 +50,7 @@ fig.path <- "Outputs/Figures"
 
 setwd('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/')
 
+
 # 2017-2018 dataset
 data <- read.csv("Raw Data/20172018-Complete.csv") # nrow=378, ncol=328
 
@@ -76,8 +77,6 @@ old_amf <- read.csv("Raw Data/Old AMF Tables/otu.rr.csv") # nrow=378, ncol=244
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
 
-#plant id (removed because already in relational database)
-# plantID <- read.csv("Raw Data/PlantID.csv")
 
 
 ########################################################################
@@ -90,6 +89,4 @@ source("R Scripts/functions.R")
 #SET SEED
 set.seed(5)
 
-# old function
-# similar results to new function
-# source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitytesting/functionsOLD.R', chdir = TRUE)
+
