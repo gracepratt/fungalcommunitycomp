@@ -1,9 +1,11 @@
 ---
 title: "Functional Diversity Data Summary"
 author: "Grace Pratt"
-date: "5/20/2020"
+date: "5/21/2020"
 output: pdf_document
 ---
+
+
 
 ```{r, include=FALSE}
 ## Source for Analysis workflow 
@@ -92,7 +94,7 @@ saprotroph_plots
 
 \pagebreak
 
-#FUNGAL PARASITE
+# FUNGAL PARASITE
 
 ```{r, tidy=TRUE, echo=FALSE}
 table(fungal_parasite)
@@ -111,9 +113,9 @@ fungal_par_plots
 
 
 
+\pagebreak
 
-
-# FTBL Groups
+# All Fungi FTBL Groups
 
 ```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
 mono_nvf
@@ -143,7 +145,7 @@ polyvmono_n
 
 \pagebreak 
 
-# AMF FTBL
+# AMF FTBL Groups
 
 ```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
 mono_amf_nvf
@@ -171,7 +173,7 @@ polyvmono_amf_n
 
 ```
 
-# Box Plots
+# Box Plots of environmental range
 
 ## NP Ratio
 ```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
