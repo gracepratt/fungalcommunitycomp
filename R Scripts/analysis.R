@@ -163,24 +163,44 @@ poly_n_amf_model <- gdm(poly_n_amf_inputs, geo = TRUE)
 table(poly_n_amf_model)
 
 
-# #########################################################################
-# ### mantel tests
-# #########################################################################
-# 
-# #all fungi
-# 
-# all_mantel <- mantel_func(all_fungi, envi_factors)
-# mono_mantel <- mantel_func(monocultures, envi_factors)
-# poly_mantel <- mantel_func(polycultures, envi_factors)
-# 
-# 
-# 
-# 
-# ########################################################################
-# ## alpha tests
-# ########################################################################
-# 
-# 
+#########################################################################
+### mantel tests
+#########################################################################
+
+#all fungi
+all_mantel <- mantel_func(all_fungi, envi_factors)
+mono_mantel <- mantel_func(monocultures, envi_factors)
+poly_mantel <- mantel_func(polycultures, envi_factors)
+
+#amf
+amf_mantel <- mantel_func(amf_filter, envi_factors)
+amf_mono_mantel <- mantel_func(amf_mono_filter, envi_factors)
+amf_poly_mantel <- mantel_func(amf_poly_filter, envi_factors)
+
+#plant pathogen
+plant_mantel <- mantel_function(plant_pathogen, envi_factors)
+plant_mono_mantel <- mantel_function(plant_mono, envi_factors)
+plant_poly_mantel <- mantel_function(plant_poly, envi_factors)
+
+#saprotroph
+sap_mantel <- mantel_function(all_saprotroph, envi_factors)
+sap_mono_mantel <- mantel_function(sap_mono, envi_factors)
+sap_poly_mantel <- mantel_function(sap_poly, envi_factors)
+
+#fungal parasite
+fungal_mantel <- mantel_function(fungal_par, envi_factors)
+fungal_mono_mantel <- mantel_function(fungal_mono, envi_factors)
+fungal_poly_mantel <- mantel_function(fungal_poly, envi_factors)
+
+
+
+
+
+########################################################################
+## alpha tests
+########################################################################
+
+
 divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","div_amf", "div_path","div_sap","div_par")
 
 options(contrasts = c("contr.sum","contr.poly"))
