@@ -280,6 +280,22 @@ N_poly <- boxplot_variable(polycultures, "N", "Polycultures")
 N <- cowplot::plot_grid(plot_grid(N_mono, N_poly, N_all, nrow=3), 
                         rel_widths = c(3, .4) )
 
+
+#N focal 
+
+#N_f_all <- boxplot_variable(all_fungi, "N", "All farms")
+
+N_f_mono <- boxplot_variable(mono_f, "N", "Monocultures F")
+
+N_f_poly <- boxplot_variable(poly_f, "N", "Polycultures F")
+
+N_n_mono <- boxplot_variable(mono_n, "N", "Monocultures N")
+
+N_n_poly <- boxplot_variable(poly_n, "N", "Polycultures N")
+
+N_ftbl <- cowplot::plot_grid(plot_grid(N_f_mono, N_n_mono, N_f_poly, N_n_poly, nrow=4), 
+                        rel_widths = c(3, .4) )
+
 ########################################################################
 ## alpha diversity plots for functional  groups
 ########################################################################
@@ -297,5 +313,9 @@ richFTBLPlots <- plot_grid(alphaFTBLPlots[[1]], alphaFTBLPlots[[2]], alphaFTBLPl
 divPlots <- plot_grid(alphaPlots[[6]], alphaPlots[[7]], alphaPlots[[8]], alphaPlots[[9]], alphaPlots[[10]], ncol=3)
 
 alpha_env_Plots <- alpha_env(colNames=divIndices,expVar = "pH", color="FarmType",data = alphaDF)
+
+
+
+
 
 

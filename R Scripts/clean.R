@@ -413,5 +413,8 @@ dist.geo[1:12,1] #within farm distances
 
 
 
-
+all_fungi %>%
+  group_by(FarmKey, FarmType) %>%
+  summarise(count = n()) %>%
+  filter(count > 12)
 
