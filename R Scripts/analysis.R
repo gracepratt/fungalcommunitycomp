@@ -226,8 +226,13 @@ divModels <- sapply(c("div_all","div_amf","div_path", "div_sap","div_par"), USE.
 envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
                     function(x) {
                       model <- lmer(substitute(log(i+1) ~ FarmType*Block + (1|farmCode), list(i = as.name(x))), data=alphaDF, na.action=na.exclude)
-                      anova(model)
+                      summary(model)
                     })
+
+# The test reveals a p-value greater than 0.05, indicating that there is no significant difference between the group variances
+pH_lt <- car::leveneTest(log(NP_ratio+1) ~ FarmType, data=alphaDF)
+
+# soil_leveneTest <- sapply(envi_factors, USE.NAMES=TRUE, simplify = FALSE, function(x) { car::leveneTest(substitute(i ~ FarmType, list(i = as.name(x))), data=alphaDF)})
 
 alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", divIndices)] %>%
   gather(key = "variable", value = "value", -c(FarmType)) %>%
