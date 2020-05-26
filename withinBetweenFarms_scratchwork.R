@@ -8,10 +8,16 @@ colors2 <- c("#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
 
 envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")
 
-df <- amf %>%
+
+df <- guild_filter(all_fungi, "Plant Pathogen") %>%
   filter(Block == "F", FocalCrop == "Eggplant") 
 
-spatial <- input_diss(df, c("pH", "P", "TOC", "N", "NP_ratio","FarmBi")  )
+
+df <- all_fungi %>%
+  filter(Block == "F", FocalCrop == "Eggplant") 
+
+
+spatial <- input_diss(df, c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi") )
 spatial_diss <- input_diss(df, c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi") )
 spatial$distanceM <-distHaversine(spatial[,3:4],spatial[,5:6])
 
