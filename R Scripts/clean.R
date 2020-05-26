@@ -404,4 +404,14 @@ alphaDF <-meta %>%
 
 # scratch work for distance
 
-distanceM <-distHaversine(all_inputs[,3:4],all_inputs[,5:6])
+geo <- all_fungi %>% dplyr::select("Long_point", "Lat_point")
+dist.geo <- distm(geo, fun = distHaversine)
+
+max(dist.geo)
+dist.geo[1:12,1] #within farm distances
+
+
+
+
+
+
