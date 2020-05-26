@@ -178,19 +178,19 @@ amf_mono_mantel <- mantel_func(amf_mono_filter, envi_factors)
 amf_poly_mantel <- mantel_func(amf_poly_filter, envi_factors)
 
 #plant pathogen
-plant_mantel <- mantel_function(plant_pathogen, envi_factors)
-plant_mono_mantel <- mantel_function(plant_mono, envi_factors)
-plant_poly_mantel <- mantel_function(plant_poly, envi_factors)
+plant_mantel <- mantel_func(plant_pathogen, envi_factors)
+plant_mono_mantel <- mantel_func(plant_mono, envi_factors)
+plant_poly_mantel <- mantel_func(plant_poly, envi_factors)
 
 #saprotroph
-sap_mantel <- mantel_function(all_saprotroph, envi_factors)
-sap_mono_mantel <- mantel_function(sap_mono, envi_factors)
-sap_poly_mantel <- mantel_function(sap_poly, envi_factors)
+sap_mantel <- mantel_func(all_saprotroph, envi_factors)
+sap_mono_mantel <- mantel_func(sap_mono, envi_factors)
+sap_poly_mantel <- mantel_func(sap_poly, envi_factors)
 
 #fungal parasite
-fungal_mantel <- mantel_function(fungal_par, envi_factors)
-fungal_mono_mantel <- mantel_function(fungal_mono, envi_factors)
-fungal_poly_mantel <- mantel_function(fungal_poly, envi_factors)
+fungal_mantel <- mantel_func(fungal_par, envi_factors)
+fungal_mono_mantel <- mantel_func(fungal_mono, envi_factors)
+fungal_poly_mantel <- mantel_func(fungal_poly, envi_factors)
 
 
 
@@ -287,6 +287,29 @@ alphaEnvFTBLSummary <-  alphaDF[, names(alphaDF) %in% c("FTBL", envi_factors)] %
   as.data.frame() %>%
   mutate_if(is.numeric, round, 3) %>%
   arrange(variable)
+
+
+
+
+########################################################################
+## envi variables
+########################################################################
+
+
+all_envi <- enviRange(all_fungi)
+
+mono_envi <- enviRange(monocultures)
+
+poly_envi <- enviRange(polycultures)
+
+
+
+all_fungi %>%
+  group_by(FarmKey) %>%
+  summarise(n())
+
+
+
 
 
 

@@ -292,3 +292,48 @@ boxplot_variable <- function(complete_table, variable, title){
           axis.line.y = element_blank())
   
 }
+
+
+########################################################################
+## 9. envi variable tables
+########################################################################
+
+
+enviRange <- function(complete_table){
+  
+  mean <- complete_table %>%
+    dplyr::select(envi_factors) %>%
+    colMeans()
+  
+  
+  min <- complete_table %>%
+    dplyr::select(envi_factors) %>%
+    as.matrix() %>%
+    apply(2,min)
+  
+  
+  max <- complete_table %>%
+    dplyr::select(envi_factors) %>%
+    as.matrix() %>%
+    apply(2,max)
+  
+  
+  sd <- complete_table %>%
+    dplyr::select(envi_factors) %>%
+    as.matrix() %>%
+    apply(2,sd)
+  
+  table <- data.frame(mean, sd, min, max)
+  
+  return (table)
+}
+
+
+
+
+
+
+
+
+
+
