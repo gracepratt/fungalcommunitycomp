@@ -1,170 +1,104 @@
 # distance
 
-# FarmBi, Geographic, N, NP_ratio, P, pH, TOC
-colors1 <- c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
-colors2 <- c("#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
-# colors1 <- c("#332288","#117733","#44AA99","#88CCEE", "#DDCC77", "#CC6677", "#AA4499", "#882255")
-# colors2 <- c("#117733","#44AA99","#88CCEE", "#DDCC77", "#CC6677", "#AA4499", "#882255")
-
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")
-
-
-df <- guild_filter(all_fungi, "Plant Pathogen") %>%
-  filter(Block == "F", FocalCrop == "Eggplant") 
-
-
-df <- all_fungi %>%
-  filter(Block == "F", FocalCrop == "Eggplant") 
-
-
-spatial <- input_diss(df, c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi") )
-spatial_diss <- input_diss(df, c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi") )
-spatial$distanceM <-distHaversine(spatial[,3:4],spatial[,5:6])
-
-#monoculture
-monocultures_amf <- df %>%
-  filter(FarmType == "Monoculture") 
-
-spatial_mono <- input_diss(monocultures_amf, envi_factors) 
-spatial_mono_diss <- input_diss(monocultures_amf, envi_factors)
-spatial_mono$distanceM <-distHaversine(spatial_mono[,3:4],spatial_mono[,5:6])
-
-#polyculture
-polycultures_amf <- df %>%
-  filter(FarmType == "Polyculture")
-
-spatial_poly <- input_diss(polycultures_amf, envi_factors)
-spatial_poly_diss <- input_diss(polycultures_amf, envi_factors)
-spatial_poly$distanceM <-distHaversine(spatial_poly[,3:4],spatial_poly[,5:6])
-
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")
 
 
 # ALL
 
 # across farms
+across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
-across <- spatial %>% 
-  dplyr::select(-"distanceM")
+# tables 
+# best model is `item:4` w/ Geographic, pH, P, N
+across_table <- across$tables$`item:4`
 
-amf_across <- gdm(across, geo = TRUE)
-table(amf_across)
-
-# varImp
-# acrossVarImp <- gdm.varImp(across, geo=TRUE, nPerm=5, cores=8)
-  
 #plot
-amf_across_plots <- predictors_plot(amf_across) + scale_color_manual(values=colors1) + ggtitle("Across") + theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+across_plots <- across$plotList$`item:4` + theme(legend.position="none")
 
 # dissimilarity within farms
-within <- spatial %>% 
-  filter(distanceM < 60) %>%
-  dplyr::select(-"distanceM")
+within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
-amf_within <- gdm(within, geo = TRUE)
-table(amf_within)
+# tables 
+# best model is `item:3` w/ pH, P, N, TOC, N
+within_table <- within$tables$`item:3`
 
+#plot
+within_plots <- within$plotList$`item:3` + theme(legend.position="none")
 
-amf_within_plots <- predictors_plot(amf_within) + scale_color_manual(values=colors1) + ggtitle("Within") + theme(legend.position="none", plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
+# legend for all plots
+all_legend <- get_legend(across$plotList$`item:1`)
 
-# dissimilarity between farms
-between <- spatial %>% 
-  filter(distanceM > 60) %>%
-  dplyr::select(-"distanceM")
-
-
-amf_between <- gdm(between, geo = TRUE)
-table(amf_between)
-
-amf_between_plots <- predictors_plot(amf_between) + scale_color_manual(values=colors1) + ggtitle("Between") + theme(legend.position="none",plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
-
-all_legend <- get_legend(predictors_plot(amf_across)+ scale_color_manual(values=colors1))
-
-all_spatial <- cowplot::plot_grid(plot_grid(amf_across_plots, amf_within_plots, amf_between_plots, nrow=1), all_legend, rel_widths = c(3, .4) )
+# all farms plots
+all_spatial <- cowplot::plot_grid(plot_grid(across_plots, within_plots, nrow=1), all_legend, rel_widths = c(2, .4) )
 
 
 # MONO
 
 
 # across farms
+mono_across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
-across_mono <- gdm(spatial_mono, geo = TRUE)
-table(across_mono)
+# tables 
+# best model is `item:3` w/ Geographic, pH, P, TOC, N
+mono_across_table <- mono_across$tables$`item:3`
 
-mono_across_plots <- predictors_plot(across_mono) + scale_color_manual(values=colors2)  + ggtitle("Across") + theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+#plot
+mono_across_plots <- mono_across$plotList$`item:3` + theme(legend.position="none")
 
 # dissimilarity within farms
-within_mono <- spatial_mono %>% 
-  filter(distanceM < 60) %>%
-  dplyr::select(-"distanceM")
+mono_within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
-amf_within_mono <- gdm(within_mono, geo = TRUE)
-table(amf_within_mono)
+# tables 
+# best model is `item:3` w/ pH, P, N, TOC, N
+mono_within_table <- mono_within$tables$`item:3`
 
-
-mono_within_plots <- predictors_plot(amf_within_mono) + scale_color_manual(values=colors2) + ggtitle("Within") + theme(legend.position="none", plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
-
-
-# dissimilarity between farms
-between_mono <- spatial_mono %>% 
-  filter(distanceM > 60) %>%
-  dplyr::select(-"distanceM")
+#plot
+mono_within_plots <- mono_within$plotList$`item:3` + theme(legend.position="none")
 
 
-amf_between_mono <- gdm(between_mono, geo = TRUE)
-table(amf_between_mono)
 
-mono_between_plots <- predictors_plot(amf_between_mono)+ scale_color_manual(values=colors2) + ggtitle("Between") + theme(legend.position="none",plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
+# all farms plots
+mono_plots <- cowplot::plot_grid(plot_grid(mono_across_plots, mono_within_plots, nrow=1), all_legend, rel_widths = c(2, .4) )
 
-mono_legend <- get_legend(predictors_plot(across_mono)+ scale_color_manual(values=colors2))
-
-mono_plots <- cowplot::plot_grid(plot_grid(mono_across_plots, mono_within_plots, mono_between_plots, nrow=1), mono_legend, rel_widths = c(3, .4) )
 
 
 # POLY
 
+
 # across farms
+poly_across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
-across_poly <- gdm(spatial_poly, geo = TRUE)
-table(across_poly)
+# tables 
+# best model is `item:4` w/ Geographic, pH, P, N
+poly_across_table <- poly_across$tables$`item:4`
 
-poly_across_plots <- predictors_plot(across_poly)+ scale_color_manual(values=colors2) + ggtitle("Across") + theme(legend.position="none", plot.title = element_text(hjust = 0.5))
+#plot
+poly_across_plots <- poly_across$plotList$`item:4` + theme(legend.position="none")
 
 # dissimilarity within farms
-within_poly <- spatial_poly %>% 
-  filter(distanceM < 60) %>%
-  dplyr::select(-"distanceM")
+poly_within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
-amf_within_poly <- gdm(within_poly, geo = TRUE)
-table(amf_within_poly)
+# tables 
+# best model is `item:3` w/ pH, P, TOC
+poly_within_table <- poly_within$tables$`item:4`
 
-
-poly_within_plots <- predictors_plot(amf_within_poly)+ scale_color_manual(values=colors2) + ggtitle("Within") + theme(legend.position="none", plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
-
-
-# dissimilarity between farms
-between_poly <- spatial_poly %>% 
-  filter(distanceM > 60) %>%
-  dplyr::select(-"distanceM")
+#plot
+poly_within_plots <- poly_within$plotList$`item:4` + theme(legend.position="none")
 
 
-amf_between_poly <- gdm(between_poly, geo = TRUE)
-table(amf_between_poly)
 
-poly_between_plots <- predictors_plot(amf_between_poly)+ scale_color_manual(values=colors2) + ggtitle("Between") + theme(legend.position="none",plot.title = element_text(hjust = 0.5),axis.title.y = element_blank())
+# all farms plots
+poly_plots <- cowplot::plot_grid(plot_grid(poly_across_plots, poly_within_plots, nrow=1), all_legend, rel_widths = c(2, .4) )
 
-poly_legend <- get_legend(predictors_plot(across_poly)+ scale_color_manual(values=colors2))
-
-poly_plots <- cowplot::plot_grid(plot_grid(poly_across_plots, poly_within_plots, poly_between_plots, nrow=1), poly_legend, rel_widths = c(3, .4) )
 
 
 
 allplots <- plot_grid(all_spatial,mono_plots, poly_plots, labels=c("All","MONO","POLY"), ncol=1)
-# formatsitepair(within, bioFormat=4, XColumn="Long_point", YColumn="Lat_point",
-# siteColumn="Key", predData= envi_table, abundance = FALSE)
 
 
 
 # models of alpha
+options(contrasts = c("contr.sum","contr.poly"))
 
 alpha <- as.data.frame(microbiome::alpha(t(amf %>% dplyr::select(contains("OTU"))), index=c("diversity_shannon", "observed"))) %>%
   rename(obs = observed, div = diversity_shannon) %>%
@@ -175,7 +109,7 @@ alpha <- as.data.frame(microbiome::alpha(t(amf %>% dplyr::select(contains("OTU")
 row.names(alpha) <- alpha$Key
 # soil texture index
 
-library(ggfortify)
+
 
 textPCA <- prcomp(alpha[c("CLAY","SILT","SAND")], scale.=TRUE)
 textPCAvalues <- data.frame(textPCA$x)[1:2]
@@ -185,20 +119,23 @@ alpha$soilTexture2 <- textPCAvalues$PC2[match(alpha$Key, row.names(textPCAvalues
 
 
 alphaModels <-  glmer.nb(obs ~ FarmType*Block+   scale(pH) + scale(P) + scale(NP_ratio) + scale(TOC) + scale(N) + scale(soilTexture) + (1|farmCode), data=alpha, nAGQ=1, na.action=na.exclude)
-summary(alphaModels)   
+alphaModels_summary <- summary(alphaModels)   
 
 
 envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
                     function(x) {
                       model <- lmer(substitute(log(i+1) ~ FarmType*Block + (1|farmCode), list(i = as.name(x))), data=alphaDF, na.action=na.exclude)
-                      anova(model)
+                      summary(model)
                     })
 
 
+divIndices <- c("obs_all","obs_amf", "obs_path","obs_sap","obs_par", "div_all","div_amf", "div_path","div_sap","div_par")
 
 
 
-alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", "obs","div")] %>%
+
+
+alphaSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", divIndices)] %>%
   gather(key = "variable", value = "value", -c(FarmType)) %>%
   group_by(FarmType, variable) %>%
   summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
@@ -256,4 +193,15 @@ alphaEnvFTBLSummary <-  alphaDF[, names(alphaDF) %in% c("FTBL", envi_factors)] %
   as.data.frame() %>%
   mutate_if(is.numeric, round, 3) %>%
   arrange(variable)
+
+
+# The test reveals a p-value greater than 0.05, indicating that there is no significant difference between the group variances
+pH_lt <- as.data.frame(car::leveneTest(pH ~ FarmType, data=alphaDF)[1,2:3], row.names="pH")
+NP_ratio_lt <-  as.data.frame(car::leveneTest(NP_ratio ~ FarmType, data=alphaDF)[1,2:3], row.names="NP_ratio")
+P_lt <- as.data.frame(car::leveneTest(P ~ FarmType, data=alphaDF)[1,2:3], row.names="P")
+TOC_lt <-  as.data.frame(car::leveneTest(TOC ~ FarmType, data=alphaDF)[1,2:3], row.names="TOC")
+N_lt <- as.data.frame(car::leveneTest(N ~ FarmType, data=alphaDF)[1,2:3], row.names="N")
+
+leveneTest_table <- round(rbind(pH_lt,NP_ratio_lt,P_lt,TOC_lt,N_lt),3)
+
                       
