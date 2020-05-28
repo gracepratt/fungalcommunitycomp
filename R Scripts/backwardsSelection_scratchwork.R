@@ -101,7 +101,3 @@ backwardsSelection <- function(df,guild, block, focalcrop, farmtype, env_factors
   return(list(tables=tableList,gdmModels= gdmList, plotList = plotList))
 }
 
-
-
-
-
