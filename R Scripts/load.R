@@ -36,6 +36,10 @@ library(tidyverse)
 library(gdm)
 library(geosphere)
 library(microbiome)
+library(ggfortify)
+library(lme4)
+library(lmerTest)
+
 
 ########################################################################
 ## set figure path
@@ -48,7 +52,7 @@ fig.path <- "Outputs/Figures"
 ########################################################################
 
 
-# setwd('/Volumes/GoogleDrive/My Drive/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
+setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
 
 
 # 2017-2018 dataset
