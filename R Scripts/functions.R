@@ -150,6 +150,9 @@ mantel_func <- function(complete_table, envi_variables, transform_method = "hell
 ## 6. plot variable isplines
 ########################################################################
 
+# model <- gdm(mono_inputs, geo = TRUE)
+
+
 predictors_plot <- function(model){
   
 
@@ -169,12 +172,22 @@ predictors_plot <- function(model){
     full_join(x_values, by = "Key")
   
   
+  # create color palette (need to fix)
+  palette <- data.frame(Predictors = c("FarmBi","Geographic","N","NP_ratio","P", "pH", "TOC"), 
+                        colors = c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7"))
+  
+  colors <- palette %>%
+    filter(Predictors %in% levels(as.factor(predictors$Factor))) %>%
+    pull(colors)
+  
   predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
     geom_line() +
     xlab("Standardized Variables") +
     ylab("Partial Ecological Distance") + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(predictors$Y), max(predictors$Y), length.out = 6),1)) +
     # ylim(0, 2.5) +
-    theme_classic()
+    theme_classic() 
   
 }
 
