@@ -58,8 +58,6 @@ setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/
 # 2017-2018 dataset
 data <- read.csv("Raw Data/20172018-Complete.csv") # nrow=378, ncol=328
 
-
-
 # 2017 dataset
 data2017 <- read.csv("Raw Data/2017-Complete.csv") # nrow=120, ncol=69
 
