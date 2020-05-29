@@ -162,6 +162,52 @@ table(poly_f_amf_model)
 poly_n_amf_model <- gdm(poly_n_amf_inputs, geo = TRUE)
 table(poly_n_amf_model)
 
+#########################################################################
+### backwards selection?
+#########################################################################
+
+#plant path across
+#table 3
+across_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+#table 2
+across_mono_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+#table 4
+across_poly_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+
+#plant path within
+#table 
+win_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+#table 
+win_mono_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+#table 
+win_poly_plant <- backwardsSelection(df=all_fungi, guild= "Plant Pathogen", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+
+
+
+#saprotrophs
+across_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across_mono_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across_poly_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+
+win_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+win_mono_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+win_poly_sap <- backwardsSelection(df=all_fungi, guild= "Saprotroph", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+
+
+
+#fungal parasite
+across_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across_mono_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across_poly_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+
+win_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+win_mono_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+win_poly_fungal <- backwardsSelection(df=all_fungi, guild= "Fungal Parasite", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+
+
+
+
+
 
 #########################################################################
 ### mantel tests
@@ -230,7 +276,13 @@ envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
                     })
 
 # The test reveals a p-value greater than 0.05, indicating that there is no significant difference between the group variances
-pH_lt <- car::leveneTest(log(NP_ratio+1) ~ FarmType, data=alphaDF)
+pH_lt <- as.data.frame(car::leveneTest(pH ~ FarmType, data=alphaDF)[1,2:3], row.names="pH")
+NP_ratio_lt <-  as.data.frame(car::leveneTest(NP_ratio ~ FarmType, data=alphaDF)[1,2:3], row.names="NP_ratio")
+P_lt <- as.data.frame(car::leveneTest(P ~ FarmType, data=alphaDF)[1,2:3], row.names="P")
+TOC_lt <-  as.data.frame(car::leveneTest(TOC ~ FarmType, data=alphaDF)[1,2:3], row.names="TOC")
+N_lt <- as.data.frame(car::leveneTest(N ~ FarmType, data=alphaDF)[1,2:3], row.names="N")
+
+leveneTest_table <- round(rbind(pH_lt,NP_ratio_lt,P_lt,TOC_lt,N_lt),3)
 
 # soil_leveneTest <- sapply(envi_factors, USE.NAMES=TRUE, simplify = FALSE, function(x) { car::leveneTest(substitute(i ~ FarmType, list(i = as.name(x))), data=alphaDF)})
 
