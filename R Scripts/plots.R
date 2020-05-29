@@ -316,6 +316,45 @@ alpha_env_Plots <- alpha_env(colNames=divIndices,expVar = "pH", color="FarmType"
 
 
 
+########################################################################
+## plotting envi predictors together
+########################################################################
+
+across_fungal_model <- isplineExtract(across_fungal$gdmModels$`item:1`) %>% data.frame()
+
+win_fungal_model <- isplineExtract(win_fungal$gdmModels$`item:1`) %>% data.frame()
+
+across_TOC_x <- across_fungal_model$x.TOC
+
+across_TOC_y <- across_fungal_model$y.TOC
+
+across_TOC <- data.frame(across_TOC_x, across_TOC_y)
+
+win_TOC_x <- win_fungal_model$x.TOC
+
+win_TOC_y <- win_fungal_model$y.TOC
+
+win_TOC <- data.frame(win_TOC_x, win_TOC_y)
+
+ggplot() + 
+  geom_line(data= across_TOC, aes(x= across_TOC_x, y= across_TOC_y), color='green') + 
+  geom_line(data= win_TOC, aes(x= win_TOC_x, y= win_TOC_y), color='red')
+
+across_plant_model <- isplineExtract(across_plant$gdmModels$`item:1`) %>% data.frame()
+across_plant_TOC <- data.frame(across_plant_model$x.TOC, across_plant_model$y.TOC)
+
+
+ggplot() + 
+  geom_line(data= across_TOC, aes(x= across_TOC_x, y= across_TOC_y), color='green') + 
+  geom_line(data= across_plant_TOC, aes(x= across_plant_model.x.TOC, y= across_plant_model.y.TOC), color='red')
+
+
+
+
+
+
+
+
 
 
 
