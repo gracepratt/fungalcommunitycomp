@@ -38,7 +38,6 @@ farms <- prop[,c("FarmKey","Lat","Long")]
 farms <- farms[! duplicated(farms[,1:3]),]
 
 
-
 # F1_1
 farms$F1_1.LAT <- farms$Lat + 0 
 farms$F1_1.LONG <- farms$Long + 0
@@ -50,7 +49,6 @@ farms$F1_2.LONG <- farms$Long + (1*0.0001)
 # F1_3
 farms$F1_3.LAT <- farms$Lat + 0 
 farms$F1_3.LONG <- farms$Long + (2*0.0001)
-
 
 # F2_1
 farms$F2_1.LAT <- farms$Lat + (1*0.0001)
@@ -64,7 +62,6 @@ farms$F2_2.LONG <- farms$Long + (2*0.0001)
 farms$F2_3.LAT <- farms$Lat + (1*0.0001)
 farms$F2_3.LONG <- farms$Long + (3*0.0001)
 
-
 # N1_1
 farms$N1_1.LAT <- farms$Lat + (2*0.0001)
 farms$N1_1.LONG <- farms$Long + (1*0.0001)
@@ -76,7 +73,6 @@ farms$N1_2.LONG <- farms$Long + (1*0.0001)
 # N1_3
 farms$N1_3.LAT <- farms$Lat + (4*0.0001)
 farms$N1_3.LONG <- farms$Long + (1*0.0001)
-
 
 # N2_1
 farms$N2_1.LAT <- farms$Lat + (3*0.0001)
@@ -101,7 +97,7 @@ latlong$Point <- substring(latlong$variable, 4,4)
 latlong  <- dcast(latlong, FarmKey + Lat + Long  + Transect + Point  ~ coord)
 
 prop$Lat_point <- latlong$LAT[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))]
-prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] # nrow=378, ncol=88
+prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] 
 # nrow=372, ncol=88
 
 ########################################################################
@@ -119,7 +115,6 @@ prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
 
 #remove N:P ratio outlier
 prop <- prop %>% filter(NP_ratio < 600) #nrow=371, ncol=90
-# prop$NP_ratio <- (log(prop$N)/log(prop$P))*100 #probably will be removed
 
  
 ########################################################################
@@ -141,7 +136,6 @@ species.rr_df <- data.frame(rrarefy(species_only, sample=minReads))
 
 #taking away OTUs with no reads
 species.rr_df <- species.rr_df[,colSums(species.rr_df!= 0)>0]
-
 
 species.rr_df$Key <- otu$Key
 species.rr_df <- species.rr_df[!species.rr_df$Key %in% extraKey,]
@@ -166,13 +160,9 @@ all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_row
 #count OTU 
 ncol(all_fungi %>% dplyr::select(contains("OTU")))
 
-#just eggplant filter
-all_fungi <- all_fungi %>%
-  filter(FocalCrop == "Eggplant")
-
-
 
 # AMF
+
 #add AMF table for AMF dataset
 amf_otu$Key <- row.names(amf_otu) # nrow=378, ncol=245
   
@@ -189,8 +179,6 @@ amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))] <- KY_rows
 
 #taking out samples with no AMF
 amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=371, ncol=335
-
-
 amf <- amf %>% filter(rowsum > 0) # nrow=321, ncol=335
 
 
@@ -218,7 +206,6 @@ monocultures <- all_fungi %>%
   filter(FarmType == "Monoculture") 
 
 mono_inputs <- input_tables(monocultures, envi_factors) 
-mono_diss <- input_diss(monocultures, envi_factors)
 
 #polyculture
 #nrow=192
@@ -226,7 +213,6 @@ polycultures <- all_fungi %>%
   filter(FarmType == "Polyculture")
 
 poly_inputs <- input_tables(polycultures, envi_factors) 
-poly_diss <- input_diss(polycultures, envi_factors)
 
 
 #FTBL 
