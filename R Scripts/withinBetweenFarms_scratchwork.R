@@ -1,12 +1,12 @@
 # distance
 
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi", "CropBi")
 
 
 # ALL
 
 # across farms
-across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= c("F") ,focalcrop= c("Eggplant", "Squash"), farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
 # tables 
 # best model is `item:4` w/ Geographic, pH, P, N
@@ -16,7 +16,7 @@ across_table <- across$tables$`item:4`
 across_plots <- across$plotList$`item:4` + theme(legend.position="none")
 
 # dissimilarity within farms
-within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop=  c("Eggplant", "Squash"), farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
 # tables 
 # best model is `item:3` w/ pH, P, N, TOC, N
@@ -165,14 +165,14 @@ alphaFTBLSummary <-  alphaDF[, names(alphaDF) %in% c("FTBL", divIndices)] %>%
   arrange(variable)
 
 
-alphaEnvSummary <-  alphaDF[, names(alphaDF) %in% c("FarmType", envi_factors)] %>%
-  gather(key = "variable", value = "value", -c(FarmType)) %>%
-  group_by(FarmType, variable) %>%
-  summarize_at("value", list(mean = mean, SE=std.error, min = min, max = max), na.rm=TRUE) %>%
+alphaEnvSummary <-  alphaDF[, names(alphaDF) %in% c("FarmKey","FarmType", envi_factors)] %>%
+  gather(key = "variable", value = "value", -c(FarmKey,FarmType)) %>%
+  group_by(FarmKey, FarmType, variable) %>%
+  summarize_at("value", list(mean = mean, SE=std.error,sd=sd, min = min, max = max), na.rm=TRUE) %>%
   ungroup() %>%
   as.data.frame() %>%
   mutate_if(is.numeric, round, 3) %>%
-  arrange(variable)
+  arrange(FarmType,variable)
 
 
 alphaEnvBlockSummary <-  alphaDF[, names(alphaDF) %in% c("Block", envi_factors)] %>%
@@ -203,5 +203,24 @@ TOC_lt <-  as.data.frame(car::leveneTest(TOC ~ FarmType, data=alphaDF)[1,2:3], r
 N_lt <- as.data.frame(car::leveneTest(N ~ FarmType, data=alphaDF)[1,2:3], row.names="N")
 
 leveneTest_table <- round(rbind(pH_lt,NP_ratio_lt,P_lt,TOC_lt,N_lt),3)
+
+
+pH_lt_FTBL <- as.data.frame(car::leveneTest(pH ~ FTBL, data=alphaDF)[1,2:3], row.names="pH")
+NP_ratio_lt_FTBL <-  as.data.frame(car::leveneTest(NP_ratio ~ FTBL, data=alphaDF)[1,2:3], row.names="NP_ratio")
+P_lt_FTBL <- as.data.frame(car::leveneTest(P ~ FTBL, data=alphaDF)[1,2:3], row.names="P")
+TOC_lt_FTBL <-  as.data.frame(car::leveneTest(TOC ~ FTBL, data=alphaDF)[1,2:3], row.names="TOC")
+N_lt_FTBL <- as.data.frame(car::leveneTest(N ~ FTBL, data=alphaDF)[1,2:3], row.names="N")
+
+leveneTest_table_FTBL <- round(rbind(pH_lt_FTBL,NP_ratio_lt_FTBL,P_lt_FTBL,TOC_lt_FTBL,N_lt_FTBL),3)
+
+
+
+pH_lt_Block <- as.data.frame(car::leveneTest(pH ~ Block, data=alphaDF)[1,2:3], row.names="pH")
+NP_ratio_lt_Block <-  as.data.frame(car::leveneTest(NP_ratio ~ Block, data=alphaDF)[1,2:3], row.names="NP_ratio")
+P_lt_Block <- as.data.frame(car::leveneTest(P ~ Block, data=alphaDF)[1,2:3], row.names="P")
+TOC_lt_Block <-  as.data.frame(car::leveneTest(TOC ~ Block, data=alphaDF)[1,2:3], row.names="TOC")
+N_lt_Block <- as.data.frame(car::leveneTest(N ~ Block, data=alphaDF)[1,2:3], row.names="N")
+
+leveneTest_table_Block <- round(rbind(pH_lt_Block,NP_ratio_lt_Block,P_lt_Block,TOC_lt_Block,N_lt_Block),3)
 
                       
