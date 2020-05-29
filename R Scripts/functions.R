@@ -173,8 +173,8 @@ predictors_plot <- function(model){
   
   
   # create color palette (need to fix)
-  palette <- data.frame(Predictors = c("FarmBi","Geographic","N","NP_ratio","P", "pH", "TOC"), 
-                        colors = c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7"))
+  palette <- data.frame(Predictors = c("FarmBi","Geographic","N","NP_ratio","P", "pH", "TOC", "CropBi"), 
+                        colors = c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7", "#e817da"))
   
   colors <- palette %>%
     filter(Predictors %in% levels(as.factor(predictors$Factor))) %>%
