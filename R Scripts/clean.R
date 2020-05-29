@@ -109,7 +109,10 @@ prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, 
 ########################################################################
 
 prop <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
-                                          "Polyculture" = 0)) # nrow=372, ncol=89
+                                          "Polyculture" = 0),
+                        CropBi = recode(FocalCrop, "Eggplant" = 1,
+                                        "Squash" = 0)) # nrow=372, ncol=89
+
 
 # create N:P ratio column
 prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
@@ -160,6 +163,9 @@ VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))
 all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))] <- VD_rows
 all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_rows
 
+#count OTU 
+ncol(all_fungi %>% dplyr::select(contains("OTU")))
+
 #just eggplant filter
 all_fungi <- all_fungi %>%
   filter(FocalCrop == "Eggplant")
@@ -194,7 +200,7 @@ amf <- amf %>% filter(rowsum > 0) # nrow=321, ncol=335
 
 # choose the variables you want
 
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio")  
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")  
 
 
 ########################################################################
@@ -283,6 +289,11 @@ poly_diss_amf <- input_diss(polycultures_amf, envi_factors)
 
 #amf
 amf_filter <- guild_filter(all_fungi, "Arbuscular Mycorrhizal")
+
+
+#ratio
+ncol(amf_filter)/ncol(all_fungi)
+
 amf_mono_filter <- guild_filter(monocultures, "Arbuscular Mycorrhizal")
 amf_poly_filter <- guild_filter(polycultures, "Arbuscular Mycorrhizal")
 
@@ -319,6 +330,10 @@ poly_n_amf_inputs <- input_tables(poly_n_amf, envi_factors)
 
 #plant pathogen
 plant_pathogen <- guild_filter(all_fungi, "Plant Pathogen")
+
+#ratio
+ncol(plant_pathogen)/ncol(all_fungi)
+
 plant_mono  <- guild_filter(monocultures, "Plant Pathogen")
 plant_poly <- guild_filter(polycultures, "Plant Pathogen")
 
@@ -330,6 +345,10 @@ plant_poly_inputs <- input_tables(plant_poly, envi_factors)
 
 #saprotroph
 all_saprotroph <- guild_filter(all_fungi, "Saprotroph")
+
+#ratio
+ncol(all_saprotroph)/ncol(all_fungi)
+
 sap_mono <- guild_filter(monocultures, "Saprotroph")
 sap_poly <- guild_filter(polycultures, "Saprotroph")
 
@@ -341,6 +360,10 @@ sap_poly_inputs <- input_tables(sap_poly, envi_factors)
 
 #fungal parasite
 fungal_par <- guild_filter(all_fungi, "Fungal Parasite")
+
+#ratio
+ncol(fungal_par)/ncol(all_fungi)
+
 fungal_mono <- guild_filter(monocultures, "Fungal Parasite")
 fungal_poly <- guild_filter(polycultures, "Fungal Parasite")
 
@@ -389,7 +412,7 @@ alphaDF <-meta %>%
   left_join(., alpha_pathogen, by="Key" ) %>%
   left_join(., alpha_sap, by="Key" ) %>%
   left_join(., alpha_par, by="Key" )  %>%
-  mutate(NP_ratio = (N/P)*100)
+  mutate(NP_ratio = (N/P)*100, FarmType = as.factor(FarmType))
 
 
 
@@ -403,18 +426,18 @@ alphaDF <-meta %>%
 
 
 # scratch work for distance
-
-geo <- all_fungi %>% dplyr::select("Long_point", "Lat_point")
-dist.geo <- distm(geo, fun = distHaversine)
-
-max(dist.geo)
-dist.geo[1:12,1] #within farm distances
-
-
-
-
-all_fungi %>%
-  group_by(FarmKey, FarmType) %>%
-  summarise(count = n()) %>%
-  filter(count > 12)
-
+# 
+# geo <- all_fungi %>% dplyr::select("Long_point", "Lat_point")
+# dist.geo <- distm(geo, fun = distHaversine)
+# 
+# max(dist.geo)
+# dist.geo[1:12,1] #within farm distances
+# 
+# 
+# 
+# 
+# all_fungi %>%
+#   group_by(FarmKey, FarmType) %>%
+#   summarise(count = n()) %>%
+#   filter(FarmType == "Polyculture")
+# 
