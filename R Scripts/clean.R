@@ -360,6 +360,25 @@ fungal_mono_inputs <- input_tables(fungal_mono, envi_factors)
 fungal_poly_inputs <- input_tables(fungal_poly, envi_factors)
 
 
+#other groups
+
+animal <- guild_filter(all_fungi, "Animal") %>% ncol()
+
+animal_pathogen <- guild_filter(all_fungi, "Animal Pathogen") %>% ncol()
+
+animal_biotroph <- guild_filter(all_fungi, "Animal Associated Biotroph") %>% ncol()
+
+animal_endo <- guild_filter(all_fungi, "Animal Endosymbiont") %>% ncol()
+
+animal_par <- guild_filter(all_fungi, "Animal Parasite") %>% ncol()
+
+bryophyte_par <- guild_filter(all_fungi, "Bryophyte Parasite") %>% ncol()
+
+lichen <- guild_filter(all_fungi, "Lichen Parasite") %>% ncol()
+
+endophyte <- guild_filter(all_fungi, "Endophyte") %>% ncol()
+
+
 
 
 ########################################################################
