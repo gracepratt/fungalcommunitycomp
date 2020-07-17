@@ -52,20 +52,20 @@ fig.path <- "Outputs/Figures"
 ########################################################################
 
 
-setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
+# setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
 
 
 # 2017-2018 dataset
 data <- read.csv("Raw Data/20172018-Complete.csv") # nrow=378, ncol=328
 
-# 2017 dataset
-data2017 <- read.csv("Raw Data/2017-Complete.csv") # nrow=120, ncol=69
-
-# 2018 dataset
-data2018 <- read.csv("Raw Data/2018-Complete.csv") # nrow=258, ncol=69
+# # 2017 dataset
+# data2017 <- read.csv("Raw Data/2017-Complete.csv") # nrow=120, ncol=69
+# 
+# # 2018 dataset
+# data2018 <- read.csv("Raw Data/2018-Complete.csv") # nrow=258, ncol=69
 
 # load plant traits table
-plantID <- read.csv("Raw Data/PlantID.csv") # nrow=258, ncol=69
+# plantID <- read.csv("Raw Data/PlantID.csv") # nrow=258, ncol=69
 
 # OTU tables
 otu <- read.csv("Raw Data/fungiOTU.csv") # nrow=29, ncol=6
@@ -79,13 +79,18 @@ old_amf <- read.csv("Raw Data/Old AMF Tables/otu.rr.csv") # nrow=378, ncol=244
 # taxanomy list 
 tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
 
+# crop diversity
 
+cropDiv <- read.csv('Raw Data/cropdiversity.csv') # nrow=3427, ncol=389
 
 ########################################################################
 ## load functions
 ########################################################################
 
 source("R Scripts/functions.R")
+
+source("R Scripts/backwardsSelection_scratchwork.R")
+
 
 
 #SET SEED

@@ -152,6 +152,22 @@ mantel_func <- function(complete_table, envi_variables, transform_method = "hell
 
 # model <- gdm(mono_inputs, geo = TRUE)
 
+# 
+# envi_factors1 <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")
+# envi_factors2 <- c("pH", "P", "TOC", "NP_ratio")
+# envi_factors3 <- c("P", "TOC", "NP_ratio", "FarmBi")
+# 
+# all_inputs1 <- input_tables(all_fungi, envi_factors1) # nrow=69006, ncol=14
+# all_inputs2 <- input_tables(all_fungi, envi_factors2) # nrow=69006, ncol=14
+# all_inputs3 <- input_tables(all_fungi, envi_factors3) # nrow=69006, ncol=14
+# model1 <- gdm(all_inputs1, geo= TRUE)
+# model2 <- gdm(all_inputs2, geo= TRUE)
+# model3 <- gdm(all_inputs3, geo= TRUE)
+# 
+# predictors_plot(model1)
+# predictors_plot(model2)
+# predictors_plot(model3)
+
 
 predictors_plot <- function(model){
   
@@ -169,16 +185,20 @@ predictors_plot <- function(model){
     gather(key = "Factor", value = "Y", -"Key" )
   
   predictors <- y_values %>%
-    full_join(x_values, by = "Key")
+    full_join(x_values, by = "Key") %>%
+    mutate(Factor = as.factor(Factor))
   
   
   # create color palette (need to fix)
-  palette <- data.frame(Predictors = c("FarmBi","Geographic","N","NP_ratio","P", "pH", "TOC", "CropBi"), 
-                        colors = c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7", "#e817da"))
+  palette <- data.frame(Predictors = c("FarmBi","Geographic","N","NP_ratio","P", "pH", "TOC", "CropBi","cropDiversity","cropRichness"), 
+                        colors = c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7", "#E817DA","#6FC46C","#471E02"))
   
   colors <- palette %>%
-    filter(Predictors %in% levels(as.factor(predictors$Factor))) %>%
+    filter(Predictors %in% levels(predictors$Factor)) %>%
     pull(colors)
+  
+  
+  # across_table <- across$tables$`item:3`
   
   predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
     geom_line() +

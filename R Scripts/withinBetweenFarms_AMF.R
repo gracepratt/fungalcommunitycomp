@@ -1,29 +1,29 @@
 # distance
 
-envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi", "CropBi")
+envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi","cropDiversity", "cropRichness")
 
 
 # ALL
 
 # across farms
-across <- backwardsSelection(df=all_fungi, guild= "all fungi", block= c("F") ,focalcrop= c("Eggplant", "Squash"), farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"),env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
 # tables 
 # best model is `item:4` w/ Geographic, pH, P, N
-across_table <- across$tables$`item:4`
+across_table <- across$tables$`item:1`
 
 #plot
-across_plots <- across$plotList$`item:4` + theme(legend.position="none")
+across_plots <- across$plotList$`item:1` + theme(legend.position="none")
 
 # dissimilarity within farms
-within <- backwardsSelection(df=all_fungi, guild= "all fungi", block= "F" ,focalcrop=  c("Eggplant", "Squash"), farmtype=c("Monoculture","Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
 # tables 
 # best model is `item:3` w/ pH, P, N, TOC, N
-within_table <- within$tables$`item:3`
+within_table <- within$tables$`item:1`
 
 #plot
-within_plots <- within$plotList$`item:3` + theme(legend.position="none")
+within_plots <- within$plotList$`item:1` + theme(legend.position="none")
 
 # legend for all plots
 all_legend <- get_legend(across$plotList$`item:1`)
@@ -36,24 +36,24 @@ all_spatial <- cowplot::plot_grid(plot_grid(across_plots, within_plots, nrow=1),
 
 
 # across farms
-mono_across <- backwardsSelection(df=all_fungi, guild= "all fungi", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+mono_across <- backwardsSelection(df=monocultures, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
 # tables 
 # best model is `item:3` w/ Geographic, pH, P, TOC, N
-mono_across_table <- mono_across$tables$`item:3`
+mono_across_table <- mono_across$tables$`item:1`
 
 #plot
-mono_across_plots <- mono_across$plotList$`item:3` + theme(legend.position="none")
+mono_across_plots <- mono_across$plotList$`item:1` + theme(legend.position="none")
 
 # dissimilarity within farms
-mono_within <- backwardsSelection(df=all_fungi, guild= "all fungi", block= "F" ,focalcrop= "Eggplant", farmtype=c("Monoculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+mono_within <- backwardsSelection(df=monocultures, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
 # tables 
 # best model is `item:3` w/ pH, P, N, TOC, N
-mono_within_table <- mono_within$tables$`item:3`
+mono_within_table <- mono_within$tables$`item:1`
 
 #plot
-mono_within_plots <- mono_within$plotList$`item:3` + theme(legend.position="none")
+mono_within_plots <- mono_within$plotList$`item:1` + theme(legend.position="none")
 
 
 
@@ -66,24 +66,24 @@ mono_spatial_plots <- cowplot::plot_grid(plot_grid(mono_across_plots, mono_withi
 
 
 # across farms
-poly_across <- backwardsSelection(df=all_fungi, guild= "all fungi", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
+poly_across <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
 # tables 
 # best model is `item:4` w/ Geographic, pH, P, N
-poly_across_table <- poly_across$tables$`item:4`
+poly_across_table <- poly_across$tables$`item:1`
 
 #plot
-poly_across_plots <- poly_across$plotList$`item:4` + theme(legend.position="none")
+poly_across_plots <- poly_across$plotList$`item:1` + theme(legend.position="none")
 
 # dissimilarity within farms
-poly_within <- backwardsSelection(df=all_fungi, guild= "all fungi", block= "F" ,focalcrop= "Eggplant", farmtype=c("Polyculture"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+poly_within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
 # tables 
 # best model is `item:3` w/ pH, P, TOC
-poly_within_table <- poly_within$tables$`item:4`
+poly_within_table <- poly_within$tables$`item:1`
 
 #plot
-poly_within_plots <- poly_within$plotList$`item:4` + theme(legend.position="none")
+poly_within_plots <- poly_within$plotList$`item:1` + theme(legend.position="none")
 
 
 
@@ -93,9 +93,11 @@ poly_spatial_plots <- cowplot::plot_grid(plot_grid(poly_across_plots, poly_withi
 
 
 
-allplots_spatial <- plot_grid(all_spatial,mono_spatial_plots, poly_spatial_plots, labels=c("All","MONO","POLY"), ncol=1)
+allplots_spatial <- plot_grid(all_spatial, labels=c("ALL"), ncol=1)
 
 
+
+ggsave("allplots_spatial_amf_N_v2.pdf", plot=allplots_spatial, path=fig.path, width = 12, height=4, useDingbats=FALSE)
 
 # models of alpha
 options(contrasts = c("contr.sum","contr.poly"))

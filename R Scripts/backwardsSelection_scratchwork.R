@@ -1,15 +1,22 @@
 # Backwards selection
 
 
-backwardsSelection <- function(df,guild, block, focalcrop, farmtype, env_factors, geo, maxDist){
+
+
+backwardsSelection <- function(df,guild, block, focalcrop, farmtype, year, env_factors, geo, maxDist){
   # to supress warnings
   oldw <- getOption("warn")
   options(warn = -1)
   
   # filter dataset
+  if(guild == "all fungi"){
   
+  df <- df %>%
+    filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% year)}
+  
+  else{
   df <- guild_filter(df, guild) %>%
-    filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype)
+    filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% Year)}
   
   # create table list
   tableList <- list()
@@ -46,7 +53,7 @@ backwardsSelection <- function(df,guild, block, focalcrop, farmtype, env_factors
     
     else{                   # for across type models
       finalDF <- inputs%>% 
-        # filter(distanceM < 60) %>%
+        filter(distanceM > 60) %>%
         dplyr::select(-"distanceM")
     }
     

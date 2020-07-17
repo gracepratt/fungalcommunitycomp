@@ -27,6 +27,12 @@ extraKey <- prop[ grepl('Ex', prop$Code),]$Key
 prop <- prop[!prop$Key %in% extraKey,] #nrow=372, ncol=86
 
 
+# add cropdiversity
+
+prop <- prop %>%
+  left_join(cropDiv, by=c("FarmKey","Year"))
+
+
 ########################################################################
 ## 2. adjust lat long for each point
 ########################################################################
@@ -151,11 +157,11 @@ all_fungi <- prop %>%
   join(species.rr_df) #nrow=371, ncol=3387
 
 # rows to switch
-KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))]
-VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))]
+KY_rows <- all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(93:ncol(all_fungi))]
+VD_rows <- all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(93:ncol(all_fungi))]
 # switch
-all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(91:ncol(all_fungi))] <- VD_rows
-all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(91:ncol(all_fungi))] <- KY_rows
+all_fungi[all_fungi$farmCode %in% c("2018_KY"), c(93:ncol(all_fungi))] <- VD_rows
+all_fungi[all_fungi$farmCode %in% c("2018_VD"), c(93:ncol(all_fungi))] <- KY_rows
 
 #count OTU 
 ncol(all_fungi %>% dplyr::select(contains("OTU")))
@@ -170,11 +176,11 @@ amf <- prop %>%
   join(amf_otu) # nrow=371, ncol=334
 
 # rows to switch
-KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(91:ncol(amf))]
-VD_rows <- amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))]
+KY_rows <- amf[amf$farmCode %in% c("2018_KY"), c(93:ncol(amf))]
+VD_rows <- amf[amf$farmCode %in% c("2018_VD"), c(93:ncol(amf))]
 # switch
-amf[amf$farmCode %in% c("2018_KY"), c(91:ncol(amf))] <- VD_rows
-amf[amf$farmCode %in% c("2018_VD"), c(91:ncol(amf))] <- KY_rows
+amf[amf$farmCode %in% c("2018_KY"), c(93:ncol(amf))] <- VD_rows
+amf[amf$farmCode %in% c("2018_VD"), c(93:ncol(amf))] <- KY_rows
 
 
 #taking out samples with no AMF
