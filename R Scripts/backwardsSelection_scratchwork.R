@@ -1,6 +1,15 @@
 # Backwards selection
 
 
+  df=all_fungi 
+  guild= "Arbuscular Mycorrhizal" 
+  block= c("F") 
+  focalcrop= c("Eggplant") 
+  farmtype=c("Monoculture","Polyculture") 
+  year = c("2018","2017") 
+  env_factors=envi_factors 
+  geo=TRUE 
+  maxDist = "within"
 
 
 backwardsSelection <- function(df,guild, block, focalcrop, farmtype, year, env_factors, geo, maxDist){

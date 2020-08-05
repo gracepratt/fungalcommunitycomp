@@ -1,0 +1,145 @@
+---
+title: "Summary of AMF community assembly"
+author: "Aidee Guzman"
+date: "7/23/2020"
+output: pdf_document
+geometry: margin=2cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp")
+## If pandoc is not working: https://stackoverflow.com/questions/58610380/rmarkdown-pandoc-error-after-update-to-macos-catalina-10-15
+## https://holtzy.github.io/Pimp-my-rmd/
+
+```
+
+```{r include=FALSE, cache=FALSE}
+## Source for Analysis workflow 
+
+## *******************************************************
+## 1. load
+## *******************************************************
+source("R scripts/load.R")
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source("R scripts/clean.R")
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source("R scripts/analysis.R")
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source("R scripts/plots.R")
+
+
+## *******************************************************
+## 5. tables
+## *******************************************************
+source("R scripts/tables.R")
+
+
+
+```
+
+# Description of study design
+
+Study design: farm type x block
+
+* 21 sites: 10 monoculture and 11 polyculture
+
+* 2 transects per 2 blocks (focal vs non-focal) each site
+
+* 10 = 2017 and 11 =2018
+
+
+\pagebreak
+
+\tableofcontents # adds table of contents
+
+\newpage  
+
+
+\pagebreak  
+
+# local-rows
+
+**Model output**
+**Landscape scale**
+```{r, tidy=TRUE, echo=FALSE}
+landscape_AMF_f_table
+```
+
+**Local scale**
+```{r, tidy=TRUE, echo=FALSE}
+local_AMF_f_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+amf_f_plots
+```
+
+\pagebreak  
+
+
+# landscape-rows
+**Model output**
+**Landscape scale**
+```{r, tidy=TRUE, echo=FALSE}
+landscape_AMF_n_table
+```
+
+**Local scale**
+```{r, tidy=TRUE, echo=FALSE}
+local_AMF_n_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+amf_n_plots
+```
+
+\pagebreak  
+
+# Both landscape and local-rows
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
+amf_n_plots
+```
+
+\pagebreak  
+
+
+# Variance importance
+
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+varianceImportance
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 6, fig.width = 6, fig.align='center'}
+varImp_plot
+
+```
+
+\pagebreak  
+
+
+## Data summary
+
+```{r, tidy=TRUE, echo=FALSE}
+# mean +/- SE tables
+summaryDF
+```
+

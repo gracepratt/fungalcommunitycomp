@@ -48,25 +48,40 @@ input_diss <- function(complete_table, envi_variables){
 ## 3. subsetting fungal guilds
 ########################################################################
 
-guild_filter <- function(complete_table, guild){
+guild_filter <- function(complete_table, guild, family){
+  
+  complete_table <- all_fungi
   
   #pull out OTU columns and transpose to make 1 row per Key and OTU
   OTURows<- complete_table %>% 
     dplyr::select(Key, contains("OTU")) %>%
     pivot_longer(cols = starts_with("OTU"), names_to = "OTU")
   
-  #pull out names of guilds
+
+  
   rawguilds <- tax %>%
-    dplyr::select("OTU" = "X.OTU.ID", "Guild")
+    dplyr::select("OTU" = "OTU", "Guild", "Family")
   
   #join guild names with OTU in each key 
   wGuild <- OTURows %>%
     left_join(rawguilds) %>%
     drop_na()
   
-  #subsetting OTUs to only guild of interest
-  fdGroup <- wGuild %>% 
-    filter(str_detect(Guild, pattern = guild)) 
+  if(family == "NA"){
+    #subsetting OTUs to only guild of interest
+    fdGroup <- wGuild %>% 
+      filter(str_detect(Guild, pattern = guild)) 
+    
+  }
+  else {
+    #subsetting OTUs to only guild of interest
+    fdGroup <- wGuild %>% 
+      filter(str_detect(Guild, pattern= guild)) %>%
+      filter(Family %in% family)
+  }
+  
+  
+ 
   
   #re-pivot back to wide format 
   wide <- fdGroup %>%
@@ -150,25 +165,6 @@ mantel_func <- function(complete_table, envi_variables, transform_method = "hell
 ## 6. plot variable isplines
 ########################################################################
 
-# model <- gdm(mono_inputs, geo = TRUE)
-
-# 
-# envi_factors1 <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi")
-# envi_factors2 <- c("pH", "P", "TOC", "NP_ratio")
-# envi_factors3 <- c("P", "TOC", "NP_ratio", "FarmBi")
-# 
-# all_inputs1 <- input_tables(all_fungi, envi_factors1) # nrow=69006, ncol=14
-# all_inputs2 <- input_tables(all_fungi, envi_factors2) # nrow=69006, ncol=14
-# all_inputs3 <- input_tables(all_fungi, envi_factors3) # nrow=69006, ncol=14
-# model1 <- gdm(all_inputs1, geo= TRUE)
-# model2 <- gdm(all_inputs2, geo= TRUE)
-# model3 <- gdm(all_inputs3, geo= TRUE)
-# 
-# predictors_plot(model1)
-# predictors_plot(model2)
-# predictors_plot(model3)
-
-
 predictors_plot <- function(model){
   
 
@@ -201,13 +197,79 @@ predictors_plot <- function(model){
   # across_table <- across$tables$`item:3`
   
   predictors %>% ggplot(aes(x = X, y = Y, color = Factor)) +
-    geom_line() +
+    geom_line(size=1) +
     xlab("Standardized Variables") +
     ylab("Partial Ecological Distance") + 
     scale_color_manual(values=colors) + 
     scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(predictors$Y), max(predictors$Y), length.out = 6),1)) +
     # ylim(0, 2.5) +
     theme_classic() 
+  
+}
+
+########################################################################
+## 6b. plot variable isplines
+########################################################################
+
+predictors_variable_plot <- function(predictors, variable){
+  
+
+  predictors <- predictors %>%
+    filter(Factor %in% variable)
+  
+  
+  # create color palette (need to fix)
+  # order = "across_F" "across_N" "within_F" "within_N"
+colors <- c("#B08ED3","#C8BE6A","#7C43B7","#A49307")
+  
+  
+  
+  # across_table <- across$tables$`item:3`
+  
+  predictors %>% ggplot(aes(x = X, y = Y, color = scaleLevel)) +
+    geom_line(size=1) +
+    xlab(paste(variable)) +
+    ylab("Partial Ecological Distance") + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(expand = c(0.01, 0.01), breaks=round(seq(min(predictors$Y), max(predictors$Y), length.out = 6),1)) +
+    # ylim(0, 2.5) +
+    theme_classic() 
+  
+}
+
+# predictors_variable_plot(predictorsTable, variable = "N")
+
+########################################################################
+## 6c. plot variable isplines -  dataframe
+########################################################################
+
+
+predictorsDF <- function(model){
+  
+  isplines <- isplineExtract(model)
+  
+  x_values <- data.frame(isplines$x) %>%
+    lapply(function(x) scale(x, center = TRUE)) %>% 
+    as.data.frame() %>% 
+    add_column(Key = row.names(data.frame(isplines$x))) %>%
+    dplyr::select("Key", X = 1)
+  
+  x_values_unscaled <- data.frame(isplines$x) %>%
+    # lapply(function(x) scale(x, center = TRUE)) %>% 
+    as.data.frame() %>% 
+    add_column(Key = row.names(data.frame(isplines$x))) %>%
+    dplyr::select("Key", X_unscaled = 1)
+  
+  y_values <- data.frame(isplines$y) %>% 
+    add_column(Key = row.names(data.frame(isplines$y))) %>%
+    gather(key = "Factor", value = "Y", -"Key" )
+  
+  predictors <- y_values %>%
+    full_join(x_values, by = "Key") %>%
+    full_join(x_values_unscaled, by = "Key") %>%
+    mutate(Factor = as.factor(Factor))
+  
+  return(predictors)
   
 }
 
@@ -368,5 +430,247 @@ enviRange <- function(complete_table){
 
 
 
+
+
+########################################################################
+## 10. Backwards selection
+########################################################################
+
+
+backwardsSelection <- function(df,guild, family, block, focalcrop, farmtype, year, env_factors, geo, maxDist){
+  # to supress warnings
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
+  # filter dataset
+  if(guild == "all fungi"){
+    
+    df <- df %>%
+      filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% year)}
+  
+  else{
+    df <- guild_filter(df, guild,family) %>%
+      filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% Year)}
+  
+  # calculate diversity indices 
+  diversity <- df %>%
+    dplyr::select(contains("OTU")) %>%
+    t() %>%
+    richness() %>%
+    mutate(Key = df$Key,
+           shannon = vegan::diversity(df %>%
+                                        dplyr::select(contains("OTU"))))
+  
+  df <- df %>%
+    left_join(diversity, by="Key")
+  
+  # create table list
+  tableList <- list()
+  
+  # create gdm list
+  gdmList <- list()
+  
+  # create plot list
+  plotList <- list()
+  
+  compPlotList <- list()
+  
+  predictorsDFList <- list()
+  
+  spTableList <- list()
+  
+  # new predictors
+  new_predictors <- env_factors
+  
+  # get length of predictos
+  i <- length(new_predictors)
+  
+  repeat {
+    
+    # create name for list based on the model number order
+    modelNum <- paste('item:',(length(env_factors)+1)-i,sep='') 
+    
+    # create inputs
+    inputs <- input_diss(df, new_predictors)
+    
+    # calculate distance
+    inputs$distanceM <-distHaversine(inputs[,3:4],inputs[,5:6])
+    
+    # remove distance
+    
+    if(maxDist == "local") { # for within type models
+      finalDF <- inputs%>% 
+        filter(distanceM < 60) %>%
+        dplyr::select(-"distanceM")}
+    
+    else if(maxDist == "both") { # for within type models
+      finalDF <- inputs%>% 
+        # filter(distanceM < 60) %>%
+        dplyr::select(-"distanceM")}
+    
+    else{                   # for across type models
+      finalDF <- inputs%>% 
+        filter(distanceM > 60) %>%
+        dplyr::select(-"distanceM")
+    }
+    
+    #spTable
+    
+    spTableList[[modelNum]]<- finalDF
+    
+    # finalDF <- within_AMF_f$spTable$`item:1`
+    # geo = FALSE
+    
+    # run GDM model
+    model <- gdm(finalDF, geo=geo)
+    gdmList[[modelNum]] <- model
+    
+    # create plotList
+    plotList[[modelNum]] <- predictors_plot(model) + ggtitle(paste(maxDist)) + theme( plot.title = element_text(hjust = 0.5)) 
+    # + theme(legend.position="none")
+    
+    compPlotList[[modelNum]] <- comp_plot(model)
+    
+    predictorsDFList[[modelNum]] <- predictorsDF(model)
+    
+    # get DIC value
+    DIC <- c("DIC", model$gdmdeviance)
+    
+    # add to list
+    tableList[[modelNum]] <- table(model)
+    
+    # add DIC value
+    tableList[[modelNum]]  <- rbind(tableList[[modelNum]], DIC)
+    
+    # round numeric values
+    tableList[[modelNum]]$Coefficients <- round(as.numeric(tableList[[modelNum]]$Coefficients),3) 
+    
+    # find predictor with lowest coefficient
+    predictor <- tableList[[modelNum]] %>% 
+      filter(Coefficients == min(Coefficients)) %>% 
+      pull(Predictors)
+    
+    
+    # get list of new predictors
+    new_predictors <- new_predictors[! new_predictors %in% predictor[1]]
+    
+    # get new length of predictors
+    i <-  length(new_predictors)  
+    
+    if (predictor == "Geographic") { # If geographic is in the list, set geo=FALSE
+      
+      geo = FALSE
+      
+    } # If geographic is NOT in the list, set geo=TRUE
+    
+    else{
+      geo = TRUE }
+    
+    if(i < 1) { # break when there is only 1 predictor left
+      break
+    }
+    
+  }
+  options(warn = oldw)
+  
+  return(list(df= list(df), spTable = spTableList, tables=tableList,gdmModels= gdmList, plotList = plotList, predictors=predictorsDFList, compPlots = compPlotList))
+}
+
+
+
+
+########################################################################
+## 11. simple selection
+########################################################################
+
+
+simpleSelection <- function(df,guild, family, block, focalcrop, farmtype, year, env_factors, geo, maxDist){
+  # to supress warnings
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
+  # filter dataset
+  if(guild == "all fungi"){
+    
+    df <- df %>%
+      filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% year)}
+  
+  else{
+    df <- guild_filter(df, guild, family) %>%
+      filter(Block %in% block, FocalCrop %in% focalcrop, FarmType %in% farmtype, Year %in% Year)}
+  
+  # calculate diversity indices 
+  diversity <- df %>%
+    dplyr::select(contains("OTU")) %>%
+    t() %>%
+    richness() %>%
+    mutate(Key = df$Key,
+           shannon = vegan::diversity(df %>%
+                                        dplyr::select(contains("OTU"))))
+  
+  df <- df %>%
+    left_join(diversity, by="Key")
+  
+    
+    # create inputs
+    inputs <- input_diss(df, env_factors)
+    
+    # calculate distance
+    inputs$distanceM <-distHaversine(inputs[,3:4],inputs[,5:6])
+    
+    # remove distance
+    
+    if(maxDist == "local") { # for within type models
+      finalDF <- inputs%>% 
+        filter(distanceM < 60) %>%
+        dplyr::select(-"distanceM")}
+    
+    else if(maxDist == "both") { # for within type models
+      finalDF <- inputs%>% 
+        # filter(distanceM < 60) %>%
+        dplyr::select(-"distanceM")}
+    
+    else{                   # for across type models
+      finalDF <- inputs%>% 
+        filter(distanceM > 60) %>%
+        dplyr::select(-"distanceM")
+    }
+    
+    #spTable
+    
+    spTableList <- finalDF
+    
+    # finalDF <- within_AMF_f$spTable$`item:1`
+    # geo = FALSE
+    
+    # run GDM model
+    model <- gdm(finalDF, geo=geo)
+    gdmList <- model
+    
+    # create plotList
+    plotList <- predictors_plot(model) + ggtitle(paste(maxDist)) + theme( plot.title = element_text(hjust = 0.5)) 
+    # + theme(legend.position="none")
+    
+    compPlotList <- comp_plot(model)
+    
+    predictorsDFList <- predictorsDF(model)
+    
+    # get DIC value
+    DIC <- c("DIC", model$gdmdeviance)
+    
+    # add to list
+    tableList <- table(model)
+    
+    # add DIC value
+    tableList  <- rbind(tableList, DIC)
+    
+    # round numeric values
+    tableList$Coefficients <- round(as.numeric(tableList$Coefficients),3) 
+    
+  
+  options(warn = oldw)
+  
+  return(list(df= list(df), spTable = spTableList, tables=tableList,gdmModels= gdmList, plotList = plotList, predictors=predictorsDFList, compPlots = compPlotList))
+}
 
 

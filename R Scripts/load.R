@@ -4,8 +4,8 @@
 
 
 library(lme4)
-#library(car)
-#library(lmerTest)
+library(car)
+library(lmerTest)
 library(vegan)
 library(reshape2)
 library(ggplot2)
@@ -39,20 +39,22 @@ library(microbiome)
 library(ggfortify)
 library(lme4)
 library(lmerTest)
+library(betapart)
+library(ape)
 
 
 ########################################################################
 ## set figure path
 ########################################################################
 
-fig.path <- "Outputs/Figures"
+fig.path <- "Outputs/Figures/FINAL"
 
 ########################################################################
 ## load data
 ########################################################################
 
 
-# setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
+setwd('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp')
 
 
 # 2017-2018 dataset
@@ -77,7 +79,8 @@ old_amf <- read.csv("Raw Data/Old AMF Tables/otu.rr.csv") # nrow=378, ncol=244
 # amf_otu_nr <- read.csv("Raw Data/glomOTU_nr.csv")
 
 # taxanomy list 
-tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
+# tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
+tax <- read.csv('Raw Data/taxanomy.csv') # nrow=3427, ncol=389
 
 # crop diversity
 
@@ -88,8 +91,6 @@ cropDiv <- read.csv('Raw Data/cropdiversity.csv') # nrow=3427, ncol=389
 ########################################################################
 
 source("R Scripts/functions.R")
-
-source("R Scripts/backwardsSelection_scratchwork.R")
 
 
 
