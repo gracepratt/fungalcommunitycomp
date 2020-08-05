@@ -8,7 +8,10 @@ across$gdmModels$`item:1`
 # ALL
 
 # across farms
-across <- backwardsSelection(df=all_fungi, guild= "all fungi", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"),env_factors=envi_factors, geo=TRUE, maxDist = "across")
+across <- backwardsSelection(df=all_fungi, 
+                             guild= "all fungi", block= c("F") ,focalcrop= c("Eggplant"), 
+                             farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"),
+                             env_factors=envi_factors, geo=TRUE, maxDist = "across")
 
 # tables 
 # best model is `item:4` w/ Geographic, pH, P, N

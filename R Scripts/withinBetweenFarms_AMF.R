@@ -16,7 +16,7 @@ across_table <- across$tables$`item:1`
 across_plots <- across$plotList$`item:1` + theme(legend.position="none")
 
 # dissimilarity within farms
-within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "N" ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
+within <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", block= "F" ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "within")
 
 # tables 
 # best model is `item:3` w/ pH, P, N, TOC, N
