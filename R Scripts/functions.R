@@ -1,10 +1,10 @@
-########################################################################
-## FUNCTIONS
-########################################################################
+## *****************************************************************************
+## FUNCTIONS ###################################################################
+## *****************************************************************************
 
-########################################################################
-## 1. species table inputs for gdm
-########################################################################
+## *****************************************************************************
+## 1. species table inputs for gdm #############################################
+## *****************************************************************************
 
 input_tables <- function(complete_table, envi_variables){
   species_table <- complete_table %>% 
@@ -19,9 +19,9 @@ input_tables <- function(complete_table, envi_variables){
   return(formated_tables)
 }
 
-########################################################################
-## 2. dissimilarity matrix inputs for gdm
-########################################################################
+## *****************************************************************************
+## 2. dissimilarity matrix inputs for gdm ######################################
+## *****************************************************************************
 
 input_diss <- function(complete_table, envi_variables){
   species_table <- complete_table%>%
@@ -44,9 +44,9 @@ input_diss <- function(complete_table, envi_variables){
 }
 
 
-########################################################################
-## 3. subsetting fungal guilds
-########################################################################
+## *****************************************************************************
+## 3. subsetting fungal guilds #################################################
+## *****************************************************************************
 
 guild_filter <- function(complete_table, guild, family){
   
@@ -104,9 +104,9 @@ guild_filter <- function(complete_table, guild, family){
 }
 
 
-########################################################################
-## 4. nice output tables for gdm models
-########################################################################
+## *****************************************************************************
+## 4. nice output tables for gdm models ########################################
+## *****************************************************************************
 
 
 table <- function(model){
@@ -127,43 +127,131 @@ table <- function(model){
   return(nice_table)
 }
 
-########################################################################
-## 5. mantel functions with nice table
-########################################################################
+## *****************************************************************************
+## 5. mantel functions with nice table #########################################
+## *****************************************************************************
 
-mantel_func <- function(complete_table, envi_variables, transform_method = "hellinger", mantel_method = "spearman"){
+# complete_table=all
+# envi_variables=edaphic_variables 
+# type = "turnover"
+
+# mantel <- mantel_func(complete_table=all, envi_variables=edaphic_variables, type = "composition")
+
+
+
+mantel_func <- function(complete_table, envi_variables, type , transform_method = "hellinger", mantel_method = "spearman", mantelType){
   
   species <- complete_table %>% dplyr::select(contains("OTU"))
   envi <- complete_table %>% dplyr::select(envi_variables)
   geo <- complete_table %>% dplyr::select("Long_point", "Lat_point")
-  
+  cropDiv <- complete_table %>% dplyr::select("cropDiversity")
+  pH <- complete_table %>% dplyr::select("pH")
+  P <- complete_table %>% dplyr::select("P")
+  N <- complete_table %>% dplyr::select("N")
+  TOC <- complete_table %>% dplyr::select("TOC")
+  NP <- complete_table %>% dplyr::select("NP_ratio")
+
   # transformed OTU table 
   trans <- decostand(species, method = transform_method)
   
-  # CREATE DISSIMILARITY MATRIX
-  dist.sp <- as.matrix((vegdist(trans, "bray")))
-  dist.envi <- as.matrix(dist(envi, method = "euclidean"))
-  dist.geo <- distm(geo, fun = distHaversine) 
+  # CREATE DISSIMILARITY MATRIX FOR OTUs
+  if(type == "nestedness"){
+    dist.sp<- beta.pair(decostand(species, "pa"), index.family = "jaccard")$beta.jne
+    
+  } else if( type == "turnover"){
+    
+    dist.sp<- beta.pair(decostand(species, "pa"), index.family = "jaccard")$beta.jtu
+    
+  } else {
+    
+    dist.sp <- vegdist(trans, "bray")
+  }
   
-  #mantel test
-  mantel_envi <- mantel(dist.sp, dist.envi, method = mantel_method)
-  mantel_geo <- mantel(dist.sp, dist.geo, method = mantel_method)
-  mantel_envivgeo <- mantel(dist.envi, dist.geo, method = mantel_method)
+  
+  
+  
+  # CREATE DISSIMILARITY MATRIX FOR EXPLANATORY VARIABLES
+  
+  dist.envi <- dist(envi, method = "euclidean")
+  dist.geo <- as.dist(distm(geo, fun = distHaversine) )
+  dist.cropDiv <-dist(cropDiv, method = "euclidean")
+  dist.pH <- dist(pH, method = "euclidean")
+  dist.P <- dist(P, method = "euclidean") 
+  dist.N <-dist(N, method = "euclidean")
+  dist.NP <- dist(NP, method = "euclidean")
+  dist.TOC <- dist(TOC, method = "euclidean") 
+
+  if(mantelType == "vegan"){
+    #mantel test
+  mantel_envi <- vegan::mantel(dist.sp, dist.envi, method = mantel_method, permutations = 999)
+  mantel_geo <- vegan::mantel(dist.sp, dist.geo, method = mantel_method, permutations = 999)
+  mantel_envivgeo <- vegan::mantel(dist.envi, dist.geo, method = mantel_method, permutations = 999)
+  mantel_cropDiv <- vegan::mantel(dist.sp, dist.cropDiv, method = mantel_method, permutations = 999)
+  mantel_pH <- vegan::mantel(dist.sp, dist.pH, method = mantel_method, permutations = 999)
+  mantel_P <- vegan::mantel(dist.sp, dist.P, method = mantel_method, permutations = 999)
+  mantel_N <- vegan::mantel(dist.envi, dist.N, method = mantel_method, permutations = 999)
+  mantel_NP <- vegan::mantel(dist.sp, dist.NP, method = mantel_method, permutations = 999)
+  mantel_TOC <- vegan::mantel(dist.sp, dist.TOC, method = mantel_method, permutations = 999)
+  
   
   #make a table 
-  Factor <- c("Species v Environment", "Species v Geography", "Environment v Geography")
-  Statistic <- c(mantel_envi$statistic, mantel_geo$statistic, mantel_envivgeo$statistic)
-  Significance <- c(mantel_envi$signif, mantel_geo$signif, mantel_envivgeo$signif)
+  Factor <- c("Species v Crop Diversity","Species v Environment", "Species v Geography", "Environment v Geography",
+              "Species v pH", "Species v P", "Species v N", "Species v NP", "Species v TOC")
+  Statistic <- c(mantel_cropDiv$statistic, mantel_envi$statistic, mantel_geo$statistic, mantel_envivgeo$statistic,
+                 mantel_pH$statistic, mantel_P$statistic, mantel_N$statistic, mantel_NP$statistic, mantel_TOC$statistic)
+  Significance <- c(mantel_cropDiv$signif, mantel_envi$signif, mantel_geo$signif, mantel_envivgeo$signif,
+                    mantel_pH$signif, mantel_P$signif, mantel_N$signif, mantel_NP$signif, mantel_TOC$signif)
   
-  table <- data.frame(Factor, Statistic, Significance)
+  table <- data.frame(Factor, Statistic, Significance)}
   
   
-  return(table)
+  else{
+  # NOTE ABOUT ECODIST: The mantel() function returns the Mantel r statistic, and three p values from a randomization procedure described below. For most circumstances, pval1, assessing the significance of the null hypothesis that r <= 0, is the appropriate choice. For this artificial example, pval1 provides the desired hypothesis test.The test results are non-significant, leading to the conclusion that closer samples are not more similar. The null hypotheses for the other two tests, that r >= 0 (pval2) and that r = 0 (pval3) are only relevant in special cases, most commonly when model matrices or transformations of the dissimilarities are used
+    # https://www.jstatsoft.org/article/view/v022i07/v22i07.pdf
+    
+    
+  mantel_envi <- ecodist::mantel(dist.sp ~ dist.envi)
+  mantel_geo <- ecodist::mantel(dist.sp ~ dist.geo)
+  mantel_envivgeo <- ecodist::mantel(dist.envi ~ dist.geo)
+  mantel_cropDiv <- ecodist::mantel(dist.sp ~ dist.cropDiv)
+  mantel_pH <- ecodist::mantel(dist.sp ~ dist.pH)
+  mantel_P <- ecodist::mantel(dist.sp ~ dist.P)
+  mantel_N <- ecodist::mantel(dist.envi~ dist.N)
+  mantel_NP <- ecodist::mantel(dist.sp~ dist.NP)
+  mantel_TOC <- ecodist::mantel(dist.sp~ dist.TOC)
+  
+  
+  #make a table 
+  Factor <- c("Species v Crop Diversity","Species v Environment", "Species v Geography", "Environment v Geography",
+              "Species v pH", "Species v P", "Species v N", "Species v NP", "Species v TOC")
+  Statistic <- c(as.data.frame(mantel_cropDiv)[1,1], as.data.frame(mantel_envi)[1,1], as.data.frame(mantel_geo)[1,1], as.data.frame(mantel_envivgeo)[1,1], as.data.frame(mantel_pH)[1,1],as.data.frame(mantel_P)[1,1], as.data.frame(mantel_N)[1,1], as.data.frame(mantel_NP)[1,1], as.data.frame(mantel_TOC)[1,1])
+  
+  Pval1 <- c(as.data.frame(mantel_cropDiv)[2,1], as.data.frame(mantel_envi)[2,1], as.data.frame(mantel_geo)[2,1], as.data.frame(mantel_envivgeo)[2,1], as.data.frame(mantel_pH)[2,1],as.data.frame(mantel_P)[2,1], as.data.frame(mantel_N)[2,1], as.data.frame(mantel_NP)[2,1], as.data.frame(mantel_TOC)[2,1])
+  
+  
+  Pval2 <- c(as.data.frame(mantel_cropDiv)[3,1], as.data.frame(mantel_envi)[3,1], as.data.frame(mantel_geo)[3,1], as.data.frame(mantel_envivgeo)[3,1], as.data.frame(mantel_pH)[3,1],as.data.frame(mantel_P)[3,1], as.data.frame(mantel_N)[3,1], as.data.frame(mantel_NP)[3,1], as.data.frame(mantel_TOC)[3,1])
+  
+  
+  Pval3 <- c(as.data.frame(mantel_cropDiv)[4,1], as.data.frame(mantel_envi)[4,1], as.data.frame(mantel_geo)[4,1], as.data.frame(mantel_envivgeo)[4,1], as.data.frame(mantel_pH)[4,1],as.data.frame(mantel_P)[4,1], as.data.frame(mantel_N)[4,1], as.data.frame(mantel_NP)[4,1], as.data.frame(mantel_TOC)[4,1])
+  
+  
+  table <- data.frame(Factor, Statistic, Pval1,Pval2, Pval3)
+  }
+  
+  
+  
+  
+  
+  densityPlot = plot(density(dist.sp))
+  
+  list(table = table, data.frame = dist.sp, plot = densityPlot )
 }
 
-########################################################################
-## 6. plot variable isplines
-########################################################################
+
+
+## *****************************************************************************
+## 6. plot variable isplines ###################################################
+## *****************************************************************************
 
 predictors_plot <- function(model){
   
@@ -207,9 +295,9 @@ predictors_plot <- function(model){
   
 }
 
-########################################################################
-## 6b. plot variable isplines
-########################################################################
+## *****************************************************************************
+## 6b. plot variable isplines ##################################################
+## *****************************************************************************
 
 predictors_variable_plot <- function(predictors, variable){
   
@@ -239,9 +327,9 @@ colors <- c("#B08ED3","#C8BE6A","#7C43B7","#A49307")
 
 # predictors_variable_plot(predictorsTable, variable = "N")
 
-########################################################################
-## 6c. plot variable isplines -  dataframe
-########################################################################
+## *****************************************************************************
+## 6c. plot variable isplines -  dataframe #####################################
+## *****************************************************************************
 
 
 predictorsDF <- function(model){
@@ -274,9 +362,9 @@ predictorsDF <- function(model){
 }
 
 
-########################################################################
-## 7. plot obs vs predicted comp dissimilarity
-########################################################################
+## *****************************************************************************
+## 7. plot obs vs predicted comp dissimilarity #################################
+## *****************************************************************************
 
 comp_plot <- function(model){
   
@@ -296,9 +384,9 @@ comp_plot <- function(model){
 }
 
 
-########################################################################
-## 8. plot pred ecological distance vs obs comp dissimilarity
-########################################################################
+## *****************************************************************************
+## 8. plot pred ecological distance vs obs comp dissimilarity ##################
+## *****************************************************************************
 
 ecodist_plot <- function(model){
   
@@ -317,9 +405,9 @@ ecodist_plot <- function(model){
   
 }
 
-########################################################################
-## 8. plot alpha diversity
-########################################################################
+## *****************************************************************************
+## 8. plot alpha diversity #####################################################
+## *****************************************************************************
 
 alpha_plot <- plotFunction <- function(colNames, expVar, data){
   # library(scales)
@@ -374,9 +462,9 @@ alpha_env <- plotFunction <- function(colNames, expVar, color, data){
 
 
 
-########################################################################
-## 9. box plot of environmental variable range
-########################################################################
+## *****************************************************************************
+## 9. box plot of environmental variable range #################################
+## *****************************************************************************
 
 boxplot_variable <- function(complete_table, variable, title){
   
@@ -389,9 +477,9 @@ boxplot_variable <- function(complete_table, variable, title){
 }
 
 
-########################################################################
-## 9. envi variable tables
-########################################################################
+## *****************************************************************************
+## 9. envi variable tables #####################################################
+## *****************************************************************************
 
 
 enviRange <- function(complete_table){
@@ -432,9 +520,9 @@ enviRange <- function(complete_table){
 
 
 
-########################################################################
-## 10. Backwards selection
-########################################################################
+## *****************************************************************************
+## 10. Backwards selection #####################################################
+## *****************************************************************************
 
 
 backwardsSelection <- function(df,guild, family, block, focalcrop, farmtype, year, env_factors, geo, maxDist){
@@ -579,9 +667,9 @@ backwardsSelection <- function(df,guild, family, block, focalcrop, farmtype, yea
 
 
 
-########################################################################
-## 11. simple selection
-########################################################################
+## *****************************************************************************
+## 11. simple selection ########################################################
+## *****************************************************************************
 
 
 simpleSelection <- function(df,guild, family, block, focalcrop, farmtype, year, env_factors, geo, maxDist){
@@ -671,6 +759,59 @@ simpleSelection <- function(df,guild, family, block, focalcrop, farmtype, year, 
   options(warn = oldw)
   
   return(list(df= list(df), spTable = spTableList, tables=tableList,gdmModels= gdmList, plotList = plotList, predictors=predictorsDFList, compPlots = compPlotList))
+}
+
+## *****************************************************************************
+## 12. taxonColor ##############################################################
+## *****************************************************************************
+
+
+
+taxonColor <- function(taxons){
+  
+  Taxons <- c("Acaulospora", "Acaulosporaceae", "Archaeospora", "Cetraspora", 
+              "Claroideoglomus", "Diversispora","Diversisporaceae","Diversisporales",
+              "Funneliformis","Glomeraceae","Paraglomeraceae","Rhizophagus")
+  
+  Colors <- c( "#652926", "#009E73", "#8569D5", "#FFA500", 
+               "#E7298A", "#66A61E", "#A6321D", "#CBD588", #"#FFA500", 
+               "#1c3a85", "#A84100", "#5BAABD", "#6f6c70" #, "#57a3d9"
+  )
+  
+  colorTable <- data.frame(Taxons = Taxons, Colors = Colors)
+  
+  colorTable %>% filter(Taxons %in% levels(factor(taxons))) %>%
+    pull(Colors)
+}
+
+## *****************************************************************************
+## 13. TITAN Output ############################################################
+## *****************************************************************************
+
+titanOutput <- function(titan) {
+  df <- titan$sppmax  %>%
+    as.data.frame() %>% 
+    rownames_to_column("OTU") %>%
+    left_join(tax, by = "OTU") %>%
+    filter(filter >0) %>%
+    mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*1, zenv.cp*-1)) %>%
+    group_by(filter) %>%
+    mutate(rank = order(order(organization, decreasing=TRUE)), 
+           rank2 = ifelse(filter != 1, rank+0.5, rank)) %>%
+    ungroup() %>%
+    arrange( rank2) %>%
+    mutate(OTU = factor(OTU, levels=OTU))
+  
+  plot <- ggplot(df , aes(y= zenv.cp, x= OTU, color=Taxon )) +
+    geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE), width=0, size=0.75, position=position_dodge(0.05)) +
+    geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
+    scale_shape_manual(values = c(16,21) ) + 
+    scale_color_manual(values = taxonColor(taxons=df$Taxon)) + 
+    coord_flip() + theme_classic() #+ facet_wrap(~filter)
+  
+  list(df=df, plot=plot)
+  
+  
 }
 
 

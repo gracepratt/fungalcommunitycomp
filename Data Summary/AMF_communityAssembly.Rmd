@@ -1,7 +1,7 @@
 ---
 title: "Summary of AMF community assembly"
 author: "Aidee Guzman"
-date: "7/23/2020"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: pdf_document
 geometry: margin=2cm
 ---
@@ -41,7 +41,7 @@ source("R scripts/plots.R")
 ## *******************************************************
 ## 5. tables
 ## *******************************************************
-source("R scripts/tables.R")
+# source("R scripts/tables.R")
 
 
 
@@ -67,79 +67,194 @@ Study design: farm type x block
 
 \pagebreak  
 
-# local-rows
+# Monoculture and Polyculture
 
 **Model output**
+
+
+**No-scale scale**
+```{r, tidy=TRUE, echo=FALSE}
+noscale$tables
+```
+
+
 **Landscape scale**
 ```{r, tidy=TRUE, echo=FALSE}
-landscape_AMF_f_table
+landscape_f$tables
 ```
 
 **Local scale**
 ```{r, tidy=TRUE, echo=FALSE}
-local_AMF_f_table
-```
-
-
-**Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
-amf_f_plots
+local_f$tables
 ```
 
 \pagebreak  
 
 
-# landscape-rows
+# Focal blocks
 **Model output**
+
+## Monoculture
+
 **Landscape scale**
 ```{r, tidy=TRUE, echo=FALSE}
-landscape_AMF_n_table
+landscape_mono_f$tables
 ```
 
 **Local scale**
 ```{r, tidy=TRUE, echo=FALSE}
-local_AMF_n_table
+local_mono_f$tables
 ```
 
+## Polyculture
 
-**Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
-amf_n_plots
+**Landscape scale**
+```{r, tidy=TRUE, echo=FALSE}
+landscape_poly_f$tables
+```
+
+**Local scale**
+```{r, tidy=TRUE, echo=FALSE}
+local_poly_f$tables
+```
+
+\pagebreak  
+
+**Plots for all focal blocks** 
+```{r, echo=FALSE, fig.align='center'}
+all_focal_plots
 ```
 
 \pagebreak  
 
-# Both landscape and local-rows
-
-**Plots** 
-```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center'}
-amf_n_plots
-```
-
-\pagebreak  
 
 
 # Variance importance
 
 **Output**
 ```{r, tidy=TRUE, echo=FALSE}
-varianceImportance
+varImp_Focal
 ```
 
 
 **Plots** 
-```{r, echo=FALSE, fig.height = 6, fig.width = 6, fig.align='center'}
-varImp_plot
+```{r, echo=FALSE, fig.align='center'}
+varImp_Focal_plot
 
 ```
 
 \pagebreak  
 
 
-## Data summary
 
+# Mantel tests
+
+## Composition
+
+**Output**
 ```{r, tidy=TRUE, echo=FALSE}
-# mean +/- SE tables
-summaryDF
+mantel$table
 ```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mantel$plot
+```
+
+## Nestedness
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+mantel_nestedness$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mantel_nestedness$plot
+```
+
+## Turnover
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+mantel_turnover$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mantel_turnover$plot
+```
+
+
+# Monoculture
+
+## Composition
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+mono_mantel$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mono_mantel$plot
+```
+
+## Nestedness
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+mono_mantel_nestedness$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mono_mantel_nestedness$plot
+```
+
+## Turnover
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+mono_mantel_turnover$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+mono_mantel_turnover$plot
+```
+
+
+# Polyculture
+
+## Composition
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+poly_mantel$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+poly_mantel$plot
+```
+
+## Nestedness
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+poly_mantel_nestedness$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+poly_mantel_nestedness$plot
+```
+
+## Turnover
+**Output**
+```{r, tidy=TRUE, echo=FALSE}
+poly_mantel_turnover$table
+```
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+poly_mantel_turnover$plot
+```
+
+
+\pagebreak  
 

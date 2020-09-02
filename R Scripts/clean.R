@@ -1,10 +1,10 @@
-########################################################################
-## clean
-########################################################################
+## *****************************************************************************
+## clean #######################################################################
+## *****************************************************************************
 
-########################################################################
-## 1. clean and bind 2017 and 2018 soils dataset
-########################################################################
+## *****************************************************************************
+## 1. clean and bind 2017 and 2018 soils dataset ###############################
+## *****************************************************************************
 
 # Enter 2017-2018 data as prop (since the relational database combines both now )
 # Only include non-OTU columns 
@@ -30,12 +30,17 @@ prop <- prop[!prop$Key %in% extraKey,] #nrow=372, ncol=86
 # add cropdiversity
 
 prop <- prop %>%
-  left_join(cropDiv, by=c("FarmKey","Year"))
+  left_join(cropDiv, by=c("FarmKey","Year")) %>%
+  mutate(TOC = ifelse(FarmKey == "BE", OM/1.72, TOC),
+         PolyYears = ifelse(FarmKey == "FO" & Year == "2018" , PolyYears + 3, PolyYears),
+         PolyYears = ifelse(FarmKey == "FO" & Year == "2017" , PolyYears + 2, PolyYears),
+         PolyYears = ifelse(FarmKey == "KY" & Year == "2018" , PolyYears + 1, PolyYears)) 
+  
 
 
-########################################################################
-## 2. adjust lat long for each point
-########################################################################
+## *****************************************************************************
+## 2. adjust lat long for each point ###########################################
+## *****************************************************************************
 
 # extract unique lat long by farm
 
@@ -106,15 +111,26 @@ prop$Lat_point <- latlong$LAT[match( interaction(prop$FarmKey, prop$Transect, pr
 prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, prop$Point), interaction(latlong$FarmKey, latlong$Transect, latlong$Point))] 
 # nrow=372, ncol=88
 
-########################################################################
-## 3. adding additional variables (N:P ratio & mono vs poly)
-########################################################################
+## *****************************************************************************
+## 3. adding additional variables (N:P ratio & mono vs poly) ###################
+## *****************************************************************************
 
-prop <- prop %>% mutate(FarmBi = recode(FarmType, "Monoculture" = 1,
+# This was used as check to see if the trends were to the inherent high turnover between sites. 
+# FarmBi_codes = c(14,1,14, 2, 14, 3, 4, 5, 14, 14, 6, 14, 14, 7, 8, 9, 10, 11, 14, 14, 14, 14, 14, 12, 13)
+
+# FarmBi_codes = c(0,1,0, 2, 0, 3, 4, 5, 0, 0, 6, 0, 0, 7, 8, 9, 10, 11, 0, 0, 0, 0, 0, 12, 13)
+
+
+# farmBi <- data.frame(FarmBi = FarmBi_codes,
+                     # FarmKey = levels(factor(prop$FarmKey)))
+
+prop <- prop %>% mutate( FarmBi = recode(FarmType, "Monoculture" = 50,
                                           "Polyculture" = 0),
                         CropBi = recode(FocalCrop, "Eggplant" = 1,
-                                        "Squash" = 0)) # nrow=372, ncol=89
+                                        "Squash" = 0)) #%>%
+  # left_join(farmBi, by="FarmKey")
 
+# prop <- prop %>% mutate(FarmBi = )
 
 # create N:P ratio column
 prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
@@ -123,9 +139,9 @@ prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
 prop <- prop %>% filter(NP_ratio < 600) #nrow=371, ncol=90
 
  
-########################################################################
-## 3. rarefy dataset with all fungi
-########################################################################
+## *****************************************************************************
+## 3. rarefy dataset with all fungi ############################################
+## *****************************************************************************
 
 #add key to OTUs
 otu$Key <- row.names(otu)
@@ -147,9 +163,9 @@ species.rr_df$Key <- otu$Key
 species.rr_df <- species.rr_df[!species.rr_df$Key %in% extraKey,]
 
 
-########################################################################
-## 4. Add OTU tables
-########################################################################
+## *****************************************************************************
+## 4. Add OTU tables ###########################################################
+## *****************************************************************************
 
 
 # add rarefied OTU table to complete dataset
@@ -188,161 +204,318 @@ amf$rowsum <- rowSums(amf %>% dplyr::select(contains("OTU"))) # nrow=371, ncol=3
 amf <- amf %>% filter(rowsum > 0) # nrow=321, ncol=335
 
 
-########################################################################
-## 6. create input dataframes
-########################################################################
+## *****************************************************************************
+## 6. Environmental factors ####################################################
+## *****************************************************************************
 
 # choose the variables you want
 
 envi_factors <- c("pH", "P", "TOC", "N", "NP_ratio", "FarmBi","cropDiversity")
+edaphic_variables <- c("pH","P","TOC","N","NP_ratio")
 
 # crop richness not working well w/n maybe because there's only 1 value for local? but that would be the same for crop diversity... hm hm hm hm 
 
-########################################################################
-## AMF -  full data frame
-########################################################################
+## *****************************************************************************
+## 7. full data frame ######################################################
+## *****************************************************************************
 
 test <- all_fungi %>% filter(farmCode != "2018_FO")
 
-all_amf <- as.data.frame(backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")$df)
+all <- as.data.frame(simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")$df)
 
+all_sap <- as.data.frame(simpleSelection(df=all_fungi, guild= "Saprotroph", family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")$df)
 
-########################################################################
-## AMF -  no scale
-########################################################################
-
-
-noscale_amf <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal",  family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+all_fun <- as.data.frame(simpleSelection(df=all_fungi, guild= "all fungi", family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")$df)
 
 
 
+## *****************************************************************************
+## 8.  no scale #############################################################
+## *****************************************************************************
 
-noscale_mono_amf <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
-
-
-
-
-noscale_poly_amf <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
-
+# Monoculture + Polyculture
+noscale <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal",  family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
 
-########################################################################
-## AMF -  all farms
-########################################################################
+# Monoculture
+noscale_mono <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
 
-landscape_amf <- backwardsSelection(df=all_amf, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
-
-local_amf <- backwardsSelection(df=all_amf, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
-
-########################################################################
-## AMF -  landscape
-########################################################################
-
-## all farms  -  Focal - landscape
-
-landscape_AMF_f <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
-
-## all farms  -  Non-focal - landscape
-
-landscape_AMF_n <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
-
-########################################################################
-## AMF -  local
-########################################################################
-
-## all farms  -  Focal - local
-
-local_AMF_f <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
-
-## all farms  -  Non-focal - local
-
-local_AMF_n <- backwardsSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+# Polyculture
+noscale_poly <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
 
 
-########################################################################
-## full predictors table
-########################################################################
+## *****************************************************************************
+## 9. all blocks ############################################################
+## *****************************************************************************
+
+# Monoculture + Polyculture
+landscape <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+local <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+# Monoculture 
+landscape_mono <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+local_mono <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+# Polyculture 
+landscape_poly <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+local_poly <- simpleSelection(df=all, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+## *****************************************************************************
+## 10. landscape ############################################################
+## *****************************************************************************
+
+# Monoculture + Polyculture
+
+# Focal
+landscape_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+# Non-focal
+landscape_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+# Monoculture
+
+# Focal
+landscape_mono_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+# Non-focal
+landscape_mono_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+
+# Polyculture
+
+# Focal
+landscape_poly_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+# Non-focal
+landscape_poly_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")
+
+
+
+
+## *****************************************************************************
+## 11. local ############################################################
+## *****************************************************************************
+
+# Monoculture + Polyculture
+
+# Focal
+local_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+# Non-focal
+local_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+# Monoculture
+
+# Focal
+local_mono_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+# Non-focal
+local_mono_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+
+# Polyculture
+
+# Focal
+local_poly_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+# Non-focal
+local_poly_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "local")
+
+
+
+
+## *****************************************************************************
+## 12. full predictors table ###################################################
+## *****************************************************************************
 
 predictorsTable <- rbind(
-landscape_AMF_f$predictors$`item:1` %>% mutate(scaleLevel = "landscape_F"),
-landscape_AMF_n$predictors$`item:1` %>% mutate(scaleLevel = "landscape_N"),
-local_AMF_f$predictors$`item:1` %>% mutate(scaleLevel = "local_F"),
-local_AMF_n$predictors$`item:1` %>% mutate(scaleLevel = "local_N") ) %>%
+landscape_f$predictors %>% mutate(scaleLevel = "landscape_F"),
+landscape_n$predictors %>% mutate(scaleLevel = "landscape_N"),
+local_f$predictors %>% mutate(scaleLevel = "local_F"),
+local_n$predictors %>% mutate(scaleLevel = "local_N") ) %>%
   mutate(scaleLevel = as.factor(scaleLevel)) %>%
   dplyr::select(Key, scaleLevel, Factor, Y, X, X_unscaled)
 
 
+predictorsTable_mono <- rbind(
+  landscape_mono_f$predictors %>% mutate(scaleLevel = "landscape_F"),
+  landscape_mono_n$predictors %>% mutate(scaleLevel = "landscape_N"),
+  local_mono_f$predictors %>% mutate(scaleLevel = "local_F"),
+  local_mono_n$predictors %>% mutate(scaleLevel = "local_N") ) %>%
+  mutate(scaleLevel = as.factor(scaleLevel)) %>%
+  dplyr::select(Key, scaleLevel, Factor, Y, X, X_unscaled)
 
-########################################################################
-## relative abundance
-########################################################################
+
+predictorsTable_poly <- rbind(
+  landscape_poly_f$predictors %>% mutate(scaleLevel = "landscape_F"),
+  landscape_poly_n$predictors %>% mutate(scaleLevel = "landscape_N"),
+  local_poly_f$predictors %>% mutate(scaleLevel = "local_F"),
+  local_poly_n$predictors %>% mutate(scaleLevel = "local_N") ) %>%
+  mutate(scaleLevel = as.factor(scaleLevel)) %>%
+  dplyr::select(Key, scaleLevel, Factor, Y, X, X_unscaled)
 
 
-relAbun <- all_amf %>%  
-  mutate(totalReads = rowSums(all_amf %>% dplyr::select(contains("OTU")))) %>%
+## *****************************************************************************
+## 13. relative abundance ######################################################
+## *****************************************************************************
+
+all.pa <- decostand(all %>% dplyr::select(contains("OTU")), "pa")  %>%
+  mutate(Key = all$Key)
+all.pa <-  all.pa %>% mutate(totalFreq = c(rowSums(all.pa %>% dplyr::select(contains("OTU"))))) %>%
+  pivot_longer(cols=contains("OTU"), names_to = "OTU", values_to = "freq") %>%
+  filter(freq != 0) %>%
+  mutate(relFreq = freq/totalFreq) #%>%
+  # left_join(tax , by=c("OTU"))
+
+
+rel <- all %>%
+  mutate(totalReads = rowSums(all %>% dplyr::select(contains("OTU")))) %>%
   pivot_longer(cols=contains("OTU"), names_to = "OTU", values_to = "reads") %>%
   filter(reads != 0) %>%
   mutate(relAbun = reads/totalReads) %>%
-  left_join(tax %>% dplyr::select(OTU, Family), by=c("OTU"))
+  left_join(tax , by=c("OTU")) %>%
+  left_join(all.pa, by = c("Key","OTU"))
 
 
-relAbun_ag <- all_amf %>%  
-  mutate(totalReads = rowSums(all_amf %>% dplyr::select(contains("OTU")))) %>%
+relAbun_ag <- all %>%
+  mutate(totalReads = rowSums(all %>% dplyr::select(contains("OTU")))) %>%
   pivot_longer(cols=contains("OTU"), names_to = "OTU", values_to = "reads") %>%
   left_join(tax %>% dplyr::select(OTU, Family), by=c("OTU")) %>%
-  group_by(Key, Family) %>%
+  group_by(Key, Taxon) %>%
   summarise_at(vars(reads, totalReads), list(sum=sum, mean=mean), na.rm=TRUE) %>%
   dplyr::select(Key, Family, reads_sum, totalReads_mean) %>%
   rename("reads"= reads_sum ,"totalReads"= totalReads_mean) %>%
   filter(reads != 0) %>%
   mutate(relAbun = reads/totalReads) %>%
-  left_join(all_amf, by="Key") %>%
+  left_join(all, by="Key") %>%
   ungroup()
 
-relAbun_ag <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=cropDiversity)) + 
-  geom_point()  +
-  stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm', formula= y~x)
-  # ylab("% variance explained") +
-  # xlab("spatial scale") + 
-  # scale_fill_manual(values = predictorColors) +
-  # scale_y_continuous(expand = c(0.01, 0.01), 
-  #                    limits= c(0,75), breaks=round(seq(0, 75, length.out = 6),1)) +
-  theme_classic()
-  
-relAbun_pH <- ggplot(relAbun_ag %>% filter(cropDiversity > 0), aes(color=Family,fill=Family, y=relAbun, x=cropDiversity)) + 
-    geom_point()  +
-    stat_summary(fun.data=mean_cl_normal) + 
-    geom_smooth(method='lm', se=FALSE) +
-  # ylab("% variance explained") +
-  # xlab("spatial scale") + 
-  # scale_fill_manual(values = predictorColors) +
-  # scale_y_continuous(expand = c(0.01, 0.01), 
-  #                    limits= c(0,75), breaks=round(seq(0, 75, length.out = 6),1)) +
+
+rel_ag <- rel %>%
+  group_by(Key, Taxon) %>%
+  summarise_at(vars(reads, totalReads, freq, totalFreq), list(sum=sum, mean=mean)) %>%
+  dplyr::select(Key, Taxon, reads_sum, totalReads_mean,  freq_sum, totalFreq_mean) %>%
+  # rename("reads"= reads_sum ,"totalReads"= totalReads_mean) %>%
+  # filter(reads != 0) %>%
+  # mutate(relAbun = reads/totalReads) %>%
+  left_join(all, by="Key") %>%
+  ungroup()
+
+# [1] "Acaulospora"      "Acaulosporaceae"  "Archaeospora"     "Cetraspora"      
+# [5] "Claroideoglomus"  "Diversispora"     "Diversisporaceae" "Diversisporales" 
+# [9] "Funneliformis"    "Glomeraceae"      "Paraglomeraceae"  "Rhizophagus"  
+
+ggplot(rel_ag %>% filter(Taxon %in% c("Rhizophagus")), aes( y=freq_sum/totalFreq_mean, x= TOC)) +
+  geom_point() +
+  stat_smooth(method="lm")
+
+ggplot(rel_ag %>% filter(Taxon %in% c("Rhizophagus")), aes( y=reads_sum/totalReads_mean, x= TOC)) +
+  geom_point() +
+  stat_smooth(method="lm")
+
+relAbun_P <-  ggplot(rel_ag %>% filter(Taxon %in% c("Rhizophagus"), P<90), aes( y=reads_sum/totalReads_mean, x= P)) +
+  geom_point() +
+  stat_smooth(method="lm")
+  # ylab("relative abundance") +
+  # xlab("P") +
+  # scale_fill_brewer(palette="Paired")+
+  # theme_classic()
+
+relAbun_P <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(P,10)))) +
+  geom_bar(position="fill", stat="identity") +
+  ylab("relative abundance") +
+  xlab("P") +
+  scale_fill_brewer(palette="Paired")+
   theme_classic()
 
-relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=factor(cropDiv))) + 
+relAbun_pH <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(pH,0.5)))) +
   geom_bar(position="fill", stat="identity")  +
-  # stat_summary(fun.data=mean_cl_normal) + 
-  # geom_smooth(method='lm', se=FALSE) +
-  # # ylab("% variance explained") +
-  # xlab("spatial scale") + 
-  # scale_fill_manual(values = predictorColors) +
-  # scale_y_continuous(expand = c(0.01, 0.01), 
-  #                    limits= c(0,75), breaks=round(seq(0, 75, length.out = 6),1)) +
+  ylab("relative abundance") +
+  xlab("pH") +
+  scale_fill_brewer(palette="Paired")+
   theme_classic()
 
-  
+relAbun_NP <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(NP_ratio,0.5)))) +
+  geom_bar(position="fill", stat="identity") +
+  ylab("relative abundance") +
+  xlab("N:P") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()
+
+relAbun_TOC <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(TOC,0.1)))) +
+  geom_bar(position="fill", stat="identity")+
+  ylab("relative abundance") +
+  xlab("TOC") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()
+
+
+relAbun_N <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(N,0.01)))) +
+  geom_bar(position="fill", stat="identity")+
+  ylab("relative abundance") +
+  xlab("N") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()
+
+
+relAbun_cropDiv <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(cropDiversity,0.25)))) +
+  geom_bar(position="fill", stat="identity")  +
+  ylab("relative abundance") +
+  xlab("crop diversity") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()
+
+relAbun_cropRichness <-  ggplot(relAbun %>% filter(cropRichness !=5), aes(fill=Taxon, y=relAbun, x=factor(round_any(cropRichness,5)))) +
+  geom_bar(position="fill", stat="identity")  +
+  ylab("relative abundance") +
+  xlab("crop richness") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()
+
+relAbun_Years <-  ggplot(relAbun %>% filter(FarmKey %in% c("KY","FO","DI","CF")) , aes(fill=Taxon, y=relAbun, x=factor(Year))) +
+  geom_bar(position="fill", stat="identity")  +
+  ylab("relative abundance") +
+  xlab("crop richness") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic()  
+
+farmDiv <- c("AE", "AS", "DS", "IS", "SD", "VI", "VK", "GA", "CF", "BE", "KY", "DI","FO", "OT", "YJ")
+farmRich <- c("AE", "AS", "DS", "IS", "SD", "VI", "VK", "GA", "CF","YJ","KY","OT","BE","DI","FO")
+
+relAbun$FarmKey <- factor(relAbun$FarmKey, levels=farmRich)
+
+relAbun_cropRichness <-  ggplot(relAbun %>% filter(cropRichness !=5), aes(fill=Taxon, y=relAbun, x= FarmKey)) +
+  geom_bar(position="fill", stat="identity")  +
+  ylab("relative abundance") +
+  xlab("crop richness") +
+  scale_fill_brewer(palette="Paired")+
+  theme_classic() + facet_wrap(vars(FarmType), scales = "free", drop=TRUE)
 
 
 
-# ########################################################################
+
+# ## *****************************************************************************
 # ## distance matrix
-# ########################################################################
-# all_amf <- all_amf %>% mutate(Key = as.integer(Key))
-# amf_otu <- all_amf %>% dplyr::select(contains("OTU"))
+# ## *****************************************************************************
+# all <- all %>% mutate(Key = as.integer(Key))
+# amf_otu <- all %>% dplyr::select(contains("OTU"))
 # dist <- vegdist(amf_otu, "bray")
 # # KEYS NOT MATCHING WHEN TURNING TO MATRIX!
 # 
@@ -353,14 +526,14 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # fung.dist01<-beta.pair(fung01, index.family = "jaccard");
 # 
 # jne <- as.data.frame(as.matrix(fung.dist01$beta.jne))
-# colnames(jne)  = all_amf$Key
-# rownames(jne) = all_amf$Key
+# colnames(jne)  = all$Key
+# rownames(jne) = all$Key
 # jne <- jne %>%  
 #   rownames_to_column("Key") %>%
 #   pivot_longer(cols= -Key, names_to = "pairs", values_to = "dissim") %>%
 #   mutate(Key = as.integer(Key), pairs = as.integer(pairs)) %>%
-#   left_join(all_amf %>% dplyr::select(Key, farmCode), by= "Key") %>%
-#   left_join(all_amf %>% dplyr::select(Key, farmCode), by= c("pairs" = "Key")) %>%
+#   left_join(all %>% dplyr::select(Key, farmCode), by= "Key") %>%
+#   left_join(all %>% dplyr::select(Key, farmCode), by= c("pairs" = "Key")) %>%
 #   mutate(scale = ifelse(farmCode.x == farmCode.y, "within","between"))
 # 
 # # check = summary(is.na(jne$farmCode.x))
@@ -384,10 +557,10 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # # NEED TO CHANGE THE DIST BELOW TO WITHIN AND BETWEEN
 # 
 # par(mfrow=c(1,1),mar=c(2, 2, 4, 0.5))
-# td<-dist(all_amf$FarmBi) ## da$TP is the variable of interest in the meta table ###
+# td<-dist(all$FarmBi) ## da$TP is the variable of interest in the meta table ###
 # # test <- as.data.frame(as.matrix(td))
 # color=rgb(0,0,0,alpha=0.1)
-# plot(all_amf$FarmBi,as.dist(jne_within),xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
+# plot(all$FarmBi,as.dist(jne_within),xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
 # vegan::mantel(fung.dist01$beta.jne~td)
 # abline(lm(fung.dist01$beta.jne~td),col="red")
 # 
@@ -411,12 +584,12 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # distUpper[lower.tri(distUpper)] <- NA
 # distUpper[distUpper == 0] <- NA
 # 
-# means <- all_amf %>%
+# means <- all %>%
 #   # filter(FocalCrop == "Eggplant") %>%
 #   mutate(distMeans = rowMeans(distUpper, na.rm = TRUE),
 #          dissIndex = rowSums(distUpper, na.rm=TRUE)/(nrow(distUpper)*(nrow(distUpper)-1)))
 # 
-# summary(lm(as.matrix(dist.z) ~ all_amf$FarmType*all_amf$Block))
+# summary(lm(as.matrix(dist.z) ~ all$FarmType*all$Block))
 # 
 # 
 # nest <- nestednodf(amf_otu,
@@ -424,23 +597,23 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 #            order=FALSE) $statistic["NODF"]
 # 
 # 
-# bd <- betadisper(dist.z, all_amf$FTBL, type=c("centroid"))
+# bd <- betadisper(dist.z, all$FTBL, type=c("centroid"))
 # permutest(bd)
 # 
-# polyOTU <- all_amf %>% filter(FarmType == "Polyculture") %>% dplyr::select(contains("OTU"))
-# allPoly <- all_amf %>% filter(FarmType == "Polyculture")
+# polyOTU <- all %>% filter(FarmType == "Polyculture") %>% dplyr::select(contains("OTU"))
+# allPoly <- all %>% filter(FarmType == "Polyculture")
 # 
 # bd <- betadisper(vegdist(polyOTU, "bray"), allPoly$FarmKey, type=c("centroid"))
 # 
 # 
-# monoOTU <- all_amf %>% filter(FarmType == "Monoculture") %>% dplyr::select(contains("OTU"))
-# allMono <- all_amf %>% filter(FarmType == "Monoculture")
+# monoOTU <- all %>% filter(FarmType == "Monoculture") %>% dplyr::select(contains("OTU"))
+# allMono <- all %>% filter(FarmType == "Monoculture")
 # 
 # bd <- betadisper(vegdist(monoOTU, "bray"), allMono$FarmKey, type=c("centroid"))
 # 
 # 
 # distDF <- as.data.frame(distUpper) %>%
-#   mutate(Key = as.character(all_amf$Key)) %>%
+#   mutate(Key = as.character(all$Key)) %>%
 #   pivot_longer(cols=-Key, names_to="compared_to", values_to = "distance") %>%
 #   filter(! distance %in% c(0)) %>%
 #   left_join(prop %>% mutate(Key=as.character(Key)), by="Key")
@@ -456,7 +629,7 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # PCoA <- ape::pcoa(amf_bp$beta.jtu)
 # 
 # axes <- as.data.frame(PCoA$vectors[,1:2])
-# axes$Key <- all_amf$Key
+# axes$Key <- all$Key
 # axes <- axes %>%
 #   left_join(prop, by= "Key") %>%
 #   mutate(Year = as.factor(Year))
@@ -473,15 +646,15 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # 
 # plot(nestedtemp(amf_otu))
 
-# ########################################################################
+# ## *****************************************************************************
 # ## all fungi -  local
-# ########################################################################
+# ## *****************************************************************************
 # 
 # 
 # 
 # 
 # # partial dbRDA model
-# dbRDAmodel <- capscale(dist ~  cropDiversity+ pH + P  + TOC + N + NP_ratio  + Condition(farmCode) , data=all_amf)
+# dbRDAmodel <- capscale(dist ~  cropDiversity+ pH + P  + TOC + N + NP_ratio  + Condition(farmCode) , data=all)
 # 
 # 
 # # automatically select variables of "env" matrix that best explain "spe" matrix
@@ -523,7 +696,7 @@ relAbun_pH <- ggplot(relAbun_ag, aes(color=Family,fill=Family, y=relAbun, x=fact
 # # Testing the significance of CCA axes (at least the first two or three should present a significant p value):
 # rdaAxesSig <- anova(finalmodel, by="axis")
 # 
-
-
-test <- tax %>% filter(Guild == "Arbuscular Mycorrhizal")
-levels(factor(test$Family))
+# 
+# 
+# test <- tax %>% filter(Guild == "Arbuscular Mycorrhizal")
+# levels(factor(test$Family))
