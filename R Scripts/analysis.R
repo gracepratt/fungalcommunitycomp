@@ -228,20 +228,39 @@ varImp_nonfocal <- rbind(landscape_n_var,  local_n_var,landscape_mono_n_var, loc
 # Composition
 mantel <- mantel_func(all, edaphic_variables, type = "composition", mantelType = "vegan")
 mono_mantel <- mantel_func(all %>% filter(FarmType == "Monoculture"), envi_factors, type = "composition", mantelType = "vegan")
-poly_mantel <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "composition", mantelType = "ecodist")
+poly_mantel <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "composition", mantelType = "vegan")
 
 # Nestedness
 mantel_nestedness <- mantel_func(all, edaphic_variables, type = "nestedness", mantelType = "vegan")
-mono_mantel_nestedness <- mantel_func(all %>% filter(FarmType == "Monoculture"), envi_factors, type = "nestedness", mantelType = "ecodist")
-poly_mantel_nestedness <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "nestedness", mantelType = "ecodist")
+mono_mantel_nestedness <- mantel_func(all %>% filter(FarmType == "Monoculture"), envi_factors, type = "nestedness", mantelType = "vegan")
+poly_mantel_nestedness <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "nestedness", mantelType = "vegan")
 
 # Turnover
-mantel_turnover <- mantel_func(all, edaphic_variables, type = "turnover", mantelType = "ecodist")
-mono_mantel_turnover <- mantel_func(all %>% filter(FarmType == "Monoculture"), envi_factors, type = "turnover", mantelType = "ecodist")
-poly_mantel_turnover <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "turnover", mantelType = "ecodist")
+mantel_turnover <- mantel_func(all, edaphic_variables, type = "turnover", mantelType = "vegan")
+mono_mantel_turnover <- mantel_func(all %>% filter(FarmType == "Monoculture"), envi_factors, type = "turnover", mantelType = "vegan")
+poly_mantel_turnover <- mantel_func(all %>% filter(FarmType == "Polyculture"), envi_factors, type = "turnover", mantelType = "vegan")
 
 
-## *****************************************************************************
+mantelTests <- as.data.frame(rbind(mantel$table,mono_mantel$table,poly_mantel$table)) %>%
+  mutate(Test = rep("compositional",27), 
+         Data = rep(c("All","Mono","Poly"), each=9))
+
+
+nestednessTests <- as.data.frame(rbind(mantel_nestedness$table,mono_mantel_nestedness$table,poly_mantel_nestedness$table)) %>%
+  mutate(Test = rep("nestedness",27), 
+         Data = rep(c("All","Mono","Poly"), each=9))
+
+turnoverTests <- as.data.frame(rbind(mantel_turnover$table,mono_mantel_turnover$table,poly_mantel_turnover$table)) %>%
+  mutate(Test = rep("turnover",27), 
+         Data = rep(c("All","Mono","Poly"), each=9))
+
+
+allMantel <- rbind(mantelTests, nestednessTests, turnoverTests)
+
+write.csv(allMantel, "Outputs/Tables/allMantel.csv", row.names = FALSE)
+
+
+ge## *****************************************************************************
 ## alpha models ################################################################
 ## *****************************************************************************
 
@@ -259,7 +278,7 @@ poly_mantel_turnover <- mantel_func(all %>% filter(FarmType == "Polyculture"), e
 
 envModels <- sapply(c(envi_factors), USE.NAMES=TRUE, simplify = FALSE,
                     function(x) {
-                      model <- lmer(substitute(log(i+1) ~ FarmType*Block + (1|farmCode), 
+                      model <- lmer(substitute(log(i+1) ~ cropDiversity + (1|farmCode), 
                                                list(i = as.name(x))), data=all, na.action=na.exclude)
                       summary(model)
                     })
@@ -283,10 +302,6 @@ leveneTest_table <- round(rbind(pH_lt,NP_ratio_lt,P_lt,TOC_lt,N_lt),3)
 ## TITAN2 ######################################################################
 ## *****************************************************************************
 
-add3 <- function(x, na.rm = FALSE) ifelse(x>0, x+3, x)
-add3_all <- function(x, na.rm = FALSE) x+3
-
-
 
 taxa <- all %>% dplyr::select(contains("OTU"))
 
@@ -301,15 +316,8 @@ taxa <- taxa[, colSums(taxa != 0) > 0]
 taxa <- taxa[c(plus3)]
 
 
-# taxa <- taxa %>% 
-  # mutate_all(add3_all)
 
-
-
-pH.titanOutput <- titanOutput(pH.titan)
-
-
-
+# select variables
 env.pH <- all %>% dplyr::select(pH)
 env.N <- all %>% dplyr::select(N)
 env.P <- all %>% dplyr::select(P)
@@ -317,6 +325,7 @@ env.NP <- all %>% dplyr::select(NP_ratio)
 env.TOC <- all %>% dplyr::select(TOC)
 env.CD <- all %>% dplyr::select(cropDiversity)
 
+# TITAN analysis
 
 pH.titan <- titan(env.pH, taxa, ncpus = 8)
 N.titan <- titan(env.N, taxa, ncpus = 8)
@@ -325,120 +334,80 @@ NP.titan <- titan(env.NP, taxa, ncpus = 8)
 TOC.titan <- titan(env.TOC, taxa, ncpus = 8)
 CD.titan <- titan(env.CD, taxa, ncpus = 8)
 
-
-pH.titan_table <- pH.titan$sppmax %>%
-  as.data.frame() %>% 
-  rownames_to_column("OTU") %>%
-  left_join(tax, by = "OTU") %>%
-  filter(filter >0) %>%
-  mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*1, zenv.cp*-1)) %>%
-  group_by(filter) %>%
-    mutate(rank = order(order(organization, decreasing=TRUE)), 
-           rank2 = ifelse(filter != 1, rank+0.5, rank)) %>%
-  ungroup() %>%
-  arrange( rank2) %>%
-  mutate(OTU = factor(OTU, levels=OTU))
-
-ggplot(pH.titan_table , aes(y= zenv.cp, x= OTU, color=Taxon )) +
-  geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE), width=0, size=0.75, position=position_dodge(0.05)) +
-  geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-  scale_shape_manual(values = c(16,21) ) + 
-  scale_color_manual(values = taxonColor(taxons=pH.titan_table$Taxon)) + 
-  coord_flip() + theme_classic() #+ facet_wrap(~filter)
+# TITAN Output
+pH.titanOutput <- titanOutput(pH.titan)
+N.titanOutput <- titanOutput(N.titan)
+P.titanOutput <- titanOutput(P.titan)
+NP.titanOutput <- titanOutput(NP.titan)
+TOC.titanOutput <- titanOutput(TOC.titan)
+CD.titanOutput <- titanOutput(CD.titan)
 
 
-# ggplot(pH.titan_table , aes(y= zenv.cp, x= rank2, color=Taxon )) +
-#   geom_errorbar(data=pH.titan_table %>% filter(filter == 1) , aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE), width=0, size=0.75, position=position_dodge(0.05)) +
-#   geom_point(data=pH.titan_table %>% filter(filter == 1) ,aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-#   geom_errorbar(data=pH.titan_table %>% filter(filter != 1) , aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE), width=0, size=0.75, position=position_dodge(0.05)) +
-#   geom_point(data=pH.titan_table %>% filter(filter != 1) ,aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-#   scale_shape_manual(values = c(16,21) ) + 
-#   scale_color_brewer(palette = "Dark2") +
-#   scale_x_continuous(sec.axis = sec_axis(~./1, breaks = c(1:31), labels=pH.titan_table$OTU), breaks = c(1:31), labels=pH.titan_table$OTU) +
-#   coord_flip() + theme_classic() #+ facet_wrap(~filter)
+legend <- get_legend(relAbun_CD + guides(fill=guide_legend(ncol=5)))
+
+compositionalPlots <- plot_grid(
+  relAbun_pH + theme(legend.position="none"), 
+  relAbun_N + theme(legend.position="none"), 
+  relAbun_P+ theme(legend.position="none"), 
+  relAbun_NP+ theme(legend.position="none"), 
+  relAbun_TOC+ theme(legend.position="none"), 
+  relAbun_CD + theme(legend.position="none"), ncol=1)
+
+compositionalPlots_h <- plot_grid(
+  relAbun_pH + theme(legend.position="none"), 
+  relAbun_N + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_P + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_NP + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_TOC + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_CD + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()), nrow=1, align="v")
+
+ggsave( "compositionalPlots.pdf",plot=compositionalPlots, path=fig.path, width=4, height=22, useDingbats = FALSE)
 
 
-P.titan_table <- P.titan$sppmax %>%
-  as.data.frame() %>% 
-  rownames_to_column("OTU") %>%
-  left_join(tax, by = "OTU") %>%
-  filter(filter >0) %>%
-  mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*-1, zenv.cp)) %>%
-  arrange( organization, filter) %>%
-  mutate(OTU = factor(OTU, levels=OTU))
-
-ggplot(P.titan_table , aes(y= zenv.cp, x= OTU, color=Taxon )) +
-  geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE, linetype=factor(filter)), width=0, size=0.75, position=position_dodge(0.05)) +
-  geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-  scale_shape_manual(values = c(16,21) ) + 
-  scale_color_manual(values = taxonColor(taxons=P.titan_table$Taxon)) + 
-  coord_flip() + theme_classic() #+ facet_wrap(~filter,scales = "free")
+titanPlots <- plot_grid(pH.titanOutput$plot + theme(legend.position="none"), N.titanOutput$plot + theme(legend.position="none"), P.titanOutput$plot + theme(legend.position="none"), NP.titanOutput$plot + theme(legend.position="none"), TOC.titanOutput$plot + theme(legend.position="none"), CD.titanOutput$plot + theme(legend.position="none"), ncol=1)
 
 
 
-
-CD.titan_table <- CD.titan$sppmax %>%
-  as.data.frame() %>% 
-  rownames_to_column("OTU") %>%
-  left_join(tax, by = "OTU") %>%
-  filter(filter >0) %>%
-  mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*-1, zenv.cp)) %>%
-  arrange( organization, filter) %>%
-  mutate(OTU = factor(OTU, levels=OTU))
-
-ggplot(CD.titan_table , aes(y= zenv.cp, x= OTU, color=Taxon )) +
-  geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE, linetype=factor(filter)), width=0, size=0.75, position=position_dodge(0.05)) +
-  geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-  scale_shape_manual(values = c(16,21) ) + 
-  # scale_color_brewer(palette = "Dark2") +
-  coord_flip() + theme_classic() #+ facet_wrap(~filter,scales = "free")
+titalComposition_h <- plot_grid(
+  relAbun_pH + theme(legend.position="none"), 
+  relAbun_N + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_P + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_NP + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_TOC + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_CD + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  pH.titanOutput$plot + theme(legend.position="none"), 
+  N.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  P.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  NP.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  TOC.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  CD.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), nrow=2, align="hv")
 
 
 
 
-NP.titan_table <- NP.titan$sppmax %>%
-  as.data.frame() %>% 
-  rownames_to_column("OTU") %>%
-  left_join(tax, by = "OTU") %>%
-  filter(filter >0) %>%
-  mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*-1, zenv.cp)) %>%
-  arrange( organization, filter) %>%
-  mutate(OTU = factor(OTU, levels=OTU))
+titalComposition_h <- egg::ggarrange(
+  pH.titanOutput$plot + theme(legend.position="none"), 
+  N.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  P.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  NP.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  TOC.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()), 
+  CD.titanOutput$plot + theme(legend.position="none", axis.title.y=element_blank()),
+  relAbun_pH + theme(legend.position="none"), 
+  relAbun_N + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_P + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_NP + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_TOC + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  relAbun_CD + theme(legend.position="none", axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank()),
+  nrow=2)
 
-ggplot(NP.titan_table , aes(y= zenv.cp, x= OTU, color=Taxon )) +
-  geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE, linetype=factor(filter)), width=0, size=0.75, position=position_dodge(0.05)) +
-  geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-  scale_shape_manual(values = c(16,21) ) + 
-  # scale_color_brewer(palette = "Dark2") +
-  coord_flip() + theme_classic() #+ facet_wrap(~filter,scales = "free")
+titalComposition <- plot_grid(compositionalPlots,titanPlots, axis="top" )
 
+# titalComposition_h <- plot_grid(compositionalPlots_h,titanPlots_h, nrow=2, align = "hv")
 
+ggsave( "titanPlots.pdf",plot=titanPlots, path=fig.path, width=4, height=22, useDingbats = FALSE)
 
-TOC.titan_table <- TOC.titan$sppmax %>%
-  as.data.frame() %>% 
-  rownames_to_column("OTU") %>%
-  left_join(tax, by = "OTU") %>%
-  filter(filter >0) %>%
-  mutate(lowSE = zenv.cp-`5%`, highSE = abs( zenv.cp-`95%`), filter = factor(filter), organization = ifelse(filter == 1, zenv.cp*-1, zenv.cp)) %>%
-  arrange( organization, filter) %>%
-  mutate(OTU = factor(OTU, levels=OTU))
+ggsave( "titalComposition.pdf",plot=titalComposition, path=fig.path, width=7.5, height=16, useDingbats = FALSE)
 
-ggplot(TOC.titan_table , aes(y= zenv.cp, x= OTU, color=Taxon )) +
-  geom_errorbar(aes(ymin=zenv.cp-lowSE, ymax=zenv.cp+highSE, linetype=factor(filter)), width=0, size=0.75, position=position_dodge(0.05)) +
-  geom_point(aes(shape=factor(filter), size=zscore), fill = "white", stroke=0.75) +
-  scale_shape_manual(values = c(16,21) ) + 
-  # scale_color_brewer(palette = "Dark2") +
-  coord_flip() + theme_classic() #+ facet_wrap(~filter,scales = "free")
+ggsave( "titalComposition_h.pdf",plot=titalComposition_h, path=fig.path, width=16, height=6, useDingbats = FALSE)
 
-
-
-# ggplot(pH.titan_table , aes(x= zenv.cp, y= OTU, color=Taxon )) +
-#   geom_point(data=pH.titan_table %>% filter(filter == 1) , aes(x= zenv.cp, y= OTU, color=Taxon , shape=factor(filter), size=zscore), color = "black") +
-#   geom_errorbar(data=pH.titan_table %>% filter(filter == 1) , aes(xmin=zenv.cp-lowSE, xmax=zenv.cp+highSE), width=.2, position=position_dodge(0.05), color = "black") +
-#   geom_point(data=pH.titan_table %>% filter(filter == 2) , aes(x= zenv.cp, y= OTU, color=Taxon , shape=factor(filter), size=zscore), color = "black") +
-#   geom_errorbar(data=pH.titan_table %>% filter(filter == 2) , aes(xmin=zenv.cp-lowSE, xmax=zenv.cp+highSE), width=.2, position=position_dodge(0.05), color = "black") +
-#   scale_shape_manual(values = c(16,1) ) +
-#   # scale_y_continuous(sec.axis = sec_axis(~./1)) +
-#   # coord_flip() + 
-#   theme_classic()
-
+ggsave("titalComposition_h.tiff",plot=titalComposition_h, path=fig.path, width=16, height=6)

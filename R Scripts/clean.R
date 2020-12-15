@@ -31,11 +31,12 @@ prop <- prop[!prop$Key %in% extraKey,] #nrow=372, ncol=86
 
 prop <- prop %>%
   left_join(cropDiv, by=c("FarmKey","Year")) %>%
+  mutate(cropDiversity = ifelse(FarmKey == "GA", 0, cropDiversity))
   mutate(TOC = ifelse(FarmKey == "BE", OM/1.72, TOC),
          PolyYears = ifelse(FarmKey == "FO" & Year == "2018" , PolyYears + 3, PolyYears),
          PolyYears = ifelse(FarmKey == "FO" & Year == "2017" , PolyYears + 2, PolyYears),
-         PolyYears = ifelse(FarmKey == "KY" & Year == "2018" , PolyYears + 1, PolyYears)) 
-  
+         PolyYears = ifelse(FarmKey == "KY" & Year == "2018" , PolyYears + 1, PolyYears))
+
 
 
 ## *****************************************************************************
@@ -124,10 +125,10 @@ prop$Long_point <- latlong$LONG[match( interaction(prop$FarmKey, prop$Transect, 
 # farmBi <- data.frame(FarmBi = FarmBi_codes,
                      # FarmKey = levels(factor(prop$FarmKey)))
 
-prop <- prop %>% mutate( FarmBi = recode(FarmType, "Monoculture" = 50,
-                                          "Polyculture" = 0),
-                        CropBi = recode(FocalCrop, "Eggplant" = 1,
-                                        "Squash" = 0)) #%>%
+prop <- prop %>% mutate( FarmBi = dplyr::recode(FarmType, "Monoculture" = 0,
+                                          "Polyculture" = 1),
+                        CropBi = dplyr::recode(FocalCrop, "Eggplant" = 1,
+                                        "Squash" = 0) ) #%>%
   # left_join(farmBi, by="FarmKey")
 
 # prop <- prop %>% mutate(FarmBi = )
@@ -136,7 +137,7 @@ prop <- prop %>% mutate( FarmBi = recode(FarmType, "Monoculture" = 50,
 prop$NP_ratio <- ((prop$N)/prop$P)*100 #nrow=372, ncol=90
 
 #remove N:P ratio outlier
-prop <- prop %>% filter(NP_ratio < 600) #nrow=371, ncol=90
+prop <- prop %>% filter(NP_ratio < 600, TOC <0.7) #nrow=371, ncol=90
 
  
 ## *****************************************************************************
@@ -227,7 +228,41 @@ all_sap <- as.data.frame(simpleSelection(df=all_fungi, guild= "Saprotroph", fami
 
 all_fun <- as.data.frame(simpleSelection(df=all_fungi, guild= "all fungi", family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "landscape")$df)
 
+all_summary <- all %>%
+  group_by(PolyYears) %>%
+  summarise_at(vars(observed), list(mean=mean, SE=std.error), na.rm=TRUE)
 
+
+themeBorder <- theme_bw() + theme(legend.title=element_blank(), 
+                                  panel.background = element_blank(),
+                                  panel.grid.major = element_blank(), 
+                                  panel.grid.minor = element_blank(),
+                                  axis.line =element_blank(),
+                                  panel.border = element_rect(colour = "black", fill=NA, size=0.75))
+
+test <- ggplot(all, aes(x=factor(PolyYears), y=observed, group=PolyYears)) +
+  geom_boxplot() +
+  ylab("observed AMF richness") +
+  xlab("years under polyculure management") + 
+  themeBorder 
+
+
+ggsave(filename = "mgmtLegacy.pdf", 
+       plot = test,
+       width = 3, 
+       height = 2.5,
+       useDingbats=FALSE)
+
+
+ggsave(filename = "mgmtLegacy.png", 
+       plot = test,
+       width = 3, 
+       height = 2.5,)
+
+
+ggplot(all_summary, aes(x=PolyYears, y=mean)) +
+  geom_line() +
+  geom_point()
 
 ## *****************************************************************************
 ## 8.  no scale #############################################################
@@ -235,16 +270,45 @@ all_fun <- as.data.frame(simpleSelection(df=all_fungi, guild= "all fungi", famil
 
 # Monoculture + Polyculture
 noscale <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal",  family="NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+noscale_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal",  family="NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+noscale_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal",  family="NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture","Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
+
+
+all_fungi_test <- all_fungi
+all_fungi_test$P <- log(all_fungi$P+1)
 
 # Monoculture
+
 noscale_mono <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+
+noscale_mono_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+
+noscale_mono_f_df <- as.data.frame(noscale_mono_f$df)
+
+noscale_mono_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Monoculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+
+noscale_mono_n_df <- as.data.frame(noscale_mono_f$df)
 
 
 # Polyculture
 noscale_poly <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F","N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
+noscale_poly_f <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("F") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
 
+noscale_poly_n <- simpleSelection(df=all_fungi, guild= "Arbuscular Mycorrhizal", family = "NA", block= c("N") ,focalcrop= c("Eggplant"), farmtype=c("Polyculture"), year = c("2018","2017"), env_factors=envi_factors, geo=TRUE, maxDist = "both")
+
+
+
+noscale$plotList
+noscale_f$plotList
+noscale_n$plotList
+noscale_mono$plotList
+noscale_mono_f$plotList
+noscale_mono_n$plotList
+noscale_poly$plotList
+noscale_poly_f$plotList
+noscale_poly_n$plotList
 
 ## *****************************************************************************
 ## 9. all blocks ############################################################
@@ -384,7 +448,7 @@ all.pa <-  all.pa %>% mutate(totalFreq = c(rowSums(all.pa %>% dplyr::select(cont
   mutate(relFreq = freq/totalFreq) #%>%
   # left_join(tax , by=c("OTU"))
 
-
+# total reads = 3258
 rel <- all %>%
   mutate(totalReads = rowSums(all %>% dplyr::select(contains("OTU")))) %>%
   pivot_longer(cols=contains("OTU"), names_to = "OTU", values_to = "reads") %>%
@@ -438,55 +502,55 @@ relAbun_P <-  ggplot(rel_ag %>% filter(Taxon %in% c("Rhizophagus"), P<90), aes( 
   # scale_fill_brewer(palette="Paired")+
   # theme_classic()
 
-relAbun_P <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(P,10)))) +
+relAbun_P <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(P,12)))) +
   geom_bar(position="fill", stat="identity") +
   ylab("relative abundance") +
   xlab("P") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 relAbun_pH <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(pH,0.5)))) +
   geom_bar(position="fill", stat="identity")  +
   ylab("relative abundance") +
   xlab("pH") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 relAbun_NP <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(NP_ratio,0.5)))) +
   geom_bar(position="fill", stat="identity") +
   ylab("relative abundance") +
   xlab("N:P") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
-relAbun_TOC <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(TOC,0.1)))) +
+relAbun_TOC <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(TOC,0.125)))) +
   geom_bar(position="fill", stat="identity")+
   ylab("relative abundance") +
   xlab("TOC") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
-relAbun_N <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(N,0.01)))) +
+relAbun_N <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(N,0.015)) ) ) +
   geom_bar(position="fill", stat="identity")+
   ylab("relative abundance") +
   xlab("N") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 
-relAbun_cropDiv <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(cropDiversity,0.25)))) +
+relAbun_CD <-  ggplot(relAbun, aes(fill=Taxon, y=relAbun, x=factor(round_any(cropDiversity,0.3)))) +
   geom_bar(position="fill", stat="identity")  +
   ylab("relative abundance") +
   xlab("crop diversity") +
-  scale_fill_brewer(palette="Paired")+
-  theme_classic()
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1))
 
 relAbun_cropRichness <-  ggplot(relAbun %>% filter(cropRichness !=5), aes(fill=Taxon, y=relAbun, x=factor(round_any(cropRichness,5)))) +
   geom_bar(position="fill", stat="identity")  +
   ylab("relative abundance") +
   xlab("crop richness") +
-  scale_fill_brewer(palette="Paired")+
+  scale_fill_manual(values= taxonColor(relAbun$Taxon))+
   theme_classic()
 
 relAbun_Years <-  ggplot(relAbun %>% filter(FarmKey %in% c("KY","FO","DI","CF")) , aes(fill=Taxon, y=relAbun, x=factor(Year))) +
@@ -511,62 +575,69 @@ relAbun_cropRichness <-  ggplot(relAbun %>% filter(cropRichness !=5), aes(fill=T
 
 
 
-# ## *****************************************************************************
-# ## distance matrix
-# ## *****************************************************************************
-# all <- all %>% mutate(Key = as.integer(Key))
-# amf_otu <- all %>% dplyr::select(contains("OTU"))
-# dist <- vegdist(amf_otu, "bray")
-# # KEYS NOT MATCHING WHEN TURNING TO MATRIX!
-# 
-# 
-# library(phyloseq)
-# 
-# fung01<-amf_otu; fung01[fung01>0]=1 # fung is the OTU table ##
-# fung.dist01<-beta.pair(fung01, index.family = "jaccard");
-# 
-# jne <- as.data.frame(as.matrix(fung.dist01$beta.jne))
-# colnames(jne)  = all$Key
-# rownames(jne) = all$Key
-# jne <- jne %>%  
-#   rownames_to_column("Key") %>%
-#   pivot_longer(cols= -Key, names_to = "pairs", values_to = "dissim") %>%
-#   mutate(Key = as.integer(Key), pairs = as.integer(pairs)) %>%
-#   left_join(all %>% dplyr::select(Key, farmCode), by= "Key") %>%
-#   left_join(all %>% dplyr::select(Key, farmCode), by= c("pairs" = "Key")) %>%
-#   mutate(scale = ifelse(farmCode.x == farmCode.y, "within","between"))
-# 
-# # check = summary(is.na(jne$farmCode.x))
-# 
-# 
-# jne_within <- jne %>%
-#   filter(scale == "within") %>%
-#   dplyr::select(-farmCode.x, -farmCode.y) %>%
-#   pivot_wider(id_cols=Key, names_from= pairs, values_from = dissim) %>%
-#   column_to_rownames("Key")
-# 
-# jne_between <- jne %>%
-#   filter(scale == "between") %>%
-#   dplyr::select(-farmCode.x, -farmCode.y) %>%
-#   pivot_wider(id_cols=Key, names_from= pairs, values_from = dissim) %>%
-#   column_to_rownames("Key")
-# 
-# jne_between <- jne_between[c(201:212,1:200)]
-# 
-# # NOTE
-# # NEED TO CHANGE THE DIST BELOW TO WITHIN AND BETWEEN
-# 
-# par(mfrow=c(1,1),mar=c(2, 2, 4, 0.5))
-# td<-dist(all$FarmBi) ## da$TP is the variable of interest in the meta table ###
-# # test <- as.data.frame(as.matrix(td))
-# color=rgb(0,0,0,alpha=0.1)
-# plot(all$FarmBi,as.dist(jne_within),xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
-# vegan::mantel(fung.dist01$beta.jne~td)
-# abline(lm(fung.dist01$beta.jne~td),col="red")
-# 
-# plot(jitter(td),fung.dist01$beta.jtu,xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
-# mantel(fung.dist01$beta.jtu~td)
-# abline(lm(fung.dist01$beta.jtu~td),col="red")
+## *****************************************************************************
+## distance matrix #############################################################
+## *****************************************************************************
+all <- all %>% mutate(Key = as.integer(Key))
+amf_otu <- all %>% dplyr::select(contains("OTU"))
+dist <- vegdist(amf_otu, "bray")
+# KEYS NOT MATCHING WHEN TURNING TO MATRIX!
+
+
+library(phyloseq)
+
+fung01<-amf_otu; fung01[fung01>0]=1 # fung is the OTU table ##
+fung.dist01<-beta.pair(fung01, index.family = "jaccard");
+
+jne <- as.data.frame(as.matrix(fung.dist01$beta.jne))
+colnames(jne)  = all$Key
+rownames(jne) = all$Key
+jne <- jne %>%
+  rownames_to_column("Key") %>%
+  pivot_longer(cols= -Key, names_to = "pairs", values_to = "dissim") %>%
+  mutate(Key = as.integer(Key), pairs = as.integer(pairs)) %>%
+  left_join(all %>% dplyr::select(Key, farmCode), by= "Key") %>%
+  left_join(all %>% dplyr::select(Key, farmCode), by= c("pairs" = "Key")) %>%
+  mutate(scale = ifelse(farmCode.x == farmCode.y, "within","between"))
+
+# check = summary(is.na(jne$farmCode.x))
+
+
+jne_within <- jne %>%
+  filter(scale == "within") %>%
+  dplyr::select(-farmCode.x, -farmCode.y) %>%
+  pivot_wider(id_cols=Key, names_from= pairs, values_from = dissim) %>%
+  column_to_rownames("Key")
+
+jne_between <- jne %>%
+  filter(scale == "between") %>%
+  dplyr::select(-farmCode.x, -farmCode.y) %>%
+  pivot_wider(id_cols=Key, names_from= pairs, values_from = dissim) %>%
+  column_to_rownames("Key")
+
+jne_between <- jne_between[c(194:205,1:193)]
+
+pH <-dist(all %>% dplyr::select(pH), method = "euclidean")
+CD <-dist(all %>% dplyr::select(cropDiversity), method = "euclidean")
+TOC <-dist(all %>% dplyr::select(TOC), method = "euclidean")
+
+vegan::mantel(as.dist(jne_between), pH, na.rm=TRUE)
+vegan::mantel(as.dist(jne_between), TOC, na.rm=TRUE)
+
+# NOTE
+# NEED TO CHANGE THE DIST BELOW TO WITHIN AND BETWEEN
+
+par(mfrow=c(1,1),mar=c(2, 2, 4, 0.5))
+td<-dist(all$FarmBi) ## da$TP is the variable of interest in the meta table ###
+# test <- as.data.frame(as.matrix(td))
+color=rgb(0,0,0,alpha=0.1)
+plot(all$FarmBi,as.dist(jne_within),xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
+vegan::mantel(fung.dist01$beta.jne~td)
+abline(lm(fung.dist01$beta.jne~td),col="red")
+
+plot(jitter(td),fung.dist01$beta.jtu,xlab=" ",ylab=" ", ylim=c(0,1), col=color, cex=0.2)
+mantel(fung.dist01$beta.jtu~td)
+abline(lm(fung.dist01$beta.jtu~td),col="red")
 # 
 # 
 # 

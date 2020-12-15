@@ -42,6 +42,7 @@ library(lmerTest)
 library(betapart)
 library(ape)
 library(TITAN2)
+library(ecodist)
 
 
 ########################################################################

@@ -1,0 +1,249 @@
+---
+title: "Functional Diversity Data Summary"
+author: "Grace Pratt"
+date: "5/21/2020"
+output: pdf_document
+---
+
+
+
+```{r, include=FALSE}
+## Source for Analysis workflow 
+
+
+## *******************************************************
+## 1. load
+## *******************************************************
+
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/load.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/clean.R', chdir = TRUE)
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/analysis.R', chdir = TRUE)
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/plots.R', chdir = TRUE)
+```
+
+# ALL FUNGI
+
+```{r, tidy=TRUE, echo=FALSE}
+table(all_farms_model)
+
+table(mono_model)
+
+table(poly_model)
+```
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+all_fungi_plots
+
+```
+
+
+
+
+# AMF FUNCTIONAL GROUP
+
+```{r, tidy=TRUE, echo=FALSE}
+table(amf_fd)
+
+table(amf_fd_mono)
+
+table(amf_fd_poly)
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+amf_fd_plots
+
+```
+
+
+\pagebreak  
+
+# PLANT PATHOGENS
+
+```{r, tidy=TRUE, echo=FALSE}
+table(plant_path)
+
+table(plant_path_mono)
+
+table(plant_path_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+plant_path_plots
+
+```
+
+
+\pagebreak  
+
+# SAPROTROPHS
+
+```{r, tidy=TRUE, echo=FALSE}
+table(saprotroph)
+
+table(saprotroph_mono)
+
+table(saprotroph_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+saprotroph_plots
+
+```
+
+
+\pagebreak
+
+# FUNGAL PARASITE
+
+```{r, tidy=TRUE, echo=FALSE}
+table(fungal_parasite)
+
+table(fungal_par_mono)
+
+table(fungal_par_poly)
+```
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+fungal_par_plots
+
+```
+
+
+
+
+\pagebreak
+
+# All Fungi FTBL Groups
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_f
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_n
+
+```
+
+\pagebreak 
+
+# AMF FTBL Groups
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_amf_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_amf_nvf
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_amf_f
+
+```
+
+
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+polyvmono_amf_n
+
+```
+
+# Box Plots of environmental range
+
+## NP Ratio
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+np_ratio
+
+```
+
+
+## pH
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+pH
+
+```
+
+
+## P
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+P
+
+```
+
+## TOC
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+TOC
+
+```
+
+
+## N 
+
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+N
+
+```
+
+
+
+
+
+
+```{r}
+geo <- all_fungi %>% dplyr::select("Long_point", "Lat_point")
+dist.geo <- distm(geo, fun = distHaversine) 
+
+prop$Lat_point
+```
+
+
+
+
+
+
+
+

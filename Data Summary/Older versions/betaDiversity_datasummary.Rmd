@@ -1,0 +1,87 @@
+---
+title: "Beta-diversity project"
+output: pdf_document
+---
+
+```{r include=FALSE, cache=FALSE}
+## Source for Analysis workflow 
+
+
+## *******************************************************
+## 1. load
+## *******************************************************
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/load.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/clean.R', chdir = TRUE)
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/analysis.R', chdir = TRUE)
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/plots.R', chdir = TRUE)
+
+```
+
+
+
+# ALL FARMS
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(amf_diss_model)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+all_amf_plots 
+all_amf_comp_plot
+```
+
+\pagebreak  
+
+
+# MONOCULTURE
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(mono_amf_diss_model)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_amf_plots 
+mono_amf_comp_plot
+```
+
+\pagebreak  
+
+
+# POLYCULTURE
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+table(poly_amf_diss_model)
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_amf_plots 
+poly_amf_comp_plot
+```
+
+\pagebreak  
+
+

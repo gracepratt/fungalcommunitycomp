@@ -1,0 +1,203 @@
+---
+title: "Within and Across"
+author: "Aidee Guzman"
+date: "5/27/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE, cache=FALSE}
+## Source for Analysis workflow 
+
+
+## *******************************************************
+## 1. load
+## *******************************************************
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/load.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/functions.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/backwardsSelection_scratchwork.R', chdir = TRUE)
+
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/clean.R', chdir = TRUE)
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/withinBetweenFarms_allFungi.R', chdir = TRUE)
+
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/analysis.R', chdir = TRUE)
+
+
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source('/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp/R Scripts/plots.R', chdir = TRUE)
+
+```
+
+
+
+# ALPHA
+
+**Data summary** 
+```{r, tidy=TRUE, echo=FALSE}
+alphaSummary
+alphaFTBLSummary
+alphaBlockSummary
+```
+
+**Model output** 
+```{r, tidy=TRUE, echo=FALSE}
+alphaModels
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+richPlots
+richBlockPlots
+richFTBLPlots
+```
+
+\pagebreak  
+
+# Alpha x Environment 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+alphaEnvSummary
+alphaEnvFTBLSummary
+alphaEnvBlockSummary
+```
+
+**Model output** 
+```{r, tidy=TRUE, echo=FALSE}
+envModels
+```
+
+
+**Levene's Test** 
+```{r, tidy=TRUE, echo=FALSE}
+leveneTest_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+pH_alpha <- alpha_env(colNames=divIndices,expVar = "pH", color="FarmType",data = alphaDF)
+plot_grid(pH_alpha[[1]], pH_alpha[[2]], pH_alpha[[3]], pH_alpha[[4]], pH_alpha[[5]], ncol=3)
+plot_grid(pH_alpha[[6]], pH_alpha[[7]], pH_alpha[[8]], pH_alpha[[9]], pH_alpha[[10]], ncol=3)
+
+
+P_alpha <- alpha_env(colNames=divIndices,expVar = "P", color="FarmType",data = alphaDF)
+plot_grid(P_alpha[[1]], P_alpha[[2]], P_alpha[[3]], P_alpha[[4]], P_alpha[[5]], ncol=3)
+plot_grid(P_alpha[[6]], P_alpha[[7]], P_alpha[[8]], P_alpha[[9]], P_alpha[[10]], ncol=3)
+
+TOC_alpha <- alpha_env(colNames=divIndices,expVar = "TOC", color="FarmType",data = alphaDF)
+plot_grid(TOC_alpha[[1]], TOC_alpha[[2]], TOC_alpha[[3]], TOC_alpha[[4]], TOC_alpha[[5]], ncol=3)
+plot_grid(TOC_alpha[[6]], TOC_alpha[[7]], TOC_alpha[[8]], TOC_alpha[[9]], TOC_alpha[[10]], ncol=3)
+
+N_alpha <- alpha_env(colNames=divIndices,expVar = "N", color="FarmType",data = alphaDF)
+plot_grid(N_alpha[[1]], N_alpha[[2]], N_alpha[[3]], N_alpha[[4]], N_alpha[[5]], ncol=3)
+plot_grid(N_alpha[[6]], N_alpha[[7]], N_alpha[[8]], N_alpha[[9]], N_alpha[[10]], ncol=3)
+
+NP_ratio_alpha<- alpha_env(colNames=divIndices,expVar = "NP_ratio", color="FarmType",data = alphaDF)
+plot_grid(NP_ratio_alpha[[1]], NP_ratio_alpha[[2]], NP_ratio_alpha[[3]], NP_ratio_alpha[[4]], NP_ratio_alpha[[5]], ncol=3)
+plot_grid(NP_ratio_alpha[[6]], NP_ratio_alpha[[7]], NP_ratio_alpha[[8]], NP_ratio_alpha[[9]], NP_ratio_alpha[[10]], ncol=3)
+
+
+```
+
+\pagebreak  
+
+# ALL
+## ACROSS 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+across_table
+```
+
+## WITHIN 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+within_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+all_spatial
+```
+
+\pagebreak  
+
+# MONO
+## ACROSS 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+mono_across_table
+```
+
+## WITHIN 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+mono_within_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+mono_spatial_plots
+```
+
+\pagebreak  
+
+
+# POLY
+## ACROSS 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+poly_across_table
+```
+
+## WITHIN 
+
+**Tables** 
+```{r, tidy=TRUE, echo=FALSE}
+poly_within_table
+```
+
+
+**Plots** 
+```{r, echo=FALSE, fig.height = 4, fig.width = 6, fig.align='center', message=FALSE}
+poly_spatial_plots
+```
+
+\pagebreak  
+
+# ALL PLOTS
+**Plots** 
+```{r, echo=FALSE, fig.height = 8, fig.width = 6, fig.align='center', message=FALSE}
+allplots_spatial
+```
+
+\pagebreak  
+
+
+

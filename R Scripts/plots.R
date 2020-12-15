@@ -15,7 +15,7 @@ predictorColors <- c("#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00"
 ## *****************************************************************************
 
 # Monoculture + Polyculture
-noscale_plot <- noscale$plotList + ggtitle(paste("all")) + theme(legend.position="none")
+noscale_plot <- noscale$plotList + ggtitle(paste("all")) #+ theme(legend.position="none")
 
 #SAVE
 ggsave("noscale_plot.pdf", plot=noscale_plot, path=fig.path, width = 5, height=4, useDingbats=FALSE, dpi=300)
@@ -94,6 +94,8 @@ ggsave("all_blocks_poly.pdf", plot=all_blocks_poly, path=fig.path, width = 12, h
 ## *****************************************************************************
 ## Focal block #################################################################
 ## *****************************************************************************
+
+predictors_variable_plot(local_mono_f$predictors, "Geographic")
 
 # Monoculture + Polyculture
 landscape_f_plot <- landscape_f$plotList + theme(legend.position="none")
