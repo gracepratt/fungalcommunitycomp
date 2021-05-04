@@ -1,0 +1,294 @@
+---
+title: "Summary of AMF community assembly"
+author: "Aidee Guzman"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: pdf_document
+geometry: margin=2cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Volumes/GoogleDrive/My Drive/Research/Research projects/Spatial project/Analysis/R workflow/fungalcommunitycomp")
+## If pandoc is not working: https://stackoverflow.com/questions/58610380/rmarkdown-pandoc-error-after-update-to-macos-catalina-10-15
+## https://holtzy.github.io/Pimp-my-rmd/
+
+```
+
+```{r include=FALSE, cache=FALSE}
+## Source for Analysis workflow 
+
+## *******************************************************
+## 1. load
+## *******************************************************
+source("R scripts/load.R")
+
+## *******************************************************
+## 2. clean
+## *******************************************************
+source("R scripts/clean.R")
+
+## *******************************************************
+## 3. analysis
+## *******************************************************
+source("R scripts/analysis.R")
+
+## *******************************************************
+## 4. plots
+## *******************************************************
+source("R scripts/plots.R")
+
+
+## *******************************************************
+## 5. tables
+## *******************************************************
+source("R scripts/tables.R")
+
+
+
+```
+
+# Description of study design
+
+Study design: farm type x block
+
+* 21 sites: 10 monoculture and 11 polyculture
+
+* 2 transects per 2 blocks (within-rows vs across-rows) each site
+
+* 10 = 2017 and 11 =2018
+
+
+\pagebreak
+
+\tableofcontents 
+
+\newpage  
+
+
+\pagebreak  
+
+# Drivers of AM compositional dissimilarity
+
+## Crop diversity
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+final_ispline
+
+```
+
+**Model output**
+
+```{r, tidy=TRUE, echo=FALSE}
+as.data.frame(gdm_cd_wide)
+```
+
+
+\pagebreak  
+
+## Farm type
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+final_ispline_ft
+
+```
+
+**Model output**
+
+**Coefficents**
+```{r, tidy=TRUE, echo=FALSE}
+as.data.frame(gdm_ft_wide)
+```
+
+\pagebreak  
+
+# MRM tests
+
+## Crop divesrity
+
+```{r, tidy=TRUE, echo=FALSE}
+mrmTests
+```
+
+## Farm type
+```{r, tidy=TRUE, echo=FALSE}
+mrmTests_ft
+```
+
+## Environment
+```{r, tidy=TRUE, echo=FALSE}
+mrmTests_env
+```
+
+\pagebreak  
+
+
+# Drivers of AMF alpha diversity
+
+## Richness ~ crop diversity
+**Plots** 
+```{r, echo=FALSE, fig.align='center', fig.height=3.5}
+effectSizes_richness_plot
+```
+
+**Whole farm**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_wa_richness_cd)
+```
+
+**Within-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_w_richness_cd)
+```
+
+**Across-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_a_richness_cd)
+```
+
+## Shannon ~ crop diversity
+**Plots** 
+```{r, echo=FALSE, fig.align='center', fig.height=3.5}
+effectSizes_shannon_plot
+```
+
+**Whole farm**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_wa_shannon_cd)
+```
+
+**Within-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_w_shannon_cd)
+```
+
+**Across-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_a_shannon_cd)
+```
+
+## Richness ~ farm type
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+richness_ft_plots
+```
+
+**Whole farm**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_wa_richness_ft)
+```
+
+**Within-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_w_richness_ft)
+```
+
+**Across-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_a_richness_ft)
+```
+
+## Shannon ~ farm type
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+shannon_ft_plots
+```
+
+**Whole farm**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_wa_shannon_ft)
+```
+
+**Within-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_w_shannon_ft)
+```
+
+**Across-rows**
+```{r, tidy=TRUE, echo=FALSE}
+modelSummary(all_a_shannon_ft)
+```
+
+\pagebreak  
+
+# AMF compositional differences between farm type
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+composition_plot
+```
+
+**Model output**
+```{r, tidy=TRUE, echo=FALSE}
+all_wa_composition$permanova
+```
+
+\pagebreak  
+
+# dbRDA
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+dbRDA.plot
+```
+
+**Model output**
+```{r, tidy=TRUE, echo=FALSE}
+dbRDA_anova
+```
+
+\pagebreak  
+
+# Variation partitioning
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center'}
+all_varPart_plot
+mono_varPart_plot
+poly_varPart_plot
+
+```
+
+**Model output**
+```{r, tidy=TRUE, echo=FALSE}
+as.data.frame(varpart_table_wide)
+```
+
+\pagebreak 
+
+# Edaphic variables ~ crop diversity
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center', fig.height=2}
+env_plot_cd
+```
+
+**Model output**
+```{r, tidy=TRUE, echo=FALSE}
+edaphicModels_cd
+```
+
+
+\pagebreak  
+
+# Edaphic variables ~ farm type
+
+**Plots** 
+```{r, echo=FALSE, fig.align='center', fig.height=2}
+env_plot_ft
+```
+
+**Model output**
+```{r, tidy=TRUE, echo=FALSE}
+edaphicModels_ft
+```
+
+**mean +/- SE **
+```{r, tidy=TRUE, echo=FALSE}
+summaryDF
+```
+
+\pagebreak  
+
+

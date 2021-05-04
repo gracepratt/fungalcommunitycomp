@@ -1,0 +1,10 @@
+"dataset","location","geo","soil","cd","geo&cd","soil&cd","soil&geo","geo&cd&soil","residuals"
+"all farms","whole farm",0.17,0.03,0.03,0.07,0.01,0,0,0.68
+"all farms","within rows",0.16,0.04,0.03,0.07,0,0.01,0.01,0.67
+"all farms","across rows",0.17,0.04,0.03,0.07,0.02,0,0,0.68
+"monoculture farms","whole farm",0.16,0.15,NA,NA,NA,0.1,NA,0.59
+"monoculture farms","within rows",0.19,0.12,NA,NA,NA,0.13,NA,0.56
+"monoculture farms","across rows",0.15,0.15,NA,NA,NA,0.09,NA,0.61
+"polyculture farms","whole farm",0.08,0.07,NA,NA,NA,0.08,NA,0.77
+"polyculture farms","within rows",0.07,0.09,NA,NA,NA,0.09,NA,0.75
+"polyculture farms","across rows",0.11,0.03,NA,NA,NA,0.12,NA,0.73

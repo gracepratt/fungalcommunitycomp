@@ -1,0 +1,10 @@
+"dataset","location","Geographic","pH","P","TOC","N","Percent Deviance Explained","cropDiversity"
+"all farms","whole farm","1.467 *** ","1.894 *** ","0.736  ","0.405  ","1.019 * ","26.922",NA
+"all farms","within rows","1.399","2.674","0.461","0.037","1.49","35.858","1.083"
+"all farms","across rows","1.376","1.751","0.289","0.197","0.421","25.233","0.494"
+"monoculture farms","whole farm","1.258 *** ","1.083 *** ","1.111 *** ","0.085  ","0.112  ","30.725","0  "
+"monoculture farms","within rows","1.171","1.62","1.296","0.427","0.353","34.585","0"
+"monoculture farms","across rows","1.297","0.991","1.066","0","0.016","28.266","0"
+"polyculture farms","whole farm","2.392 *** ","1.767 *** ","0.985 *** ","0.167  ","1.17 * ","36.804","0.598 * "
+"polyculture farms","within rows","3.159","2.889","0.366","0","0.453","49.548","1.242"
+"polyculture farms","across rows","1.863","1.233","0.95","0.761","0.878","33.035","0.202"

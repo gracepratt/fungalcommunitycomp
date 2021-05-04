@@ -461,7 +461,7 @@ rel <- all %>%
 relAbun_ag <- all %>%
   mutate(totalReads = rowSums(all %>% dplyr::select(contains("OTU")))) %>%
   pivot_longer(cols=contains("OTU"), names_to = "OTU", values_to = "reads") %>%
-  left_join(tax %>% dplyr::select(OTU, Family), by=c("OTU")) %>%
+  left_join(tax %>% dplyr::select(OTU, Family, Taxon), by=c("OTU")) %>%
   group_by(Key, Taxon) %>%
   summarise_at(vars(reads, totalReads), list(sum=sum, mean=mean), na.rm=TRUE) %>%
   dplyr::select(Key, Family, reads_sum, totalReads_mean) %>%

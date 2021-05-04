@@ -14,10 +14,11 @@ library(ggplot2)
 library(ggthemes)
 #library(gridExtra)
 library(cowplot)
-#library(emmeans)
+library(egg)
+library(emmeans)
 # library(multcomp)
 # library(effects)
-#library(MuMIn)
+library(MuMIn)
 #library(optimx)
 # library(afex)
 # library("numDeriv")
@@ -43,6 +44,10 @@ library(betapart)
 library(ape)
 library(TITAN2)
 library(ecodist)
+library(adespatial)
+library(relaimpo)
+library(eulerr)
+library(ggord)
 
 
 ########################################################################
@@ -82,7 +87,11 @@ old_amf <- read.csv("Raw Data/Old AMF Tables/otu.rr.csv") # nrow=378, ncol=244
 
 # taxanomy list 
 # tax <- read.csv('Raw Data/fungGuildOTU.guilds.csv') # nrow=3427, ncol=389
-tax <- read.csv('Raw Data/taxanomy.csv') # nrow=3427, ncol=389
+tax <- read.csv('Raw Data/guilds.csv') # nrow=3427, ncol=389
+
+glomNum <- tax %>% filter(Phylum == "Glomeromycota") %>% pull(OTU)
+
+length(glomNum)
 
 # crop diversity
 
